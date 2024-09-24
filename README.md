@@ -31,6 +31,6 @@ These descriptions are for the optional config options found in the ReadTag.hpp 
 ## Error Feedback
 If you choose to enable the Motor or Launch pins in the config file, you can get additional feedback when scanning a card:
 * 1 Pulse: Game was launched successfully.
-* 3 Pusles: Game failed to launch via TapTo.
-* 4 Pusles: Game could not be found on your Mster.
+* 3 Pulses: Game failed to launch via TapTo.
+* 4 Pulses: Game could not be found on your Mster.
 * 5 Pulses: Response for searching the game could not parsed (Probably a Mister Remote error).
