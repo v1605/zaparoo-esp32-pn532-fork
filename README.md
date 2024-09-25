@@ -19,7 +19,8 @@ As of now, this code should be considered alpha, as it is not using the TapTo ap
 3. Clone/Download the repository and open Tap2Esp32.ino in Arunido Studio.
 4. Select your board and port, located in the Tools menu. If you do not have options for an Esp32, follow these [instrustions](https://docs.sunfounder.com/projects/umsk/en/latest/03_esp32/esp32_start/03_install_esp32.html) for installing the board configurations.
 5. Edit the ReadTag.hpp file to define your pins for the MFRC522, the Mister url (using the Remote port until TapTo 2.0, default 8182), and your Wifi credentials.
-6. (Optional) Enable any of the settings in the optional section of the config by uncommenting the line and setting the correct value for your setup. See "Optional Setup" for more info.
+6. (Optional) If you are planning to use a battery to power the Esp32, it might help to extend battery life by decreasing the CPU frequency under tools.
+7. (Optional) Enable any of the settings in the optional section of the config by uncommenting the line and setting the correct value for your setup. See "Optional Setup" for more info.
 
 ## Optional Setup
 These descriptions are for the optional config options found in the ReadTag.hpp file. Uncommment and edit the lines in the config if you want to enable them.
