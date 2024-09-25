@@ -15,7 +15,7 @@ As of now, this code should be considered alpha, as it is not using the TapTo ap
 
 ## Setup
 1. If you haven't already, downalod and install Ardunio Studio.
-2. Install the above Libaries
+2. Install the above Libaries.
 3. Clone/Download the repository and open Tap2Esp32.ino in Arunido Studio.
 4. Select your board and port, located in the Tools menu. If you do not have options for an Esp32, follow these [instrustions](https://docs.sunfounder.com/projects/umsk/en/latest/03_esp32/esp32_start/03_install_esp32.html) for installing the board configurations.
 5. Edit the ReadTag.hpp file to define your pins for the MFRC522, the Mister url (using the Remote port until TapTo 2.0, default 8182), and your Wifi credentials.
