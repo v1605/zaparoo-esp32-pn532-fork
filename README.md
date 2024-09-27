@@ -11,6 +11,7 @@ As of now, this code should be considered alpha, as it is not using the TapTo ap
 ## Required Libaries
 * ArduinoJson
 * MFRC55
+* ESP8266Audio
 * [NDEF](https://github.com/don/NDEF/tree/master)
 
 ## Setup
@@ -28,6 +29,7 @@ These descriptions are for the optional config options found in the ReadTag.hpp 
 2. WIFI_LED_PIN: This pin will enter a high state once a WiFi connection has been established.
 3. LAUNCH_LED_PIN: This pin mimics the behaviors the MOTOR_PIN, with a slightly different pulse behavior more suitable for an LED.
 4. EXTERNAL_POWER_LED: This pin will enter a High state as soon as the unit boots. This feature is useful if your enclousre blocks any built in LEDs.
+5. I2S_*: These pins are for a I2S module (such as a max98357a) to produce a launch sound. You can replace the sound in the launchAudio.h file by converting a 8-bit unsigned pcm audio file to hex.
 
 ## Error Feedback
 If you choose to enable the Motor or Launch pins in the config file, you can get additional feedback when scanning a card:
