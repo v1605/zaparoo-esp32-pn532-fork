@@ -3,13 +3,18 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
-#include "TapToEsp32.hpp"
 #include "NfcAdapter.h"
+#include "AudioFileSourcePROGMEM.h"
+#include "AudioGeneratorWAV.h"
+#include "AudioOutputI2S.h"
+#include "launchAudio.h"
+#include "TapToEsp32.hpp"
 
 //Config found in ReadTag.hpp
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 NfcAdapter nfc = NfcAdapter(&mfrc522);
+AudioOutputI2S* out;
 
 void setup(void) {
     Serial.begin(9600);
@@ -33,6 +38,10 @@ void setupPins(){
   #ifdef EXTERNAL_POWER_LED
     pinMode(EXTERNAL_POWER_LED, OUTPUT);
     digitalWrite(EXTERNAL_POWER_LED, HIGH);
+  #endif
+  #ifdef I2S_DOUT
+    out = new AudioOutputI2S();
+    out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
   #endif
 }
 
@@ -87,6 +96,7 @@ void sendTapTo(String gamePath){ // Waiting for 2.0 TapTo, for now mister remote
     Serial.println("Launched");
     triggerLaunchLed(HIGH, 0);
     triggerMotor(200, 1, 0);
+    playAudio();
     triggerLaunchLed(LOW, 2000);
   }
   else {
@@ -186,4 +196,18 @@ void expressError(int code){
     if(launchPin >= 0) digitalWrite(launchPin, LOW);
     delay(400);
   }
+}
+
+void playAudio(){
+  #ifdef I2S_DOUT
+  AudioFileSourcePROGMEM* file = new AudioFileSourcePROGMEM(launchAudio, sizeof(launchAudio));
+  AudioGeneratorWAV* wav = new AudioGeneratorWAV();
+  wav->begin(file, out);
+  delay(50); //No delay, no sound
+  if (wav->isRunning()) {
+    if (!wav->loop()) wav->stop();
+  } 
+  delete file;
+  delete wav;
+  #endif
 }
