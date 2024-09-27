@@ -28,5 +28,10 @@ const String misterRemoteUrl = "http://mister.local:8182";
 //Uncomment if using a led to display power indicator
 //#define EXTERNAL_POWER_LED 16
 
+//Uncomment if using a I2S module to produce audio
+//#define I2S_DOUT 26
+//#define I2S_BCLK 17
+//#define I2S_LRC 21
+
 //-----------------------------------------------------------------------
 #endif
