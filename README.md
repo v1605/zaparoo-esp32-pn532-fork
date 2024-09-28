@@ -2,14 +2,15 @@
 
 The goal of this project is to launch a game via the [TapTo Service](https://github.com/TapToCommunity/tapto) on the a Mister over Wifi. It should work with any Ardunio compatible board but only Esp32 models are official supported.
 
-As of now, this code should be considered alpha, as it is not using the TapTo api. Instead it parses the game from the TapTo card and launches via the [Mister Remote](https://github.com/wizzomafizzo/mrext?tab=readme-ov-file#remote). Once TapTo 2.0 is released, I plan on revisiting and using that latest api.
+As of now, this code should be considered alpha, as it is not using the TapTo 2.0 api (instead using v1 endpoints). Once TapTo 2.0 is released I will rework the api calls.
 
 ## Required Parts
 * An Esp32
 * A MFRC522
 
 ## Required Libaries
-* ArduinoJson
+* ArduinoJson (future TapTo 2.0)
+* UrlEncode
 * MFRC55
 * ESP8266Audio
 * [NDEF](https://github.com/don/NDEF/tree/master)
@@ -33,7 +34,4 @@ These descriptions are for the optional config options found in the ReadTag.hpp 
 
 ## Error Feedback
 If you choose to enable the Motor or Launch pins in the config file, you can get additional feedback when scanning a card:
-* 1 Pulse: Game was launched successfully.
-* 3 Pulses: Game failed to launch via TapTo.
-* 4 Pulses: Game could not be found on your Mster.
-* 5 Pulses: Response for searching the game could not parsed (Probably a Mister Remote error).
+* 2 Pulses: Game failed to launch via TapTo.
