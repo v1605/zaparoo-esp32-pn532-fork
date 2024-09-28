@@ -10,7 +10,7 @@
 //Wifi and mister information
 const char* ssid = "NetworkName";
 const char* password = "Password";
-const String misterRemoteUrl = "http://mister.local:8182";
+const String tapToUrl = "http://mister.local:8182";
 
 //-----------------------------------------------------------------------
 
