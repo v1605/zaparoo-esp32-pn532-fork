@@ -81,7 +81,7 @@ void initWiFi() {
   triggerMotor(250, 2, 100);
 }
 
-void sendTapTo(String gamePath){ // Waiting for 2.0 TapTo, for now mister remote
+void sendTapTo(String gamePath){
   HTTPClient http;
   http.begin(tapToUrl + "/api/v1/launch/" + urlEncode(gamePath));
   int httpResponseCode = http.GET();
