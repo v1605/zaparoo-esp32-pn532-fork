@@ -2,7 +2,7 @@
 #include <MFRC522.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <ArduinoJson.h>
+#include <UrlEncode.h>
 #include "NfcAdapter.h"
 #include "AudioFileSourcePROGMEM.h"
 #include "AudioGeneratorWAV.h"
@@ -83,67 +83,20 @@ void initWiFi() {
 
 void sendTapTo(String gamePath){ // Waiting for 2.0 TapTo, for now mister remote
   HTTPClient http;
-  http.begin(misterRemoteUrl + "/api/games/launch");
-  String payload = buildRequest(gamePath);
-  if(payload.equals("")){
-    Serial.print("Error building request for ");
-    Serial.println(gamePath);
-    return;
-  }
-  Serial.println(payload);
-  int httpResponseCode = http.POST(payload);
+  http.begin(tapToUrl + "/api/v1/launch/" + urlEncode(gamePath));
+  int httpResponseCode = http.GET();
   if (httpResponseCode == 200) {
     Serial.println("Launched");
     triggerLaunchLed(HIGH, 0);
     triggerMotor(200, 1, 0);
     playAudio();
     triggerLaunchLed(LOW, 2000);
-  }
-  else {
+  }else{
     Serial.print("Error code: ");
     Serial.println(httpResponseCode);
-    expressError(3);
+    expressError(2);
   }
   http.end();
-}
-
-String buildRequest(String fullPath){
-  int pathSplit = fullPath.indexOf('/');
-  String path = getGamePath(fullPath.substring(0, pathSplit), fullPath.substring(pathSplit+1));
-  if(path.equals("")) return "";
-  JsonDocument doc;
-  doc["path"] = path;
-  String output;
-  doc.shrinkToFit();
-  serializeJson(doc, output);
-  return output;
-}
-
-String getGamePath(String system, String game){
-  HTTPClient http;
-  http.begin(misterRemoteUrl + "/api/games/search");
-  JsonDocument sendDoc;
-  sendDoc["query"] = game.substring(game.lastIndexOf('/') + 1, game.lastIndexOf('.'));;
-  sendDoc["system"] = system;
-  String req;
-  serializeJson(sendDoc, req);
-  int responseCode = http.POST(req);
-  if (responseCode >= 300 || responseCode < 0) {
-    Serial.print("Error code for searching game path: ");
-    Serial.println(responseCode);
-    expressError(4);
-    return "";
-  }
-  JsonDocument doc;
-  if(deserializeJson(doc, http.getStream())){
-    Serial.print("Error deserializing game path response");
-    expressError(5);
-    return "";
-  }
-  http.end();
-  JsonObject data = doc["data"][0];
-  const char* path = data["path"];
-  return String(path);
 }
 
 void triggerMotor(int time, int loopCount, int loopDelay){
