@@ -119,7 +119,7 @@ bool sendTapTo(String gamePath){
     if (error) {
       Serial.print("Failed to parse json");
       Serial.println(error.c_str());
-      expressError(3);
+      expressError(4);
       complete.store(true);
       wasError.store(true);
       return;
@@ -129,7 +129,7 @@ bool sendTapTo(String gamePath){
     complete.store(true);
     if(result.containsKey("result")){
       Serial.print("Error with game path");
-      expressError(4);
+      expressError(3);
       wasError.store(true);
       return;
     }
