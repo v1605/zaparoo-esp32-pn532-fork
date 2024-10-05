@@ -2,22 +2,28 @@
 #include <MFRC522.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <UrlEncode.h>
-#include "NfcAdapter.h"
-#include "AudioFileSourcePROGMEM.h"
-#include "AudioGeneratorWAV.h"
-#include "AudioOutputI2S.h"
-#include "launchAudio.h"
+#include <NfcAdapter.h>
+#include <AudioFileSourceLittleFS.h>
+#include <AudioOutputI2S.h>
+#include <AudioGeneratorMP3.h>
+#include <ArduinoWebsockets.h>
+#include <ArduinoJson.h>
+#include <UUID.h>
+#include <atomic>
+#include <LittleFS.h>
 #include "TapToEsp32.hpp"
+
+using namespace websockets;
 
 //Config found in ReadTag.hpp
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 NfcAdapter nfc = NfcAdapter(&mfrc522);
+boolean requestSent = false;
 AudioOutputI2S* out;
 
-void setup(void) {
-    Serial.begin(9600);
+void setup() {
+    Serial.begin(115200);
     setupPins();
     initWiFi();
     SPI.begin();        // Init SPI bus
@@ -42,6 +48,14 @@ void setupPins(){
   #ifdef I2S_DOUT
     out = new AudioOutputI2S();
     out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
+    out->SetChannels(1);
+    out->SetGain(AUDIO_GAIN);
+    if (!LittleFS.begin(true)) {
+      Serial.println("An error has occurred while mounting LittleFS. No launch audio");
+    }
+    else if (!LittleFS.exists(launchAudio)) {
+      Serial.println("Launch audio file not found");
+    }
   #endif
 }
 
@@ -58,12 +72,17 @@ void loop(void) {
           for (int i = 3; i < payloadLength; i++) {
                 payloadAsString += (char)payload[i];
           }
-          sendTapTo(payloadAsString);
+          if(sendTapTo(payloadAsString)){
+            Serial.print("SCAN\t" + payloadAsString + "\n");
+            triggerLaunchLed(HIGH, 0);
+            triggerMotor(200, 1, 0);
+            playAudio();
+            triggerLaunchLed(LOW, 2000);
+          }
           nfc.haltTag();
           delay(1000);
         }
       }
-    delay(200);
 }
 
 void initWiFi() {
@@ -81,22 +100,53 @@ void initWiFi() {
   triggerMotor(250, 2, 100);
 }
 
-void sendTapTo(String gamePath){
-  HTTPClient http;
-  http.begin(tapToUrl + "/api/v1/launch/" + urlEncode(gamePath));
-  int httpResponseCode = http.GET();
-  if (httpResponseCode == 200) {
-    Serial.println("Launched");
-    triggerLaunchLed(HIGH, 0);
-    triggerMotor(200, 1, 0);
-    playAudio();
-    triggerLaunchLed(LOW, 2000);
-  }else{
-    Serial.print("Error code: ");
-    Serial.println(httpResponseCode);
+bool sendTapTo(String gamePath){
+  WebsocketsClient client;
+  std::atomic<bool> complete(false);
+  std::atomic<bool> wasError(false);
+  JsonDocument doc;
+  UUID uuid;
+  const char* id = uuid.toCharArray();
+  doc["jsonrpc"]= "2.0";
+  doc["method"]="launch";
+  doc["id"]= uuid.toCharArray();
+  doc["params"]["text"] = gamePath;
+  doc.shrinkToFit();
+  client.onMessage([&complete, &wasError, &id](WebsocketsMessage msg){
+    if(complete.load()) return;
+    JsonDocument result;
+    DeserializationError error = deserializeJson(result, msg.data());
+    if (error) {
+      Serial.print("Failed to parse json");
+      Serial.println(error.c_str());
+      expressError(3);
+      complete.store(true);
+      wasError.store(true);
+      return;
+    }
+    const char* resultId = result["id"];
+    if(strcmp(id, resultId) != 0) return;
+    complete.store(true);
+    if(result.containsKey("result")){
+      Serial.print("Error with game path");
+      expressError(4);
+      wasError.store(true);
+      return;
+    }
+  });
+  if(!client.connect(tapToUrl)){
+    Serial.println("Unable to connect");
     expressError(2);
+    return false;
   }
-  http.end();
+  String request;
+  serializeJson(doc, request);
+  client.send(request);
+  while(!complete.load()){
+    client.poll();
+  }
+  client.close();
+  return !wasError.load();
 }
 
 void triggerMotor(int time, int loopCount, int loopDelay){
@@ -153,14 +203,12 @@ void expressError(int code){
 
 void playAudio(){
   #ifdef I2S_DOUT
-  AudioFileSourcePROGMEM* file = new AudioFileSourcePROGMEM(launchAudio, sizeof(launchAudio));
-  AudioGeneratorWAV* wav = new AudioGeneratorWAV();
-  wav->begin(file, out);
-  delay(50); //No delay, no sound
-  if (wav->isRunning()) {
-    if (!wav->loop()) wav->stop();
-  } 
+  AudioFileSourceLittleFS* file = new AudioFileSourceLittleFS(launchAudio);
+  AudioGeneratorMP3* mp3 = new AudioGeneratorMP3();
+  mp3->begin(file, out);
+  while(mp3->loop()){}
+  mp3->stop();
   delete file;
-  delete wav;
+  delete mp3;
   #endif
 }
