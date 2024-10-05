@@ -10,7 +10,7 @@
 //Wifi and mister information
 const char* ssid = "NetworkName";
 const char* password = "Password";
-const String tapToUrl = "http://mister.local:7497";
+const String tapToUrl = "ws://mister.local:7497";
 
 //-----------------------------------------------------------------------
 
@@ -32,6 +32,8 @@ const String tapToUrl = "http://mister.local:7497";
 //#define I2S_DOUT 26
 //#define I2S_BCLK 17
 //#define I2S_LRC 21
+//#define AUDIO_GAIN 1 //Value 0.1 - 4
+//const char* launchAudio = "/gbc-startup.mp3";
 
 //-----------------------------------------------------------------------
 #endif
