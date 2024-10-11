@@ -7,7 +7,7 @@ The project is now supporting the intial release of the v2 api (which uses webso
 ## Hardare
 * An Esp32
 * A MFRC522
-* (Optional) A max98357a board and speaker
+* (Optional) A MAX98357a board and speaker
 * (Optional) PWM Rumble motor. You can use a preconstructed board or build your own using a transistor and motor.
 
 ## Required Libaries
