@@ -1,7 +1,6 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <WiFi.h>
-#include <HTTPClient.h>
 #include <NfcAdapter.h>
 #include <AudioFileSourceLittleFS.h>
 #include <AudioOutputI2S.h>
@@ -21,11 +20,15 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 NfcAdapter nfc = NfcAdapter(&mfrc522);
 boolean requestSent = false;
 AudioOutputI2S* out;
+boolean wifiEnabled = false;
 
 void setup() {
     Serial.begin(115200);
+    Serial.println("Started");
     setupPins();
+    #ifndef SERIAL_ONLY
     initWiFi();
+    #endif
     SPI.begin();        // Init SPI bus
     mfrc522.PCD_Init(); // Init MFRC522
     nfc.begin();
@@ -59,48 +62,72 @@ void setupPins(){
   #endif
 }
 
-void loop(void) {
-    if (nfc.tagPresent()) {
-        NfcTag tag = nfc.read();       
-        if(tag.hasNdefMessage()){
-          NdefMessage message = tag.getNdefMessage();
-          int recordCount = message.getRecordCount();
-          NdefRecord record = message.getRecord(0);
-          int payloadLength = record.getPayloadLength();
-          const byte *payload = record.getPayload();
-          String payloadAsString = "";
-          for (int i = 3; i < payloadLength; i++) {
-                payloadAsString += (char)payload[i];
-          }
-          if(sendTapTo(payloadAsString)){
-            Serial.print("SCAN\t" + payloadAsString + "\n");
-            triggerLaunchLed(HIGH, 0);
-            triggerMotor(200, 1, 0);
-            playAudio();
-            triggerLaunchLed(LOW, 2000);
-          }
-          nfc.haltTag();
-          delay(1000);
-        }
-      }
+void motorOn(int predelay=0){
+  #ifdef MOTOR_PIN
+  delay(predelay);
+  analogWrite(MOTOR_PIN, 255);
+  #endif
 }
 
-void initWiFi() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi ..");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print('.');
-    triggerWifiLed(HIGH, 0);
-    delay(500);
-    triggerWifiLed(LOW, 500);
+void motorOff(int predelay=0){
+  #ifdef MOTOR_PIN 
+  delay(predelay);
+  analogWrite(MOTOR_PIN, 0);
+  #endif
+}
+
+void launchLedOn(int predelay=0){
+  #ifdef LAUNCH_LED_PIN
+  delay(predelay);
+  digitalWrite(LAUNCH_LED_PIN, HIGH);
+  #endif
+}
+
+void launchLedOff(int predelay=0, int postDelay=0){
+  #ifdef LAUNCH_LED_PIN
+  delay(predelay);
+  digitalWrite(LAUNCH_LED_PIN, LOW);
+  delay(postDelay);
+  #endif
+}
+
+void wifiLedOn(){
+  #ifdef WIFI_LED_PIN
+  digitalWrite(WIFI_LED_PIN, HIGH);
+  #endif
+}
+
+void wifiLedOff(){
+  #ifdef WIFI_LED_PIN
+  digitalWrite(WIFI_LED_PIN, LOW);
+  #endif
+}
+
+void expressError(int code){
+  for(int i=0; i < code; i++){
+    motorOn();
+    launchLedOn();
+    motorOff(800);
+    launchLedOff(0, 400);
   }
-  Serial.println(WiFi.localIP());
-  triggerWifiLed(HIGH, 0);
-  triggerMotor(250, 2, 100);
+}
+
+void playAudio(){
+  #ifdef I2S_DOUT
+  AudioFileSourceLittleFS* file = new AudioFileSourceLittleFS(launchAudio);
+  AudioGeneratorMP3* mp3 = new AudioGeneratorMP3();
+  mp3->begin(file, out);
+  while(mp3->loop()){}
+  mp3->stop();
+  delete file;
+  delete mp3;
+  #else
+  delay(1000);
+  #endif
 }
 
 bool sendTapTo(String gamePath){
+  if(!wifiEnabled) return true;
   WebsocketsClient client;
   std::atomic<bool> complete(false);
   std::atomic<bool> wasError(false);
@@ -149,66 +176,48 @@ bool sendTapTo(String gamePath){
   return !wasError.load();
 }
 
-void triggerMotor(int time, int loopCount, int loopDelay){
-  #ifdef MOTOR_PIN 
-  int last = loopCount - 1;
-  for(int i=0; i <= last; i++){
-    digitalWrite(MOTOR_PIN, HIGH);
-    delay(time);
-    digitalWrite(MOTOR_PIN, LOW);
-    if(loopDelay > 0 && i != last){
-      delay(loopDelay);
-    }
+void initWiFi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi ..");
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print('.');
+    wifiLedOn();
+    delay(500);
+    wifiLedOff();
   }
-  #endif
+  wifiEnabled =true;
+  Serial.println(WiFi.localIP());
+  wifiLedOn();
+  motorOn();
+  motorOff(250);
+  motorOn(100);
+  motorOff(250);
 }
 
-void triggerLaunchLed(int state, int preDelay){
-  #ifdef LAUNCH_LED_PIN
-  if(preDelay > 0){
-    delay(preDelay);
-  }
-  digitalWrite(LAUNCH_LED_PIN, state);
-  #endif
-}
-
-void triggerWifiLed(int state, int preDelay){
-  #ifdef WIFI_LED_PIN
-  if(preDelay > 0){
-    delay(preDelay);
-  }
-  digitalWrite(WIFI_LED_PIN, state);
-  #endif
-}
-
-void expressError(int code){
-  int motorPin = -1;
-  int launchPin= -1;
-  #ifdef MOTOR_PIN 
-  motorPin = MOTOR_PIN;
-  #endif
-  #ifdef LAUNCH_LED_PIN
-  launchPin = LAUNCH_LED_PIN;
-  #endif
-  if(motorPin == -1 && launchPin == -1) return;
-  for(int i=0; i < code; i++){
-    if(motorPin >= 0) digitalWrite(motorPin, HIGH);
-    if(launchPin >= 0) digitalWrite(launchPin, HIGH);
-    delay(800);
-    if(motorPin >= 0) digitalWrite(motorPin, LOW);
-    if(launchPin >= 0) digitalWrite(launchPin, LOW);
-    delay(400);
-  }
-}
-
-void playAudio(){
-  #ifdef I2S_DOUT
-  AudioFileSourceLittleFS* file = new AudioFileSourceLittleFS(launchAudio);
-  AudioGeneratorMP3* mp3 = new AudioGeneratorMP3();
-  mp3->begin(file, out);
-  while(mp3->loop()){}
-  mp3->stop();
-  delete file;
-  delete mp3;
-  #endif
+void loop(void) {
+    if (nfc.tagPresent()) {
+        NfcTag tag = nfc.read();       
+        if(tag.hasNdefMessage()){
+          NdefMessage message = tag.getNdefMessage();
+          int recordCount = message.getRecordCount();
+          NdefRecord record = message.getRecord(0);
+          int payloadLength = record.getPayloadLength();
+          const byte *payload = record.getPayload();
+          String payloadAsString = "";
+          for (int i = 3; i < payloadLength; i++) {
+                payloadAsString += (char)payload[i];
+          }
+          if(sendTapTo(payloadAsString)){
+            Serial.print("SCAN\t" + payloadAsString + "\n");
+            launchLedOn(0);
+            motorOn(0);
+            playAudio();
+            motorOff(0);
+            launchLedOff();
+          }
+          nfc.haltTag();
+          delay(1000);
+        }
+      }
 }
