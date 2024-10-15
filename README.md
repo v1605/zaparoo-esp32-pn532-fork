@@ -10,13 +10,11 @@ The project is now supporting the intial release of the v2 api (which uses webso
 * (Optional) A MAX98357a board and speaker
 * (Optional) PWM Rumble motor. You can use a preconstructed board or build your own using a transistor and motor.
 
-## Required Libaries
-* ArduinoJson
-* UUID
+## Required Libaries (Which may have their own dependencies)
 * MFRC55
 * ESP8266Audio
-* ArdunioWebsockets
 * [NDEF](https://github.com/don/NDEF/tree/master)
+* [TapTo Esp32 Launch Api](https://github.com/v1605/tapto-esp32-launch-api)
 
 ## Setup
 1. If you haven't already, downalod and install Ardunio Studio.
