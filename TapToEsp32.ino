@@ -5,29 +5,24 @@
 #include <AudioFileSourceLittleFS.h>
 #include <AudioOutputI2S.h>
 #include <AudioGeneratorMP3.h>
-#include <ArduinoWebsockets.h>
-#include <ArduinoJson.h>
-#include <UUID.h>
-#include <atomic>
 #include <LittleFS.h>
+#include <TapToLaunchApi.h>
 #include "TapToEsp32.hpp"
-
-using namespace websockets;
 
 //Config found in ReadTag.hpp
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 NfcAdapter nfc = NfcAdapter(&mfrc522);
-boolean requestSent = false;
+TapToLaunchApi client;
 AudioOutputI2S* out;
 boolean wifiEnabled = false;
 
 void setup() {
     Serial.begin(115200);
-    Serial.println("Started");
     setupPins();
     #ifndef SERIAL_ONLY
     initWiFi();
+    client.url(tapToUrl);
     #endif
     SPI.begin();        // Init SPI bus
     mfrc522.PCD_Init(); // Init MFRC522
@@ -126,54 +121,13 @@ void playAudio(){
   #endif
 }
 
-bool sendTapTo(String gamePath){
+bool sendTapTo(String& gamePath){
   if(!wifiEnabled) return true;
-  WebsocketsClient client;
-  std::atomic<bool> complete(false);
-  std::atomic<bool> wasError(false);
-  JsonDocument doc;
-  UUID uuid;
-  const char* id = uuid.toCharArray();
-  doc["jsonrpc"]= "2.0";
-  doc["method"]="launch";
-  doc["id"]= uuid.toCharArray();
-  doc["params"]["text"] = gamePath;
-  doc.shrinkToFit();
-  client.onMessage([&complete, &wasError, &id](WebsocketsMessage msg){
-    if(complete.load()) return;
-    JsonDocument result;
-    DeserializationError error = deserializeJson(result, msg.data());
-    if (error) {
-      Serial.print("Failed to parse json");
-      Serial.println(error.c_str());
-      expressError(4);
-      complete.store(true);
-      wasError.store(true);
-      return;
-    }
-    const char* resultId = result["id"];
-    if(strcmp(id, resultId) != 0) return;
-    complete.store(true);
-    if(result.containsKey("result")){
-      Serial.print("Error with game path");
-      expressError(3);
-      wasError.store(true);
-      return;
-    }
-  });
-  if(!client.connect(tapToUrl)){
-    Serial.println("Unable to connect");
-    expressError(2);
-    return false;
+  int code = client.launch(gamePath);
+  if(code > 0){
+    expressError(code);
   }
-  String request;
-  serializeJson(doc, request);
-  client.send(request);
-  while(!complete.load()){
-    client.poll();
-  }
-  client.close();
-  return !wasError.load();
+  return code == 0;
 }
 
 void initWiFi() {
@@ -208,16 +162,19 @@ void loop(void) {
           for (int i = 3; i < payloadLength; i++) {
                 payloadAsString += (char)payload[i];
           }
-          if(sendTapTo(payloadAsString)){
-            Serial.print("SCAN\t" + payloadAsString + "\n");
-            launchLedOn(0);
-            motorOn(0);
-            playAudio();
-            motorOff(0);
-            launchLedOff();
+          if(!payloadAsString.equalsIgnoreCase("")){
+            if(sendTapTo(payloadAsString)){
+              Serial.print("SCAN\t" + payloadAsString + "\n");
+              Serial.flush();
+              launchLedOn(0);
+              motorOn(0);
+              playAudio();
+              motorOff(0);
+              launchLedOff();
+            }
+            nfc.haltTag();
+            delay(1000);
           }
-          nfc.haltTag();
-          delay(1000);
         }
       }
 }
