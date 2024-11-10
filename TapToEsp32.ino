@@ -16,6 +16,8 @@ NfcAdapter nfc = NfcAdapter(&mfrc522);
 TapToLaunchApi client;
 AudioOutputI2S* out;
 boolean wifiEnabled = false;
+String lastId="";
+int idLoop = 0;
 
 void setup() {
     Serial.begin(115200);
@@ -130,6 +132,23 @@ bool sendTapTo(String& gamePath){
   return code == 0;
 }
 
+bool sendTapToUid(String& uid){
+  if(!wifiEnabled) return true;
+  int code = client.launchUid(uid);
+  if(code > 0){
+    expressError(code);
+  }
+  return code == 0;
+}
+
+void successActions(){
+  launchLedOn(0);
+  motorOn(0);
+  playAudio();
+  motorOff(0);
+  launchLedOff();
+}
+
 void initWiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -150,31 +169,50 @@ void initWiFi() {
 }
 
 void loop(void) {
-    if (nfc.tagPresent()) {
-        NfcTag tag = nfc.read();       
-        if(tag.hasNdefMessage()){
-          NdefMessage message = tag.getNdefMessage();
-          int recordCount = message.getRecordCount();
-          NdefRecord record = message.getRecord(0);
-          int payloadLength = record.getPayloadLength();
-          const byte *payload = record.getPayload();
-          String payloadAsString = "";
-          for (int i = 3; i < payloadLength; i++) {
-                payloadAsString += (char)payload[i];
-          }
-          if(!payloadAsString.equalsIgnoreCase("")){
-            if(sendTapTo(payloadAsString)){
-              Serial.print("SCAN\t" + payloadAsString + "\n");
-              Serial.flush();
-              launchLedOn(0);
-              motorOn(0);
-              playAudio();
-              motorOff(0);
-              launchLedOff();
-            }
-            nfc.haltTag();
-            delay(1000);
-          }
-        }
+  if (nfc.tagPresent()) {
+    NfcTag tag = nfc.read(); 
+    String id = tag.getUidString();
+    if(id.equalsIgnoreCase(lastId)){
+      idLoop++;
+    }
+    lastId = id;
+    bool foundMessage = false;
+    if(tag.hasNdefMessage()){
+      NdefMessage message = tag.getNdefMessage();
+      int recordCount = message.getRecordCount();
+      NdefRecord record = message.getRecord(0);
+      int payloadLength = record.getPayloadLength();
+      const byte *payload = record.getPayload();
+      String payloadAsString = "";
+      for (int i = 3; i < payloadLength; i++) {
+            payloadAsString += (char)payload[i];
       }
+      foundMessage = !payloadAsString.equalsIgnoreCase("");
+      if(foundMessage){
+        if(sendTapTo(payloadAsString)){
+          Serial.print("SCAN\t" + payloadAsString + "\n");
+          Serial.flush();
+          successActions();
+        }
+        nfc.haltTag();
+        delay(900);
+      }
+    }
+    if(!foundMessage){
+      if(idLoop > 3){
+        String toSend = id;
+        toSend.replace(" ", "");
+        toSend.toLowerCase();
+        if(sendTapToUid(toSend)){
+          Serial.print("SCAN\tuid=" + toSend+ "\n");
+          Serial.flush();
+          successActions();
+          idLoop = 0;
+          delay(900);
+        }
+        nfc.haltTag();
+      }
+    }
+  }
+  delay(100);
 }
