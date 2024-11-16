@@ -1,6 +1,6 @@
-# TapTo Esp32
+# Zaparoo Esp32
 
-The goal of this project is to launch games via the [TapTo Service](https://github.com/TapToCommunity/tapto) on the a Mister over Wifi. It also supports launching games via [Simple Serial](https://tapto.wiki/Reader_Drivers#Simple_Serial).
+The goal of this project is to launch games via the [Zaparoo Service](https://github.com/TapToCommunity/tapto) on the a Mister over Wifi. It also supports launching games via [Simple Serial](https://tapto.wiki/Reader_Drivers#Simple_Serial).
 
 The project is now supporting the intial release of the v2 api (which uses websockets). Further updates are required once the security layer is implemented in the api.
 
@@ -14,7 +14,7 @@ The project is now supporting the intial release of the v2 api (which uses webso
 * MFRC55
 * ESP8266Audio
 * [NDEF](https://github.com/don/NDEF/tree/master)
-* [TapTo Esp32 Launch Api](https://github.com/v1605/tapto-esp32-launch-api)
+* [Zaparoo Esp32 Launch Api](https://github.com/v1605/Zaparoo-esp32-launch-api)
 
 ## Setup
 1. If you haven't already, downalod and install Ardunio Studio.
