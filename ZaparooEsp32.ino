@@ -6,14 +6,14 @@
 #include <AudioOutputI2S.h>
 #include <AudioGeneratorMP3.h>
 #include <LittleFS.h>
-#include <TapToLaunchApi.h>
-#include "TapToEsp32.hpp"
+#include <ZaparooLaunchApi.h>
+#include "ZaparooEsp32.hpp"
 
-//Config found in ReadTag.hpp
+//Config found in .hpp file
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 NfcAdapter nfc = NfcAdapter(&mfrc522);
-TapToLaunchApi client;
+ZaparooLaunchApi client;
 AudioOutputI2S* out;
 boolean wifiEnabled = false;
 String lastId="";
@@ -24,7 +24,7 @@ void setup() {
     setupPins();
     #ifndef SERIAL_ONLY
     initWiFi();
-    client.url(tapToUrl);
+    client.url(zaparooUrl);
     #endif
     SPI.begin();        // Init SPI bus
     mfrc522.PCD_Init(); // Init MFRC522
@@ -123,7 +123,7 @@ void playAudio(){
   #endif
 }
 
-bool sendTapTo(String& gamePath){
+bool send(String& gamePath){
   if(!wifiEnabled) return true;
   int code = client.launch(gamePath);
   if(code > 0){
@@ -132,7 +132,7 @@ bool sendTapTo(String& gamePath){
   return code == 0;
 }
 
-bool sendTapToUid(String& uid){
+bool sendUid(String& uid){
   if(!wifiEnabled) return true;
   int code = client.launchUid(uid);
   if(code > 0){
@@ -189,11 +189,11 @@ void loop(void) {
       }
       foundMessage = !payloadAsString.equalsIgnoreCase("");
       if(foundMessage){
-        if(sendTapTo(payloadAsString)){
+        if(send(payloadAsString)){
           Serial.print("SCAN\t" + payloadAsString + "\n");
           Serial.flush();
           successActions();
-        }
+        }  
         nfc.haltTag();
         delay(900);
       }
@@ -203,7 +203,7 @@ void loop(void) {
         String toSend = id;
         toSend.replace(" ", "");
         toSend.toLowerCase();
-        if(sendTapToUid(toSend)){
+        if(sendUid(toSend)){
           Serial.print("SCAN\tuid=" + toSend+ "\n");
           Serial.flush();
           successActions();
