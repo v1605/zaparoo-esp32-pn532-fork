@@ -1,16 +1,19 @@
-#ifndef TAP_TO_ESP32_H
-#define TAP_TO_ESP32_H
+#ifndef ZAPAROO_ESP32_H
+#define ZAPAROO_ESP32_H
 
 //Reguired Configuration-------------------------------------------------
 
 //The SS/SDA and Reset pins of the MFRC522
+//12 and 27 are super gb
 #define SS_PIN 5
-#define RST_PIN 16
+#define RST_PIN 26
+//#define SS_PIN 12
+//#define RST_PIN 27
 
-//Wifi and mister information
+//Wifi and zaparoo information
 const char* ssid = "NetworkName";
 const char* password = "Password";
-const String tapToUrl = "ws://mister.local:7497";
+const String zaparooUrl = "ws://mister.local:7497";
 
 //Uncomment if serial only, wifi credentials will not be used
 //#define SERIAL_ONLY
