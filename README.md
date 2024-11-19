@@ -13,7 +13,7 @@ The project is now supporting the intial release of the v2 api (which uses webso
 ## Required Libaries (Which may have their own dependencies)
 * MFRC55
 * ESP8266Audio
-* [NDEF](https://github.com/don/NDEF/tree/master)
+* [NDEF-MFRC522](https://github.com/aroller/NDEF-MFRC522)
 * [Zaparoo Esp32 Launch Api](https://github.com/v1605/Zaparoo-esp32-launch-api)
 
 ## Setup
