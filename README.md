@@ -1,10 +1,10 @@
-# Zaparoo Esp32
+# Zaparoo ESP32
 
 The goal of this project is to launch games via the [Zaparoo Service](https://wiki.zaparoo.org/Main_Page) on the a Mister over Wifi. It also supports launching games via [Simple Serial](https://wiki.zaparoo.org/Reader_Drivers#Simple_Serial).
 
-The project is now supporting the intial release of the v2 api (which uses websockets). Further updates are required once the security layer is implemented in the api.
+The project is now supporting the initial release of the v2 api (which uses websockets). Further updates are required once the security layer is implemented in the api.
 
-## Hardare
+## Hardware
 * An Esp32
 * A MFRC522
 * (Optional) A MAX98357a board and speaker
@@ -17,7 +17,7 @@ The project is now supporting the intial release of the v2 api (which uses webso
 * [Zaparoo Esp32 Launch Api](https://github.com/ZaparooProject/zaparoo-esp32-launch-api)
 
 ## Setup
-1. If you haven't already, downalod and install Ardunio Studio.
+1. If you haven't already, downalod and install Arduino Studio.
 2. Install the above Libaries.
 3. Clone/Download the repository and open ZaparooEsp32.ino in Arunido Studio.
 4. Select your board and port, located in the Tools menu. If you do not have options for an Esp32, follow these [instrustions](https://docs.sunfounder.com/projects/umsk/en/latest/03_esp32/esp32_start/03_install_esp32.html) for installing the board configurations.
