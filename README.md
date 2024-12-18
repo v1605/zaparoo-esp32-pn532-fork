@@ -3,7 +3,10 @@
 The goal of this project is to launch games via the [Zaparoo Service](https://wiki.zaparoo.org/Main_Page) on the a Mister over Wifi. 
 It provides a simple Web interface to enable configuration of the ESP32/LED/Rumble Motor/Audio, and change settings.
 
-This fork is based on the main branch of the zaparoo-esp32 project.
+This fork is based on the main branch of the zaparoo-esp32 project.  
+
+Short Video  
+[![Zaparoo-esp32](https://img.youtube.com/vi/U0me8gvgdw8/0.jpg)](https://youtu.be/U0me8gvgdw8)
 
 The project is now supporting the initial release of the v2 api (which uses websockets). Further updates are required once the security layer is implemented in the api.
 
