@@ -20,7 +20,6 @@ The project is now supporting the initial release of the v2 api (which uses webs
 ## Required Libaries (Which may have their own dependencies)
 * PN532  
 * ESP8266Audio  
-* [NDEF-MFRC522](https://github.com/aroller/NDEF-MFRC522)  
 * ArdunioJSON
 * Arduino
 * Preferences
