@@ -1,6 +1,6 @@
 # Zaparoo ESP32
 
-The goal of this project is to launch games via the [Zaparoo Service](https://wiki.zaparoo.org/Main_Page) on the a Mister over Wifi. 
+The goal of this project branch is to launch games via the [Zaparoo Service](https://wiki.zaparoo.org/Main_Page) on the a Mister over Wifi, with enhanced audio settings. 
 It provides a simple Web interface to enable configuration of the ESP32/LED/Rumble Motor/Audio, and change settings.
 
 This fork is based on the main branch of the zaparoo-esp32 project.  
@@ -12,12 +12,13 @@ The project is now supporting the initial release of the v2 api (which uses webs
 
 ## Hardware
 * An Esp32
-* A MFRC522
-* (Optional) A MAX98357a board and speaker
+* A PN532 (in I2C mode)
+* A SD card module
+* A MAX98357a board and speaker
 * (Optional) PWM Rumble motor. You can use a preconstructed board or build your own using a transistor and motor.
 
 ## Required Libaries (Which may have their own dependencies)
-* MFRC55  
+* PN532  
 * ESP8266Audio  
 * [NDEF-MFRC522](https://github.com/aroller/NDEF-MFRC522)  
 * ArdunioJSON
