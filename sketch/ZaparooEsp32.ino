@@ -22,8 +22,8 @@
 #include <NfcAdapter.h>
 #include <FS.h>
 
-#define WIFI_SSID "RJBIOT"
-#define WIFI_PASSWORD "MANDARK3690"
+#define WIFI_SSID "******"
+#define WIFI_PASSWORD "******"
 #define SS_PIN 5
 #define RST_PIN 4
 
