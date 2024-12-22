@@ -409,13 +409,35 @@
 								<td><div id="searchResults" name="searchResults" class="labelText"></div></td>
 							</tr>
 						</table>
-						<table>	
+						<table class="settingsTable" style="margin-left: 10%;">	
 							<tr>
-								<td width="30%"></td>
-								<td>
+								<td width="30%">
+									<div id="wrTagAudioDiv" style="display: none;" class="labelText">
+										<table class="settingsTable">
+											<tr>
+												<td>
+													<div class="input-group">
+														<label class="label">NFC Game Launch Audio File</label>
+														<input autocomplete="off" name="audioTAGGameLaunchFilePath" id="audioTAGGameLaunchFilePath" class="input labelText" type="text">
+														<div></div>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<div class="input-group">
+														<label class="label">NFC Removed Audio File</label>
+														<input autocomplete="off" name="audioTAGRemovedFilePath" id="audioTAGRemovedFilePath" class="input labelText" type="text">
+														<div></div>
+													</div>
+												</td>
+											</tr>
+										</table>
+									</div>
+								<td width="40%">
 									<div id="qrcode" style="width:125px; height:125px; margin-top:10px;" class="labelText"></div>
 								</td>
-								<td>
+								<td width="10%">
 									<div id="wrTagDiv" style="margin-top:-15px; display: none;" class="labelText">
 										<table>
 											<tr>
@@ -433,6 +455,7 @@
 										</table>
 									</div>
 								</td>
+								<td width="20%"></td>
 							</tr>
 						</table>
 					</div>							
@@ -551,7 +574,7 @@
 								</div>
 							</td>
 						</tr>
-						<tr style="height: 100px; display: none;">
+						<tr style="height: 100px;">
 							<td width="25%">
 								<div class="input-group" style="text-align: center;">
 									<label class="label">Enable SD Card</label>
@@ -743,7 +766,7 @@
 			var bWriteMode = false;
 
 			var gateway = `ws://${window.location.hostname}/ws`;
-			
+
 			var websocket;
 			window.addEventListener('load', doOnload);
 			window.addEventListener("beforeunload", doUnload);
@@ -1047,7 +1070,7 @@
 				websocket.send(tmpLCMD);
 				setTimeout(function() {
 					websocket.close();
-				}, 2000);
+				}, 1000);
 				setTimeout(function() {
 					addLogLine("Zap ESP will now close WS");
 				}, 1000);
@@ -1181,10 +1204,10 @@
 				elZapDiv.style.display = "none";
 				var elTagDiv = document.getElementById("tagGenDiv");
 				elTagDiv.style.display = "none";
-				if(bWriteMode){websocket.send(
-					"{'cmd': 'set_WriteMode', 'data': false}")
-					bWriteMode = false;
-				}
+				// if(bWriteMode){websocket.send(
+				// 	"{'cmd': 'set_WriteMode', 'data': false}")
+				// 	bWriteMode = false;
+				// }
 				var elFMDiv = document.getElementById("FileManDiv");
 				if(elFMDiv.style.display == "block"){
 					elFMDiv.style.display = "none";
@@ -1275,7 +1298,7 @@
 				var currSelMister = true;				
 				if(!document.getElementById("selEnMisterMode").checked){currSelMister = false;};
 				var currSelSDCard = true;				
-				if(!document.getElementById("selEnSDCard").checked){currSelSDCard = false;};				
+				if(!document.getElementById("selEnSDCard").checked){currSelSDCard = false;};		
 				var currSettings = {
 					cmd: "set_Current_Config",
 					data: {
@@ -1359,11 +1382,18 @@
 				qrcode.makeCode(encodeURI(tmpText));
 				var elwrDiv = document.getElementById("wrTagDiv");
 				elwrDiv.style.display = "block";
+				var elwrAudioDiv = document.getElementById("wrTagAudioDiv");
+				elwrAudioDiv.style.display = "block";
+				
 			}
 
 			function writeTag(){
 				var elText = document.getElementById("resSel").value;
-				var tmpLCMD = `{"cmd": "write_Tag_Launch_Game", "data": "${elText}"}`;
+				var curraudioTAGRemFilePath = document.getElementById("audioTAGRemovedFilePath").value;
+				if(!curraudioTAGRemFilePath){curraudioTAGRemFilePath = "";}
+				var curraudioTAGLaunchFilePath = document.getElementById("audioTAGGameLaunchFilePath").value;
+				if(!curraudioTAGLaunchFilePath){curraudioTAGLaunchFilePath = "";}		
+				var tmpLCMD = `{"cmd": "write_Tag_Launch_Game", "launchData": "${elText}", "audioLaunchPath": "${curraudioTAGLaunchFilePath}", "audioRemovePath": "${curraudioTAGRemFilePath}"}`;
 				//console.log("Tag Data: ", tmpLCMD);
 				websocket.send(tmpLCMD);
 			}
