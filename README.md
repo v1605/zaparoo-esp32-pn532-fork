@@ -32,6 +32,7 @@ The project is now supporting the initial release of the v2 api (which uses webs
 * AudioFileSourceLittleFS
 * AudioOutputI2S
 * AudioGeneratorMP3
+* Wire  
 
 
 ## Setup
