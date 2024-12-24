@@ -66,12 +66,16 @@ It is possible to incorporate a battery to make a wireless NFC adapter. There ar
 
 ## ESP32 Default GPIO Pins  
 
-### PN532 (Check your ESP32's default I2C pins as the code uses them by default - however PN532_RST_PIN must be set to the below GPIO pins unless you change the source code)  
-SDA             21
-SCL             22
-PN532_RST_PIN   13
+### PN532
+(Check your ESP32's default I2C pins as the code uses them by default - however PN532_RST_PIN must be set to the below GPIO pins unless you change the source code)  
+  
+SDA             21  
+SCL             22  
+PN532_RST_PIN   13  
 
-### SDCARD (Check your ESP32's default vspi pins as the code uses them by default - however SDA & RST must be set to the below GPIO pins unless you change the source code)
+### SDCARD  
+(Check your ESP32's default vspi pins as the code uses them by default - however SDA & RST must be set to the below GPIO pins unless you change the source code)  
+  
 SDA     5  
 SCK     18  
 MOSI    23  
@@ -79,7 +83,7 @@ MISO    19
 RST     4  
 
 ### LED's
-WIFI    2
+WIFI    2  
 PWR     22  
 Launch  33  
 
