@@ -7,16 +7,17 @@
 #define SS_PIN 5
 #define RST_PIN 4
 
-//The GPIO pin the PN532 RSTPDN Pin is connected to ((***NOT THE PN532 RSTO PIN***)). This is essential for stability and recovery after an esp32 soft reset.
+//The GPIO pin the PN532 RSTPDN Pin is connected to ((***NOT THE PN532 RSTO PIN***)). 
+//This is essential for stability and recovery after an esp32 soft reset.
 #define PN532_RST_PIN 13
 
 
 
-//Wifi and zaparoo information
-const char* ssid = "NetworkName";
-const char* password = "Password";
+//Wifi information
+const char* ssid = "******";
+const char* password = "*******";
 
-//Set to True for serial only, wifi Game Launch & Reset API calls will not be used webUI features will still be available
+//Set to True for serial only, wifi Game Launch & Reset API calls will not be used - webUI features will still be available
 #define SERIAL_ONLY false
 
 //-----------------------------------------------------------------------
