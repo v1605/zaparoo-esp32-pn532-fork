@@ -22,13 +22,8 @@
 #include <FS.h>
 #include "index.h"
 #include "qr_code_js.h"
+#include "ZaparooEsp32.hpp"
 
-#define NFC_INTERFACE_I2C
-#define WIFI_SSID "*****"
-#define WIFI_PASSWORD "*****"
-#define SS_PIN 5
-#define RST_PIN 4
-#define PN532_RST_PIN 13
 
 PN532_I2C pn532_i2c(Wire);
 AudioFileSourceSD *source = NULL;
@@ -527,7 +522,7 @@ bool connectWifi()
   if (WiFi.status() == WL_CONNECTED){
     return true;
   }
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  WiFi.begin(ssid, password);
   int maxRetries = 10;
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -705,7 +700,9 @@ bool readNFC()
               payloadAsString3 = "";
             }            
             if(!badRead){
-              bool hasLaunched = launchGame(payloadAsString);
+              if(!SERIAL_ONLY){
+                bool hasLaunched = launchGame(payloadAsString);
+              }
               successActions(payloadAsString2);
               notifyClients("Found Msg: SCAN\t" + payloadAsString + "\n");
             }
@@ -732,7 +729,7 @@ bool readNFC()
       if(lastNFC_ID != "" && !nfc.tagPresent() && !softReset){
         //trigger a remove event;
         cardRemovedActions(payloadAsString3);
-        if(reset_on_remove_enabled && !payloadAsString.startsWith("steam://")){
+        if(reset_on_remove_enabled && !payloadAsString.startsWith("steam://") && !SERIAL_ONLY){
           callResetMister();
         }
         notifyClients("Tag Removed!");
