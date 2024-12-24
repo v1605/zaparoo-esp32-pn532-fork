@@ -1,7 +1,7 @@
 # Zaparoo ESP32
 
 The goal of this project branch is to launch games via the [Zaparoo Service](https://wiki.zaparoo.org/Main_Page) on the a Mister over Wifi, with enhanced audio settings. 
-It provides a simple Web interface to enable configuration of the ESP32/LED/Rumble Motor/Audio, change settings, upload files to SD Card, and write NFC tag/Cards with extened information to hold game lauch and tag/card removal audio file paths.
+It provides a simple Web interface to enable configuration of the ESP32/LED/Rumble Motor/Audio, change settings, upload files to SD Card, and write NFC tag/Cards with extended information to hold game lauch and tag/card removal audio file paths.
 
 This fork branch is based on the main branch of the zaparoo-esp32 project but has been changed to use a PN532 module and SD Card Module + removes direct Serial support.  
 
