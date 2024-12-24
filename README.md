@@ -3,7 +3,7 @@
 The goal of this project branch is to launch games via the [Zaparoo Service](https://wiki.zaparoo.org/Main_Page) on the a Mister over Wifi, with enhanced audio settings. 
 It provides a simple Web interface to enable configuration of the ESP32/LED/Rumble Motor/Audio, and change settings.
 
-This fork is based on the main branch of the zaparoo-esp32 project.  
+This fork is based on the main branch of the zaparoo-esp32 project but has been changed to use a PN532 module and SD Card Module.  
 
 Short Video  
 [![Zaparoo-esp32](https://img.youtube.com/vi/U0me8gvgdw8/0.jpg)](https://youtu.be/U0me8gvgdw8)
@@ -18,13 +18,13 @@ The project is now supporting the initial release of the v2 api (which uses webs
 * (Optional) PWM Rumble motor. You can use a preconstructed board or build your own using a transistor and motor.
 
 ## Required Libaries (Which may have their own dependencies)
-* PN532  
+* [PN532 & NDEF](https://github.com/MintyTrebor/PN532)  
 * ESP8266Audio  
 * ArdunioJSON
 * Arduino
 * Preferences
 * AsyncTCP
-* ESPAsyncWebServer
+* [ESPAsyncWebServer](https://github.com/MintyTrebor/ESPWebFileManager)  
 * ArduinoWebSockets
 * UUID
 * SPI
@@ -32,10 +32,6 @@ The project is now supporting the initial release of the v2 api (which uses webs
 * AudioFileSourceLittleFS
 * AudioOutputI2S
 * AudioGeneratorMP3
-
-Code also includes modified versions of the following libraries 
-* QRCode.js
-* [ESPWebFileManager](https://github.com/jobitjoseph/ESPWebFileManager)
 
 
 ## Setup
@@ -67,9 +63,14 @@ It is possible to incorporate a battery to make a wireless NFC adapter. There ar
 1. An Adadfruit Feather Esp32: it has all the required hardware to run off a lipo battery. The downside is that even with a power switch to ground the enable pin, you can still get battery drain. If you add a swich on the battery, you can only charge when its powered on. It's also possible adding a motor and audio will be too much for the regulator to handle.
 2. Combine a lipo charging board, 5v buck converter, and a switch to power the board. This option require more assembly and reasearch but avoids the downsides of option one.
 
-## ESP32 Default GPIO Pins    
+## ESP32 Default GPIO Pins  
 
-### MFRC522 (Check your ESP32's default vspi pins as the code uses them by default - however SDA & RST must be set to the below GPIO pins unless you change the source code)
+### PN532 (Check your ESP32's default I2C pins as the code uses them by default - however PN532_RST_PIN must be set to the below GPIO pins unless you change the source code)  
+SDA             21
+SCL             22
+PN532_RST_PIN   13
+
+### SDCARD (Check your ESP32's default vspi pins as the code uses them by default - however SDA & RST must be set to the below GPIO pins unless you change the source code)
 SDA     5  
 SCK     18  
 MOSI    23  
