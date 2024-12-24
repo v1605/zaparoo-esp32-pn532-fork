@@ -40,7 +40,7 @@ The project is now supporting the initial release of the v2 api (which uses webs
 2. Install the above Libaries.
 3. Clone/Download the repository and open ZaparooEsp32.ino in Arunido Studio.
 4. Select your board and port, located in the Tools menu. If you do not have options for an Esp32, follow these [instrustions](https://docs.sunfounder.com/projects/umsk/en/latest/03_esp32/esp32_start/03_install_esp32.html) for installing the board configurations.
-5. Edit the ZaparooEsp32.ino file to define your your Wifi credentials.
+5. Edit the ZaparooEsp32.hpp file to define your your Wifi credentials + addtional options.
 6. Ensure Boards -> Boards Manager -> esp32 is set to version 3.0.7
 7. (Optional) If you are planning to use a battery to power the Esp32, it might help to extend battery life by decreasing the CPU frequency under tools. If using the audio configuration, you need a min cpu of 160mhz.
 8. Make sure your "Partion Scheme" under tools is set to "No OTA(2MB APP/xMB SPIFFS)". xMB will vary based on your board, but 2MB is common. 
