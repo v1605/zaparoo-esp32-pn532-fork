@@ -1,3 +1,7 @@
+## - Use Minty Branch for RC522 module version  
+## - Use PN532_SDCARD branch for PN532 module and SDCard support version
+
+
 # Zaparoo ESP32
 
 The goal of this project is to launch games via the [Zaparoo Service](https://wiki.zaparoo.org/Main_Page) on the a Mister over Wifi. It also supports launching games via [Simple Serial](https://wiki.zaparoo.org/Reader_Drivers#Simple_Serial).
