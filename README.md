@@ -83,7 +83,7 @@ RST     4
 
 ### LED's
 WIFI    2  
-PWR     22  
+PWR     15  
 Launch  33  
 
 ### Rumble Motor
