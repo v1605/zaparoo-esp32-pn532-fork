@@ -24,9 +24,9 @@ The project is now supporting the initial release of the v2 api (which uses webs
 * Arduino
 * Preferences
 * AsyncTCP
-* [ESPAsyncWebServer](https://github.com/MintyTrebor/ESPWebFileManager)  
+* [ESPAsyncWebServer](https://github.com/MintyTrebor/ESPWebFileManager)
+* [Zaparoo-esp32-launch-api](https://github.com/ZaparooProject/zaparoo-esp32-launch-api)  
 * ArduinoWebSockets
-* UUID
 * SPI
 * LittleFS
 * AudioFileSourceLittleFS
