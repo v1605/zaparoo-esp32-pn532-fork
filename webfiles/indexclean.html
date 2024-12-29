@@ -320,7 +320,7 @@
 				</td>
 				<td width="1%" >
 					<button onclick="toggleNFCMode()" class="mybutton" id="NFCButton">
-						<span class="text">NFC Tag Generator</span>
+						<span class="text">Toggle NFC Write Mode</span>
 					</button>
 				</td>
 				<td width="1%" >
@@ -518,7 +518,7 @@
 							</td>
 							<td width="25%">
 								<div class="input-group">
-									<label class="label">Power LED GPIO Pin (22)</label>
+									<label class="label">Power LED GPIO Pin (15)</label>
 									<input autocomplete="off" name="powerLEDPin" id="powerLEDPin" class="input labelText" type="number">
 									<div></div>
 								</div>
@@ -766,7 +766,6 @@
 			var bWriteMode = false;
 
 			var gateway = `ws://${window.location.hostname}/ws`;
-
 			var websocket;
 			window.addEventListener('load', doOnload);
 			window.addEventListener("beforeunload", doUnload);
@@ -1204,10 +1203,6 @@
 				elZapDiv.style.display = "none";
 				var elTagDiv = document.getElementById("tagGenDiv");
 				elTagDiv.style.display = "none";
-				// if(bWriteMode){websocket.send(
-				// 	"{'cmd': 'set_WriteMode', 'data': false}")
-				// 	bWriteMode = false;
-				// }
 				var elFMDiv = document.getElementById("FileManDiv");
 				if(elFMDiv.style.display == "block"){
 					elFMDiv.style.display = "none";
