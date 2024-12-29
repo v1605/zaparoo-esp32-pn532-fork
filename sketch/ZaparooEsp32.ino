@@ -522,7 +522,7 @@ bool send(String& gamePath){
     expressError(code);
     notifyClients("Zaparoo Error Launching Game - Error Code: " + code);
   }
-  notifyClients("Launched Game");
+  notifyClients("Launched Game: " + gamePath);
   return code == 0;
 }
 
