@@ -45,7 +45,7 @@ const char* password = "*******";
 
 // LED's
 // WIFI           2 (This is normally replicates the cards wifi led, but it may be a different gpio on your esp32)
-// PWR            22
+// PWR            15
 // Launch         33
 
 // Rumble Motor
