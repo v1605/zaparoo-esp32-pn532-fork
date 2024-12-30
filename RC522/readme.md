@@ -51,7 +51,7 @@ The project is now supporting the initial release of the v2 api (which uses webs
 ## Web Setup
 WebUI: Open your browser and enter the IP address of your ESP32 (see serial console of the IDE or your router to get IP address - to access serial console click the magnifiying glass in the top left corner of the IDE, and set baud to 115200 - connect or reset the esp32 to see info and IP address).
 1. Zaparoo Settings: Enter IP Address of MiSTer &/or Steamdeck - can also choose to return to MiSTer menu on card removal.
-2. ESP32 Settings: Toggle LED's/Audio/Rumble motor and set GPIO Pins. Also toggle SD Card module
+2. ESP32 Settings: Toggle LED's/Audio/Rumble motor and set GPIO Pins.
 3. Audio Settings: Set Audio Gain (Volume : 0.1 - 4), and files names of audio files for Detect, Launch, & Remove Tag.
 4. Audio File Manager: Upload and delte files to the ESP32 device SD Card Module (when Enabled in Settings)
 
