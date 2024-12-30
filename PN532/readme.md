@@ -42,7 +42,7 @@ The project is now supporting the initial release of the v2 api (which uses webs
 ## Setup
 1. If you haven't already, downalod and install Arduino Studio.
 2. Install the above Libaries.
-3. Clone/Download the repository and open ZaparooEsp32.ino in Arunido Studio.
+3. Clone/Download the repository and place all the files in this folder into a folder called ZaparooEsp32. Open ZaparooEsp32.ino in Arunido Studio.
 4. Select your board and port, located in the Tools menu. If you do not have options for an Esp32, follow these [instrustions](https://docs.sunfounder.com/projects/umsk/en/latest/03_esp32/esp32_start/03_install_esp32.html) for installing the board configurations.
 5. Edit the ZaparooEsp32.hpp file to define your your Wifi credentials + addtional options.
 6. (Optional) If you are planning to use a battery to power the Esp32, it might help to extend battery life by decreasing the CPU frequency under tools. If using the audio configuration, you need a min cpu of 160mhz.
