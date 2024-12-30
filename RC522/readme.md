@@ -21,7 +21,7 @@ The project is now supporting the initial release of the v2 api (which uses webs
 * (Optional) PWM Rumble motor. You can use a preconstructed board or build your own using a transistor and motor.
 
 ## Required Libaries (Which may have their own dependencies)
-* [NDEF]([https://github.com/MintyTrebor/PN532](https://github.com/TheNitek/NDEF))
+* [NDEF](https://github.com/TheNitek/NDEF)
 * [MFRC522](https://github.com/MintyTrebor/rfid)  
 * ESP8266Audio  
 * ArdunioJSON
