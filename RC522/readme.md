@@ -41,12 +41,12 @@ The project is now supporting the initial release of the v2 api (which uses webs
 ## Setup
 1. If you haven't already, downalod and install Arduino Studio.
 2. Install the above Libaries.
-3. Clone/Download the repository and open place all the files in this folder into a folder called ZaparooEsp32. Open ZaparooEsp32.ino in Arunido Studio.
-4. Select your board and port, located in the Tools menu. If you do not have options for an Esp32, follow these [instrustions](https://docs.sunfounder.com/projects/umsk/en/latest/03_esp32/esp32_start/03_install_esp32.html) for installing the board configurations.
-5. Edit the ZaparooEsp32.hpp file to define your your Wifi credentials + addtional options.
-6. (Optional) If you are planning to use a battery to power the Esp32, it might help to extend battery life by decreasing the CPU frequency under tools. If using the audio configuration, you need a min cpu of 160mhz.
-7. Make sure your "Partion Scheme" under tools is set to "No OTA(2MB APP/xMB SPIFFS)". xMB will vary based on your board, but 2MB is common. 
-8. Compile and upload the project your esp32.
+3. Clone/Download the repository and copy all the files in this folder into a folder called ZaparooEsp32. Open ZaparooEsp32.ino in Arunido Studio.
+5. Select your board and port, located in the Tools menu. If you do not have options for an Esp32, follow these [instrustions](https://docs.sunfounder.com/projects/umsk/en/latest/03_esp32/esp32_start/03_install_esp32.html) for installing the board configurations.
+6. Edit the ZaparooEsp32.hpp file to define your your Wifi credentials + addtional options.
+7. (Optional) If you are planning to use a battery to power the Esp32, it might help to extend battery life by decreasing the CPU frequency under tools. If using the audio configuration, you need a min cpu of 160mhz.
+8. Make sure your "Partion Scheme" under tools is set to "No OTA(2MB APP/xMB SPIFFS)". xMB will vary based on your board, but 2MB is common. 
+9. Compile and upload the project your esp32.
 
 ## Web Setup
 WebUI: Open your browser and enter the IP address of your ESP32 (see serial console of the IDE or your router to get IP address - to access serial console click the magnifiying glass in the top left corner of the IDE, and set baud to 115200 - connect or reset the esp32 to see info and IP address).
