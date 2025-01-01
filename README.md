@@ -2,9 +2,9 @@
 
 The goal of this project is to launch games via the [Zaparoo Service](https://wiki.zaparoo.org/Main_Page) on the a Mister over Wifi. It also supports launching games via [Simple Serial](https://wiki.zaparoo.org/Reader_Drivers#Simple_Serial).
 
-The project is now supporting the initial release of the v2 api (which uses websockets). Further updates are required once the security layer is implemented in the api.
+The project is now supporting the initial release of the v2 api (which uses web-sockets). Further updates are required once the security layer is implemented in the api.
 
-## This fork has been enanched with new features & added support for both the the RC522 & PN532 rfid modules.  
+## This fork has been enhanced with new features & added support for both the the RC522 & PN532 rfid modules.  
 New features:  
 - Supports Universal launching for both MiSTer and SteamOS
 - Play Card Detected, Game Launched, and Card Remove Audio files  
@@ -26,7 +26,7 @@ Short Video
 * A PN532 (in I2C mode) or RC522 Module
 * (Optional) A SD Card module (Note: Only supported with PN532 Module installed)
 * (Optional) A MAX98357a board and speaker
-* (Optional) PWM Rumble motor. You can use a preconstructed board or build your own using a transistor and motor.
+* (Optional) PWM Rumble motor. You can use a pre-constructed board or build your own using a transistor and motor.
 * (Optional) LED's for Pwr, Wifi, & Game Launch indication.  
 
 ## Required Libaries (Which may have their own dependencies)
@@ -54,16 +54,16 @@ Short Video
   
 ## Setup
 1. If you haven't already, download and install Arduino Studio.
-2. Install the above Libaries, selecting the approriate libraries for the RFID module chosen.
+2. Install the above Libraries, selecting the appropriate libraries for the RFID module chosen.
 3. Clone/Download the repository and copy all the files in this folder into a folder called ZaparooEsp32. Open ZaparooEsp32.ino in Arunido Studio.
 4. Select your board and port, located in the Tools menu. If you do not have options for an Esp32, follow these [instructions](https://docs.sunfounder.com/projects/umsk/en/latest/03_esp32/esp32_start/03_install_esp32.html) for installing the board configurations.
-5. Edit the ZaparooEsp32.hpp file to define your your Wifi credentials, RFID module type, & addtional options.
+5. Edit the ZaparooEsp32.hpp file to define your your Wifi credentials, RFID module type, & additional options.
 6. (Optional) If you are planning to use a battery to power the Esp32, it might help to extend battery life by decreasing the CPU frequency under tools. If using the audio configuration, you need a min cpu of 160mhz.
-7. Make sure your "Partion Scheme" under tools is set to "No OTA(2MB APP/xMB SPIFFS)". xMB will vary based on your board, but 2MB is common. 
+7. Make sure your "Partition Scheme" under tools is set to "No OTA(2MB APP/xMB SPIFFS)". xMB will vary based on your board, but 2MB is common. 
 8. Compile and upload the project your esp32.
 
 ## Web Setup
-WebUI: Open your browser and enter the IP address of your ESP32 (see serial console of the IDE or your router to get IP address - to access serial console click the magnifiying glass in the top right corner of the IDE, and set baud to 115200 - connect or reset the esp32 to see info and IP address).
+WebUI: Open your browser and enter the IP address of your ESP32 (see serial console of the IDE or your router to get IP address - to access serial console click the magnifying glass in the top right corner of the IDE, and set baud to 115200 - connect or reset the esp32 to see info and IP address).
 1. Zaparoo Settings: Enter IP Address of MiSTer &/or Steamdeck - can also choose to return to MiSTer menu on card removal.
 2. ESP32 Settings: Toggle LED's/Audio/Rumble motor and set GPIO Pins. Also toggle SD Card module
 3. Audio Settings: Set Audio Gain (Volume : 0.1 - 4), and files names of audio files for Detect, Launch, & Remove Tag.
@@ -78,8 +78,8 @@ If you choose to enable the Motor or Launch LED in the Web UI, you can get addit
 
 ## Portable Options
 It is possible to incorporate a battery to make a wireless NFC adapter. There are a two options to consider.
-1. An Adadfruit Feather Esp32: it has all the required hardware to run off a lipo battery. The downside is that even with a power switch to ground the enable pin, you can still get battery drain. If you add a swich on the battery, you can only charge when its powered on. It's also possible adding a motor and audio will be too much for the regulator to handle.
-2. Combine a lipo charging board, 5v buck converter, and a switch to power the board. This option require more assembly and reasearch but avoids the downsides of option one.
+1. An Adadfruit Feather Esp32: it has all the required hardware to run off a lipo battery. The downside is that even with a power switch to ground the enable pin, you can still get battery drain. If you add a switch on the battery, you can only charge when its powered on. It's also possible adding a motor and audio will be too much for the regulator to handle.
+2. Combine a lipo charging board, 5v buck converter, and a switch to power the board. This option require more assembly and research but avoids the downsides of option one.
 
 ## 3D Printed Case  
 A basic case example is provided in the stl folder of the repo.  
