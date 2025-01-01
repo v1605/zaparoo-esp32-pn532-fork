@@ -53,7 +53,7 @@ Short Video
 * [MFRC522](https://github.com/MintyTrebor/rfid)  
   
 ## Setup
-1. If you haven't already, downalod and install Arduino Studio.
+1. If you haven't already, download and install Arduino Studio.
 2. Install the above Libaries, selecting the approriate libraries for the RFID module chosen.
 3. Clone/Download the repository and copy all the files in this folder into a folder called ZaparooEsp32. Open ZaparooEsp32.ino in Arunido Studio.
 4. Select your board and port, located in the Tools menu. If you do not have options for an Esp32, follow these [instructions](https://docs.sunfounder.com/projects/umsk/en/latest/03_esp32/esp32_start/03_install_esp32.html) for installing the board configurations.
