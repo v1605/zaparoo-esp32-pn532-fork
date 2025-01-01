@@ -770,7 +770,6 @@
 			var bWriteMode = false;
 
 			var gateway = `ws://${window.location.hostname}/ws`;
-			
 			var websocket;
 			window.addEventListener('load', doOnload);
 			window.addEventListener("beforeunload", doUnload);
@@ -1270,6 +1269,16 @@
 				elTagDiv.style.display = "none";
 			}
 
+			function validateAudioPath(audioFilePath){
+				if(audioFilePath.length > 0){
+					var firstChar = audioFilePath.charAt(0);
+					if(firstChar != "/"){
+						audioFilePath = "/" + audioFilePath
+					}
+				}
+				return audioFilePath;
+			}
+
 			function doSettingsSave() {
 				
 				console.log("Settings Save");
@@ -1304,11 +1313,11 @@
 				var curraudioGainInp = document.getElementById("audioGainInp").value;
 				if(!curraudioGainInp){curraudioGainInp = 1;}
 				var curraudioFilePath = document.getElementById("audioFilePath").value;
-				if(!curraudioFilePath){curraudioFilePath = "";}
+				if(!curraudioFilePath){curraudioFilePath = "";}else{curraudioFilePath = validateAudioPath(curraudioFilePath)}
 				var curraudioDetFilePath = document.getElementById("audioDetectedFilePath").value;
-				if(!curraudioDetFilePath){curraudioDetFilePath = "";}
+				if(!curraudioDetFilePath){curraudioDetFilePath = "";}else{curraudioDetFilePath = validateAudioPath(curraudioDetFilePath)}
 				var curraudioRemFilePath = document.getElementById("audioRemovedFilePath").value;
-				if(!curraudioRemFilePath){curraudioRemFilePath = "";}
+				if(!curraudioRemFilePath){curraudioRemFilePath = "";}else{curraudioRemFilePath = validateAudioPath(curraudioRemFilePath)}
 				var currSteamVal = document.getElementById("steamIP").value;
 				if(!currSteamVal){currSteamVal = "steamOS.local"};
 				var currSelSteamOS = true;				
@@ -1382,6 +1391,10 @@
 				document.getElementById("selEnSteamMode").checked = cfgDataJson.steamOS_enabled;
 				document.getElementById("selEnMisterMode").checked = cfgDataJson.mister_enabled;
 				document.getElementById("selEnSDCard").checked = cfgDataJson.sdCard_enabled;
+				if(!cfgDataJson.PN532_module){
+					document.getElementById("selEnSDCard").checked = false;
+					document.getElementById("selEnSDCard").disabled = true;
+				};
 				//set the global currConfig
 				currConfig = cfgDataJson;
 				setMenuButtons();
@@ -1408,9 +1421,9 @@
 			function writeTag(){
 				var elText = document.getElementById("resSel").value;
 				var curraudioTAGRemFilePath = document.getElementById("audioTAGRemovedFilePath").value;
-				if(!curraudioTAGRemFilePath){curraudioTAGRemFilePath = "";}
+				if(!curraudioTAGRemFilePath){curraudioTAGRemFilePath = "";}else{curraudioTAGRemFilePath = validateAudioPath(curraudioTAGRemFilePath)}
 				var curraudioTAGLaunchFilePath = document.getElementById("audioTAGGameLaunchFilePath").value;
-				if(!curraudioTAGLaunchFilePath){curraudioTAGLaunchFilePath = "";}		
+				if(!curraudioTAGLaunchFilePath){curraudioTAGLaunchFilePath = "";}else{curraudioTAGLaunchFilePath = validateAudioPath(curraudioTAGLaunchFilePath)}		
 				var tmpLCMD = `{"cmd": "write_Tag_Launch_Game", "launchData": "${elText}", "audioLaunchPath": "${curraudioTAGLaunchFilePath}", "audioRemovePath": "${curraudioTAGRemFilePath}"}`;
 				//console.log("Tag Data: ", tmpLCMD);
 				websocket.send(tmpLCMD);
