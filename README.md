@@ -67,7 +67,7 @@ WebUI: Open your browser and enter the IP address of your ESP32 (see serial cons
 1. Zaparoo Settings: Enter IP Address of MiSTer &/or Steamdeck - can also choose to return to MiSTer menu on card removal.
 2. ESP32 Settings: Toggle LED's/Audio/Rumble motor and set GPIO Pins. Also toggle SD Card module
 3. Audio Settings: Set Audio Gain (Volume : 0.1 - 4), and files names of audio files for Detect, Launch, & Remove Tag.
-4. Audio File Manager: Upload and delte files to the ESP32 device SD Card Module (when Enabled in Settings)
+4. Audio File Manager: Upload and delete files to the ESP32 device SD Card Module (when Enabled in Settings)
 5. Toggle NFC Write Mode: Search for games and write data to NFC card.  
 
 ## Error Feedback
@@ -80,6 +80,9 @@ If you choose to enable the Motor or Launch LED in the Web UI, you can get addit
 It is possible to incorporate a battery to make a wireless NFC adapter. There are a two options to consider.
 1. An Adadfruit Feather Esp32: it has all the required hardware to run off a lipo battery. The downside is that even with a power switch to ground the enable pin, you can still get battery drain. If you add a swich on the battery, you can only charge when its powered on. It's also possible adding a motor and audio will be too much for the regulator to handle.
 2. Combine a lipo charging board, 5v buck converter, and a switch to power the board. This option require more assembly and reasearch but avoids the downsides of option one.
+
+## 3D Printed Case  
+A basic case example is provided in the stl folder of the repo.  
 
 ## ESP32 Default GPIO Pins  
 
