@@ -27,7 +27,7 @@
 
 #ifdef RC522
   #include "ZaparooRC522Scanner.cpp"
-  //PN532_I2C pn532_i2c(Wire);
+  MFRC522 mfrc522(SS_PIN, RST_PIN);
 #endif
 
 //Common Setup
@@ -82,6 +82,12 @@ void setup()
     pnScanner->setResetPin(PN532_RST_PIN);
     tokenScanner = pnScanner;
     isPN532 = true;
+  #endif
+  #ifdef RC522
+    ZaparooRC522Scanner* rcScanner = new ZaparooRC522Scanner();
+    rcScanner->setConfig(mfrc522);
+    tokenScanner = rcScanner;
+    isPN532 = false;
   #endif
   tokenScanner->init();
   preferences.begin("qrplay", false);

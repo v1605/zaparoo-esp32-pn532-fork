@@ -99,18 +99,11 @@ public:
         return true;
     }
 
-    void setResetPin(int resetPin){
-      this->resetPin = resetPin;
-      pinMode(resetPin, OUTPUT);
-      digitalWrite(resetPin, HIGH);
-    }
-
     void setConfig(MFRC522& config){
       this->config = &config;
     }
 
 private:
-    int resetPin = -1;
     MFRC522* config;
     String lastId = "";
     NfcAdapter* nfc = nullptr;
