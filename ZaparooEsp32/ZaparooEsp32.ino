@@ -7,6 +7,7 @@
 #include <ArduinoWebsockets.h>
 #include <SPI.h>
 #include <AudioFileSourceLittleFS.h>
+#include "AudioFileSourceSD.h"
 #include <AudioOutputI2S.h>
 #include <AudioGeneratorMP3.h>
 #include <LittleFS.h>
@@ -17,34 +18,16 @@
 #include "index.h"
 #include "qr_code_js.h"
 #include "ZaparooEsp32.hpp"
+#include "ZaparooScanner.cpp"
 
-//PN532 Includes
 #ifdef PN532
-  #include <SecData.h>
-  #include <Wire.h>
-  #include "AudioFileSourceSD.h"
-  #include <PN532_I2C.h>
-  #include <PN532.h>
-  #include <FS.h>
-#endif
-
-//RC522 Includes
-#ifdef RC522
-  #include <MFRC522.h>
-#endif
-
-//PN532 Specific Setup
-#ifdef PN532
-  bool isPN532 = true;
+  #include "scanners\ZaparooPN532Scanner.cpp"
   PN532_I2C pn532_i2c(Wire);
-  AudioFileSourceSD *source = NULL;
 #endif
 
-//RC522 Specific Setup
 #ifdef RC522
-  bool isPN532 = false;
-  MFRC522 mfrc522(SS_PIN, RST_PIN);
-  NfcAdapter nfc = NfcAdapter(&mfrc522);  
+  #include "ZaparooRC522Scanner.cpp"
+  //PN532_I2C pn532_i2c(Wire);
 #endif
 
 //Common Setup
@@ -55,10 +38,14 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 ESPWebFileManager fileManager;
 ZaparooLaunchApi ZapClient;
+AudioFileSourceSD* source = NULL;
+ZaparooScanner* tokenScanner = NULL;
 
 //globals
 String ZAP_URL = "ws://<replace>:7497";
-String lastNFC_ID = "";
+ZaparooToken token;
+bool inserted = false;
+bool isPN532 = false;
 int idLoop = 0;
 int timeoutLoop =0;
 float val_AUDIO_GAIN = 1;
@@ -87,16 +74,19 @@ String ZapIP = "mister.local";
 void setup()
 {
   Serial.begin(115200);
+
   #ifdef PN532
-    pinMode(PN532_RST_PIN, OUTPUT);
-    digitalWrite(PN532_RST_PIN, HIGH);
+    Wire.begin();
+    ZaparooPN532Scanner* pnScanner = new ZaparooPN532Scanner();
+    pnScanner->setConfig(pn532_i2c);
+    pnScanner->setResetPin(PN532_RST_PIN);
+    tokenScanner = pnScanner;
+    isPN532 = true;
   #endif
+  tokenScanner->init();
   preferences.begin("qrplay", false);
   setPref_Bool("En_NFC_Wr", false);
   SPI.begin();
-  #ifdef RC522
-    mfrc522.PCD_Init();
-  #endif
   setupPins();
   bool connected = connectWifi();
   
@@ -252,7 +242,6 @@ void playAudio(String PrefString){
     if(PrefString.length() > 0){
       const char* launchAudio = PrefString.c_str();
       if(sdCard_enabled){
-        #ifdef PN532
           File file = SD.open(launchAudio);
           if(file){
             source = new AudioFileSourceSD();
@@ -263,18 +252,13 @@ void playAudio(String PrefString){
               mp3->stop();
               delete mp3;
             }
+            delete source;
           }else{
             notifyClients("Audio file did not exist, check path: " + PrefString);
             return;
           }
-        #endif
       }else{        
         AudioFileSourceLittleFS* file = new AudioFileSourceLittleFS(launchAudio);
-        if(file->getSize() == 0){
-          notifyClients("Audio file did not exist, check path: " + PrefString);
-          delete file;
-          return;
-        }
         AudioGeneratorMP3* mp3 = new AudioGeneratorMP3();
         mp3->begin(file, out);
         while(mp3->loop()){}
@@ -291,6 +275,7 @@ void playAudio(String PrefString){
 
 void cardInsertedActions(){
   String tmpPath = defDetectAudioPath;
+  inserted = true;
   if(tmpPath.length() > 0){
     playAudio(tmpPath);
   }
@@ -300,6 +285,7 @@ void cardInsertedActions(){
 
 void cardRemovedActions(String audioRemPath){
   String tmpPath = audioRemPath;
+  inserted = false;
   if(audioRemPath.length() > 0){
     playAudio(tmpPath);
   }else{
@@ -569,215 +555,110 @@ bool sendUid(String& uid){
   //not possible to determine if steam game from UID so always default to MiSTer if enabled
   String newURL = ZAP_URL;
   if(mister_enabled){
-    newURL.replace("<replace>", SteamIP);
+     newURL.replace("<replace>", ZapIP);
   }else{
-    newURL.replace("<replace>", ZapIP);
+    newURL.replace("<replace>", SteamIP);
   }
   ZapClient.url(newURL);
   int code = ZapClient.launchUid(uid);
   if(code > 0){
     expressError(code);
     notifyClients("Zaparoo Error Sending Card/Tag UID - Error Code: " + code);
+  }else{
+    notifyClients("Sent Card/Tag UID");
   }
-  notifyClients("Sent Card/Tag UID");
   return code == 0;
 }
 
 
 void writeTagLaunch(String launchCmd, String audioLaunchFile, String audioRemoveFile){
-  #ifdef PN532
-    NfcAdapter nfc = NfcAdapter(pn532_i2c);
-  #endif
-  nfc.begin();
   String tmpLaunchCmd = launchCmd;
-  String tmpAudioFile = audioLaunchFile;
-  String tmpAudioRemFile = audioRemoveFile;
   tmpLaunchCmd.replace("launch_cmd::", "");
-  if (nfc.tagPresent()) {
-    nfc.erase();
-    NdefMessage message = NdefMessage();
-    message.addTextRecord(tmpLaunchCmd.c_str());
-    if(tmpAudioFile.length() > 0){
-      message.addTextRecord(tmpAudioFile.c_str());
-    }
-    if(tmpAudioRemFile.length() > 0){
-      message.addTextRecord(tmpAudioRemFile.c_str());
-    }
-    bool success = nfc.write(message);
+  if (tokenScanner->tokenPresent()) {
+    bool success = tokenScanner->writeLaunch(launchCmd, audioLaunchFile, audioRemoveFile);
     if(success){
       notifyClients("Data sucessfully written. Remove the Tag/Card and close 'Creation Mode' before testing.");
     }else{
       notifyClients("Data write failed. Resetting the NFC device! Remove the Tag/Card and try again.");
-      resetPN532();
     }
   }else{
     notifyClients("No NFC Tag/Card detected - Aborting Write - Please insert a Valid NFC Tag/Card");
   }
-  #ifdef RC522
-    nfc.haltTag();
-  #endif
-}
-
-void resetPN532(){
-  #ifdef PN532
-    digitalWrite(PN532_RST_PIN, LOW);
-    delay(100);
-    digitalWrite(PN532_RST_PIN, HIGH);
-  #endif
-  return;
+  tokenScanner->halt();
 }
 
 
-bool readNFC()
-{
-  #ifdef PN532
-    notifyClients("PN532 NFC START");
-    NfcAdapter nfc = NfcAdapter(pn532_i2c);
-    if(!nfc.begin()){
-      resetPN532();    
-      return false;
-    }
-  #endif
-  #ifdef RC522
-    notifyClients("RC522 NFC START");
-    nfc.begin();
-  #endif  
-  idLoop = 0;
-  String payloadAsString = "";
-  String payloadAsString2 = "";
-  String payloadAsString3 = "";
+bool readNFC() {
+  tokenScanner->begin();
   while(!preferences.getBool("En_NFC_Wr", false)){
-    if (nfc.tagPresent()) {
-      NfcTag tag = nfc.read();
-      String id = tag.getUidString();
-      bool foundMessage = false;
-      bool foundMessage2 = false;
-      bool foundMessage3 = false;
-      bool badRead = false;
-      if(id != lastNFC_ID){
+    if (tokenScanner->tokenPresent()) {
+      if(tokenScanner->isNewToken()){
+        idLoop = 0;
+        ZaparooToken parsed = tokenScanner->getToken();
+        if(!parsed.getValid()){
+          inserted = false;
+          delay(10);
+          continue;
+        }
+        token = parsed;
         cardInsertedActions();
-        lastNFC_ID = id;
-        if(tag.hasNdefMessage()){
-          NdefMessage message = tag.getNdefMessage();
-          int recordCount = message.getRecordCount();
-          NdefRecord record = message.getRecord(0);
-          int payloadLength = record.getPayloadLength();
-          #ifdef PN532
-            byte payload[payloadLength];
-            record.getPayload(payload);
-          #endif
-          #ifdef RC522
-            const byte *payload = record.getPayload();
-          #endif            
-          payloadAsString = "";
-          for (int i = 3; i < payloadLength; i++) {
-                int tmpIntChar = payload[i];
-                if(!isAscii(tmpIntChar)){
-                  //bad read restart
-                  id = "";
-                  badRead = true;
-                }
-                payloadAsString += (char)payload[i];
-          }
-          foundMessage = !payloadAsString.equalsIgnoreCase("");
-          payloadAsString2 = "";
-          if(foundMessage){
-            //now check for launch audio file path record on the tag (this could be cleaner)
-            if(recordCount > 0) {
-              NdefRecord record = message.getRecord(1);
-              int payloadLength2 = record.getPayloadLength();
-              #ifdef PN532
-                byte payload2[payloadLength2];
-                record.getPayload(payload2);
-              #endif
-              #ifdef RC522
-                const byte *payload2 = record.getPayload();
-              #endif
-              for (int i = 3; i < payloadLength2; i++) {
-                    payloadAsString2 += (char)payload2[i];
-              }
-              foundMessage2 = !payloadAsString.equalsIgnoreCase("");
-            }
-            //now check for remove audio file path record on the tag
-            if(recordCount > 1) {
-              NdefRecord record = message.getRecord(2);
-              int payloadLength3 = record.getPayloadLength();
-              #ifdef PN532
-                byte payload3[payloadLength3];
-                record.getPayload(payload3);
-              #endif
-              #ifdef RC522
-                const byte *payload3 = record.getPayload();
-              #endif
-              payloadAsString3 = "";
-              for (int i = 3; i < payloadLength3; i++) {
-                    payloadAsString3 += (char)payload3[i];
-              }
-              foundMessage3 = !payloadAsString.equalsIgnoreCase("");
+        if(token.isPayloadSet()){
+            String payload = String(token.getPayload());
+            bool sent = true;
+            if(!SERIAL_ONLY){
+              sent = send(payload);
             }else{
-              payloadAsString3 = "";
-            }            
-            if(!badRead){
-              if(!SERIAL_ONLY){
-                if(send(payloadAsString)){
-                  successActions(payloadAsString2);
-                  notifyClients("Sent: " + payloadAsString);
-                }
-              }else{
-                Serial.print("SCAN\t" + payloadAsString + "\n");
-                Serial.flush();
-                successActions(payloadAsString2);
-              }
+              Serial.print("SCAN\t" + payload + "\n");
+              Serial.flush();
             }
-          }else{
-            if(idLoop > 3){
-              String toSend = id;
-              toSend.replace(" ", "");
-              toSend.toLowerCase();
-              if(!SERIAL_ONLY){
-                if(sendUid(toSend)){
-                  successActions("");
-                  notifyClients("Sent: " + toSend);
-                }
-              }else{
-                Serial.print("SCAN\tuid=" + toSend+ "\n");
-                Serial.flush();
-              }          
+            if(sent){
+              String audio = "";
+              if(token.isLaunchAudioSet()){
+                audio = String(token.getLaunchAudio());
+              }
+               successActions(audio);
             }
           }
+      }else{ //Same token
+        if(idLoop < 4){
+          idLoop++;
         }
-      }else{
-        //Same Tag ID - doing nothing except do soft pn532 reset every 500 read cycles to avoid timeout
-        if(idLoop == 500){
-          softReset = true;
-          resetPN532();
-          idLoop = 4;
+        //Loop count of 3 is to midigate bad reads with valid ids before launching via uid
+        if(idLoop == 3 && !token.isPayloadSet() && token.isIdSet()){
+          String toSend = String(token.getId());
+          toSend.toLowerCase();
+          bool sent = true;
+          if(!SERIAL_ONLY){
+            sent = sendUid(toSend);
+          }else{
+            Serial.print("SCAN\tuid=" + toSend+ "\n");
+            Serial.flush();
+          }
+          if(sent){
+           successActions("");
+           notifyClients("Sent: " + toSend);
+          }        
         }
-        idLoop++;      
       }
-    }else{
-      if(lastNFC_ID != "" && !nfc.tagPresent() && !softReset){
-        //trigger a remove event;
-        cardRemovedActions(payloadAsString3);
-        if(reset_on_remove_enabled && !payloadAsString.startsWith("steam://") && !SERIAL_ONLY){
+    }else if(inserted){ //Must have been removed
+      String removeAudio = "";
+      if(token.isRemoveAudioSet()){
+        removeAudio = token.getRemoveAudio();
+      }
+      cardRemovedActions(removeAudio);
+      bool isSteamPayload = false;
+      if(reset_on_remove_enabled && !SERIAL_ONLY && token.isPayloadSet()){
+        String payloadAsString = String(token.getPayload());
+        if(!payloadAsString.startsWith("steam://")){
           ZapClient.stop();
         }
-        notifyClients("Tag Removed!");
-        lastNFC_ID = "";
-        idLoop = 0;
-        #ifdef RC522
-          nfc.haltTag();
-        #endif       
-        return true;
-      }else if (lastNFC_ID != "" && !nfc.tagPresent() & softReset){
-        //softreset has been run to keep pn532 alive - clear vars and continue but do not trigger a remove event; 
-        softReset = false;
-        #ifdef RC522
-          nfc.haltTag();
-        #endif
-        return true;
       }
+      notifyClients("Tag Removed!");
+      idLoop = 0;
+      tokenScanner->halt();
+      return true;
     }
+    delay(10);
   }
   return false;
 }
