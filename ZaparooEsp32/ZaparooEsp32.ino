@@ -26,7 +26,7 @@
 #endif
 
 #ifdef RC522
-  #include "ZaparooRC522Scanner.cpp"
+  #include "scanners\ZaparooRC522Scanner.cpp"
   MFRC522 mfrc522(SS_PIN, RST_PIN);
 #endif
 
