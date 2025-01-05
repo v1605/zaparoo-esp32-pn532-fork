@@ -74,7 +74,7 @@ String ZapIP = "mister.local";
 void setup()
 {
   Serial.begin(115200);
-
+  SPI.begin();
   #ifdef PN532
     Wire.begin();
     ZaparooPN532Scanner* pnScanner = new ZaparooPN532Scanner();
@@ -86,13 +86,13 @@ void setup()
   #ifdef RC522
     ZaparooRC522Scanner* rcScanner = new ZaparooRC522Scanner();
     rcScanner->setConfig(mfrc522);
+    mfrc522.PCD_Init();
     tokenScanner = rcScanner;
     isPN532 = false;
   #endif
   tokenScanner->init();
   preferences.begin("qrplay", false);
   setPref_Bool("En_NFC_Wr", false);
-  SPI.begin();
   setupPins();
   bool connected = connectWifi();
   
@@ -595,8 +595,8 @@ void writeTagLaunch(String launchCmd, String audioLaunchFile, String audioRemove
 
 
 bool readNFC() {
-  tokenScanner->begin();
-  while(!preferences.getBool("En_NFC_Wr", false)){
+  //while(!preferences.getBool("En_NFC_Wr", false)){
+  for(int i=0; i < 20 && !preferences.getBool("En_NFC_Wr", false); i++){
     if (tokenScanner->tokenPresent()) {
       if(tokenScanner->isNewToken()){
         idLoop = 0;
@@ -624,27 +624,21 @@ bool readNFC() {
               }
                successActions(audio);
             }
+          }else if(token.isIdSet()){
+            String toSend = String(token.getId());
+            toSend.toLowerCase();
+            bool sent = true;
+            if(!SERIAL_ONLY){
+              sent = sendUid(toSend);
+            }else{
+              Serial.print("SCAN\tuid=" + toSend+ "\n");
+              Serial.flush();
+            }
+            if(sent){
+            successActions("");
+            notifyClients("Sent: " + toSend);
+            }   
           }
-      }else{ //Same token
-        if(idLoop < 4){
-          idLoop++;
-        }
-        //Loop count of 3 is to midigate bad reads with valid ids before launching via uid
-        if(idLoop == 3 && !token.isPayloadSet() && token.isIdSet()){
-          String toSend = String(token.getId());
-          toSend.toLowerCase();
-          bool sent = true;
-          if(!SERIAL_ONLY){
-            sent = sendUid(toSend);
-          }else{
-            Serial.print("SCAN\tuid=" + toSend+ "\n");
-            Serial.flush();
-          }
-          if(sent){
-           successActions("");
-           notifyClients("Sent: " + toSend);
-          }        
-        }
       }
     }else if(inserted){ //Must have been removed
       String removeAudio = "";
@@ -680,5 +674,5 @@ void loop()
         bool bReadCard = readNFC();
     }
   }
-  delay(500);
+  delay(50);
 }
