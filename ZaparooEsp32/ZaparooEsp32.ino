@@ -38,7 +38,6 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 ESPWebFileManager fileManager;
 ZaparooLaunchApi ZapClient;
-AudioFileSourceSD* source = NULL;
 ZaparooScanner* tokenScanner = NULL;
 
 //globals
@@ -236,40 +235,31 @@ void successActions(const String& audioPath) {
     launchLedOff(0, 0);
 }
 
-void playAudio(const String& PrefString){
-  if(audio_enabled){
-    if(PrefString.length() > 0){
-      const char* launchAudio = PrefString.c_str();
-      if(sdCard_enabled){
-          File file = SD.open(launchAudio);
-          if(file){
-            source = new AudioFileSourceSD();
-            if(source->open(launchAudio)){
-              AudioGeneratorMP3* mp3 = new AudioGeneratorMP3();
-              mp3->begin(source, out);
-              while(mp3->loop()){}
-              mp3->stop();
-              delete mp3;
-            }
-            delete source;
-          }else{
-            notifyClients("Audio file did not exist, check path: " + PrefString);
-            return;
-          }
-      }else{        
-        AudioFileSourceLittleFS* file = new AudioFileSourceLittleFS(launchAudio);
-        AudioGeneratorMP3* mp3 = new AudioGeneratorMP3();
-        mp3->begin(file, out);
-        while(mp3->loop()){}
-        mp3->stop();
-        delete file;
-        delete mp3;
-      }
-      
-    }else{
-      delay(1000);
-    }
+void playAudio(const String& PrefString) {
+  if (!audio_enabled || PrefString.isEmpty()) {
+    delay(1000);
+    return;
   }
+  const char* launchAudio = PrefString.c_str();
+  AudioFileSource* file = nullptr;
+  if (sdCard_enabled) {
+    AudioFileSourceSD* source = new AudioFileSourceSD(launchAudio);
+    file = source;
+  } else {
+    AudioFileSourceLittleFS* source = new AudioFileSourceLittleFS(launchAudio);
+    file = source;
+  }
+  if(file->getSize() == 0){
+    notifyClients("Audio file did not exist, check path: " + PrefString);
+    delete file;
+    return;
+  }
+  AudioGeneratorMP3* mp3 = new AudioGeneratorMP3();
+  mp3->begin(file, out);
+  while (mp3->loop()) {}
+  mp3->stop();
+  delete mp3;
+  delete file;
 }
 
 void cardInsertedActions(){
