@@ -222,27 +222,21 @@ void expressError(int code){
   }
 }
 
-void successActions(String& audioPath){
-  launchLedOn(0);  
-  if(audioPath.length() > 0){    
-    playAudio(audioPath);
+void successActions(const String& audioPath) {
+    launchLedOn(0);
+    const String& pathToPlay = !audioPath.isEmpty() ? audioPath : defAudioPath;
     motorOn(0);
-    motorOff(100);
-    motorOn(50);
-  }else{
-    String tmpAudioPath = defAudioPath;
-    if(tmpAudioPath.length() > 0) {
-      playAudio(tmpAudioPath);
+    playAudio(pathToPlay);
+    if (!pathToPlay.isEmpty()) {
+      playAudio(pathToPlay);
+    }else{
+      delay(1000);
     }
-    motorOn(0);
     motorOff(100);
-    motorOn(50);
-  }
-  motorOff(100);
-  launchLedOff(0,0);
+    launchLedOff(0, 0);
 }
 
-void playAudio(String& PrefString){
+void playAudio(const String& PrefString){
   if(audio_enabled){
     if(PrefString.length() > 0){
       const char* launchAudio = PrefString.c_str();
@@ -279,25 +273,19 @@ void playAudio(String& PrefString){
 }
 
 void cardInsertedActions(){
-  String tmpPath = defDetectAudioPath;
   inserted = true;
-  if(tmpPath.length() > 0){
-    playAudio(tmpPath);
+  if(defDetectAudioPath.length() > 0){
+    playAudio(defDetectAudioPath);
   }
   motorOn(0);
   motorOff(100);
 }
 
-void cardRemovedActions(String& audioRemPath){
-  String tmpPath = audioRemPath;
+void cardRemovedActions(const String& audioRemPath){
   inserted = false;
-  if(audioRemPath.length() > 0){
-    playAudio(tmpPath);
-  }else{
-    String tmpPath = defRemoveAudioPath;
-    if(tmpPath.length() > 0){
-      playAudio(tmpPath);
-    }
+  const String& pathToPlay = !audioRemPath.isEmpty() ? audioRemPath : defRemoveAudioPath;
+  if (!pathToPlay.isEmpty()) {
+      playAudio(pathToPlay);
   }
   motorOn(0);
   motorOff(100);
@@ -359,42 +347,31 @@ void initWebSocket() {
   server.addHandler(&ws);
 }
 
-bool connectWifi()
-{  
-  if (WiFi.status() == WL_CONNECTED){
+bool connectWifi() {
+  if (WiFi.status() == WL_CONNECTED) {
     return true;
   }
   WiFi.begin(ssid, password);
-  int maxRetries = 10;
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    if(wifi_led_enabled){
-      wifiLedOn();
-    }
+  int retries = 10;
+  while (WiFi.status() != WL_CONNECTED && retries--) {
+    wifiLedOn();
     delay(500);
-    if(wifi_led_enabled){
-      wifiLedOff();
-    }
+    wifiLedOff();
     Serial.print(".");
-    maxRetries--;
-    if (maxRetries <= 0)    {
-      return false;
-    }
+  }
+  if (WiFi.status() != WL_CONNECTED) {
+    return false;
   }
   Serial.print("WiFi connected - Zap ESP IP = ");
   Serial.println(WiFi.localIP());
   WiFi.setSleep(false);
   server.begin();
   initWebSocket();
-  if(motor_enabled){
-    motorOn();
-    motorOff(250);
-    motorOn(100);
-    motorOff(250);
-  }
-  if(wifi_led_enabled){
-    wifiLedOn();
-  }
+  motorOn();
+  motorOff(250);
+  motorOn(100);
+  motorOff(250);
+  wifiLedOn();
   return true;
 }
 
@@ -523,37 +500,34 @@ void setWebConfigData(JsonDocument cfgData){
   notifyClients("closeWS");
 }
 
-void setPref_Bool(const String key, bool valBool){
+void setPref_Bool(const String& key, bool valBool){
   preferences.putBool(key.c_str(), valBool);
 }
 
-void setPref_Int(const String key, int valInt){
+void setPref_Int(const String& key, int valInt){
   preferences.putInt(key.c_str(), valInt);
 }
 
-void setPref_Str(const String key, String valStr){
+void setPref_Str(const String& key, const String& valStr){
   preferences.putString(key.c_str(), valStr);
 }
 
-void setPref_Float(const String key, float valFloat){
+void setPref_Float(const String& key, float valFloat){
   preferences.putFloat(key.c_str(), valFloat);
 }
 
 bool send(String& gamePath){
-  String message ={};
+  String message;
   bool sent = false;
   if(SERIAL_ONLY){
-    Serial.println("SCAN\t" + gamePath);
+    Serial.print("SCAN\t");
+    Serial.println(gamePath);
     Serial.flush();
     message = "Sent game path to serial: " + gamePath; 
     sent = true;
   }else{
     String newURL = ZAP_URL;
-    if(gamePath.startsWith("steam://")){
-      newURL.replace("<replace>", SteamIP);
-    }else{
-      newURL.replace("<replace>", ZapIP);
-    }
+    newURL.replace("<replace>", gamePath.startsWith("steam://") ? SteamIP : ZapIP);
     ZapClient.url(newURL);
     int code = ZapClient.launch(gamePath);
     if(code > 0){
@@ -569,21 +543,18 @@ bool send(String& gamePath){
 }
 
 bool sendUid(String& uid){
-  String message ={};
+  String message;
   bool sent = false;
   if(SERIAL_ONLY){
-    Serial.println("SCAN\tuid=" + uid);
+    Serial.print("SCAN\tuid=");
+    Serial.println(uid);
     Serial.flush();
     message = "Sent Card/Tag UID: " + uid; 
     sent = true;
   }else{
     //not possible to determine if steam game from UID so always default to MiSTer if enabled
     String newURL = ZAP_URL;
-    if(mister_enabled){
-      newURL.replace("<replace>", ZapIP);
-    }else{
-      newURL.replace("<replace>", SteamIP);
-    }
+    newURL.replace("<replace>", mister_enabled ? ZapIP : SteamIP);
     ZapClient.url(newURL);
     int code = ZapClient.launchUid(uid);
     if(code > 0){
@@ -615,34 +586,29 @@ void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRem
   tokenScanner->halt();
 }
 
-
+//Loop 20 times per read to break out and run other loop code
 bool readScanner() {
   for(int i=0; i < 20 && !preferences.getBool("En_NFC_Wr", false); i++){
-    if (tokenScanner->tokenPresent()) {
-      if(tokenScanner->isNewToken()){
-        ZaparooToken parsed = tokenScanner->getToken();
-        if(!parsed.getValid()){
-          inserted = false;
-          delay(10);
-          continue;
-        }
-        token = parsed;
-        cardInsertedActions();
-        bool sent = false;
-        if(token.isPayloadSet()){
-          String payload = String(token.getPayload());
-          sent = send(payload);
-        }else if(token.isIdSet()){
-          String toSend = String(token.getId());
-          sent = sendUid(toSend); 
-        }
-        if(sent){
-          String audio = "";
-          if(token.isLaunchAudioSet()){
-            audio = String(token.getLaunchAudio());
-          }
-          successActions(audio);
-        }
+    if (tokenScanner->tokenPresent() && tokenScanner->isNewToken()) {
+      ZaparooToken parsed = tokenScanner->getToken();
+      if(!parsed.getValid()){
+        inserted = false;
+        delay(10);
+        continue;
+      }
+      token = parsed;
+      cardInsertedActions();
+      bool sent = false;
+      if(token.isPayloadSet()){
+        String payload = String(token.getPayload());
+        sent = send(payload);
+      }else if(token.isIdSet()){
+        String id = String(token.getId());
+        sent = sendUid(id); 
+      }
+      if(sent){
+        String audio = token.isLaunchAudioSet() ? String(token.getLaunchAudio()) : "";
+        successActions(audio);
       }
     }else if(inserted){ //Must have been removed
       String removeAudio = "";
@@ -650,7 +616,6 @@ bool readScanner() {
         removeAudio = token.getRemoveAudio();
       }
       cardRemovedActions(removeAudio);
-      bool isSteamPayload = false;
       if(reset_on_remove_enabled && !SERIAL_ONLY && token.isPayloadSet()){
         String payloadAsString = String(token.getPayload());
         if(!payloadAsString.startsWith("steam://")){
