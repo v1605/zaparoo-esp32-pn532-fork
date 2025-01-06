@@ -548,7 +548,6 @@ bool send(String& gamePath){
     message = "Sent game path to serial: " + gamePath; 
     sent = true;
   }else{
-    String message ={};
     String newURL = ZAP_URL;
     if(gamePath.startsWith("steam://")){
       newURL.replace("<replace>", SteamIP);
