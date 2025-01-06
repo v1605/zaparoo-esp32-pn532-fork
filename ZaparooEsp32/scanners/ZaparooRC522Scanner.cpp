@@ -151,7 +151,9 @@ private:
           }
           strcat(uidString, hex);
       }
-	  return String(uidString);
+	  String result = String(uidString);
+	  result.toLowerCase();
+	  return result;
 	}
 
 };

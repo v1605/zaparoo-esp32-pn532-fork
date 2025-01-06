@@ -225,7 +225,6 @@ void successActions(const String& audioPath) {
     launchLedOn(0);
     const String& pathToPlay = !audioPath.isEmpty() ? audioPath : defAudioPath;
     motorOn(0);
-    playAudio(pathToPlay);
     if (!pathToPlay.isEmpty()) {
       playAudio(pathToPlay);
     }else{
@@ -579,7 +578,8 @@ void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRem
 //Loop 20 times per read to break out and run other loop code
 bool readScanner() {
   for(int i=0; i < 20 && !preferences.getBool("En_NFC_Wr", false); i++){
-    if (tokenScanner->tokenPresent() && tokenScanner->isNewToken()) {
+    bool present = tokenScanner->tokenPresent();
+    if (present && tokenScanner->isNewToken()) {
       ZaparooToken parsed = tokenScanner->getToken();
       if(!parsed.getValid()){
         inserted = false;
@@ -600,7 +600,7 @@ bool readScanner() {
         String audio = token.isLaunchAudioSet() ? String(token.getLaunchAudio()) : "";
         successActions(audio);
       }
-    }else if(inserted){ //Must have been removed
+    }else if(!present && inserted){ //Must have been removed
       String removeAudio = "";
       if(token.isRemoveAudioSet()){
         removeAudio = token.getRemoveAudio();
