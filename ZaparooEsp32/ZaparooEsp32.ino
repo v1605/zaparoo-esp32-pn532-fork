@@ -21,12 +21,12 @@
 #include "ZaparooScanner.cpp"
 
 #ifdef PN532
-  #include "scanners\ZaparooPN532Scanner.cpp"
+  #include "scanners/ZaparooPN532Scanner.cpp"
   PN532_I2C pn532_i2c(Wire);
 #endif
 
 #ifdef RC522
-  #include "scanners\ZaparooRC522Scanner.cpp"
+  #include "scanners/ZaparooRC522Scanner.cpp"
   MFRC522 mfrc522(SS_PIN, RST_PIN);
 #endif
 
