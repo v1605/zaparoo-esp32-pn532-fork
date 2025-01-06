@@ -16,14 +16,11 @@ public:
     // Check if a token is present (e.g., if an NFC card is on the reader)     
     virtual bool tokenPresent() = 0;
 
-    // Check if the current token is considered new
-    virtual bool isNewToken() = 0;
-
     // Called after a token is removed
     virtual void halt() {}
 
     // Contains the logic for reading the token
-    virtual ZaparooToken getToken() = 0;
+    virtual ZaparooToken* getNewToken() = 0;
 
     // Reset the device reading the token
     virtual void reset() {}

@@ -31,41 +31,35 @@ public:
       return result;
     }
 
-    bool isNewToken() override{
-      NfcTag tag = nfc->read();
-      String id = tag.getUidString();
-      id.replace(" ", "");
-      if(id == ""){
-        Serial.println("Id blank");
-      }
-      bool result = id != lastId;
-      if(result){
-        lastId = id;
-      }
-      return result;
-    }
-
-    ZaparooToken getToken() override {
-        ZaparooToken token;
+    ZaparooToken* getNewToken() override {
         NfcTag tag = nfc->read();
-        String id = tag.getUidString();
-        id.replace(" ", "");
-        token.setId(id.c_str());
+		String id = tag.getUidString();
+		id.replace(" ", "");
+		if(id == ""){
+		  Serial.println("Id blank");
+		}
+		if(id == lastId){
+			return NULL;
+		}
+		ZaparooToken* token = new ZaparooToken();
+        token->setId(id.c_str());
         if(tag.hasNdefMessage()){
           NdefMessage message = tag.getNdefMessage();
           int recordCount = message.getRecordCount();
-          if(recordCount == 0) return token;
-          token.setPayload(parseNdfMessage(message, token , 0));
-          if(!token.getValid()){
-            return token;
-          }
-          if(recordCount > 1){
-            token.setLaunchAudio(parseNdfMessage(message, token , 1));
-          }
-          if(recordCount > 2){
-            token.setRemoveAudio(parseNdfMessage(message, token , 2));
-          }
+          if(recordCount != 0){
+			  token->setPayload(parseNdfMessage(message, token , 0));
+			  if(!token->getValid()){
+				return token;
+			  }
+			  if(recordCount > 1){
+				token->setLaunchAudio(parseNdfMessage(message, token , 1));
+			  }
+			  if(recordCount > 2){
+				token->setRemoveAudio(parseNdfMessage(message, token , 2));
+			  }
+		  }
         }
+		lastId = id; //Only set on valid reads
         return token;
     }
 
@@ -82,7 +76,7 @@ public:
 
 
     void clearCache() override{
-      lastId = "";
+      lastId.clear();
     }
 
     // Write a token to the given device
@@ -126,7 +120,7 @@ private:
     String lastId = "";
     NfcAdapter* nfc = nullptr;
 
-    const char* parseNdfMessage(NdefMessage& message, ZaparooToken& currentToken ,int recordIndex){
+    const char* parseNdfMessage(NdefMessage& message, ZaparooToken* currentToken ,int recordIndex){
       NdefRecord record = message.getRecord(recordIndex);
       int payloadLength = record.getPayloadLength();
       byte payload[payloadLength];
@@ -135,7 +129,7 @@ private:
       for (int i = 3; i < payloadLength; i++) {
             int tmpIntChar = payload[i];
             if(!isAscii(tmpIntChar)){
-              currentToken.setValid(false);
+              currentToken->setValid(false);
               return "";
             }
             payloadAsString += (char)payload[i];

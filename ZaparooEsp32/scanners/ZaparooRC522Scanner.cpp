@@ -34,7 +34,7 @@ public:
 
     //There was an attempt to use the result of tokenPresent to determine this
     //The blank id bug requires it to be done this way
-    bool isNewToken() override{
+    bool isNewToken(){
       if(config->uid.size == 0){ //Blank id
         reset();
         nfc->tagPresent();
@@ -47,26 +47,29 @@ public:
       return result;
     }
 
-    ZaparooToken getToken() override {
-        ZaparooToken token;
+    ZaparooToken* getNewToken() override {
+		if(!isNewToken()){
+			return NULL;
+		}
+        ZaparooToken* token = new ZaparooToken();
         NfcTag tag = nfc->read();
         String id = getUidString();
-        token.setId(id.c_str());
+        token->setId(id.c_str());
         if(tag.hasNdefMessage()){
           NdefMessage message = tag.getNdefMessage();
           int recordCount = message.getRecordCount();
           if(recordCount == 0){
             return token;
           }
-          token.setPayload(parseNdfMessage(message, token , 0));
-          if(!token.getValid()){
+          token->setPayload(parseNdfMessage(message, token , 0));
+          if(!token->getValid()){
             return token;
           }
           if(recordCount > 1){
-            token.setLaunchAudio(parseNdfMessage(message, token , 1));
+            token->setLaunchAudio(parseNdfMessage(message, token , 1));
           }
           if(recordCount > 2){
-            token.setRemoveAudio(parseNdfMessage(message, token , 2));
+            token->setRemoveAudio(parseNdfMessage(message, token , 2));
           }
         }
         return token;
@@ -122,7 +125,7 @@ private:
     String lastId = "";
     NfcAdapter* nfc = NULL;
 
-    const char* parseNdfMessage(NdefMessage& message, ZaparooToken& currentToken ,int recordIndex){
+    const char* parseNdfMessage(NdefMessage& message, ZaparooToken* currentToken ,int recordIndex){
       NdefRecord record = message.getRecord(recordIndex);
       int payloadLength = record.getPayloadLength();
       const byte *payload = record.getPayload();
@@ -130,7 +133,7 @@ private:
       for (int i = 3; i < payloadLength; i++) {
             int tmpIntChar = payload[i];
             if(!isAscii(tmpIntChar)){
-              currentToken.setValid(false);
+              currentToken->setValid(false);
               return "";
             }
             payloadAsString += (char)payload[i];

@@ -42,7 +42,7 @@ ZaparooScanner* tokenScanner = NULL;
 
 //globals
 String ZAP_URL = "ws://<replace>:7497";
-ZaparooToken token;
+ZaparooToken* token = NULL;
 bool inserted = false;
 bool isPN532 = false;
 int timeoutLoop =0;
@@ -251,6 +251,7 @@ void playAudio(const String& PrefString) {
   if(file->getSize() == 0){
     notifyClients("Audio file did not exist, check path: " + PrefString);
     delete file;
+    file = NULL;
     return;
   }
   AudioGeneratorMP3* mp3 = new AudioGeneratorMP3();
@@ -258,7 +259,9 @@ void playAudio(const String& PrefString) {
   while (mp3->loop()) {}
   mp3->stop();
   delete mp3;
+  mp3 = NULL;
   delete file;
+  file = NULL;
 }
 
 void cardInsertedActions(){
@@ -579,35 +582,38 @@ void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRem
 bool readScanner() {
   for(int i=0; i < 20 && !preferences.getBool("En_NFC_Wr", false); i++){
     bool present = tokenScanner->tokenPresent();
-    if (present && tokenScanner->isNewToken()) {
-      ZaparooToken parsed = tokenScanner->getToken();
-      if(!parsed.getValid()){
+    ZaparooToken* parsed = present ? tokenScanner->getNewToken() : NULL;
+    if (present && parsed) {
+      if(!parsed->getValid()){
         inserted = false;
+        delete parsed;
         delay(10);
         continue;
       }
+      delete token;
+      token = NULL;
       token = parsed;
       cardInsertedActions();
       bool sent = false;
-      if(token.isPayloadSet()){
-        String payload = String(token.getPayload());
+      if(token->isPayloadSet()){
+        String payload = String(token->getPayload());
         sent = send(payload);
-      }else if(token.isIdSet()){
-        String id = String(token.getId());
+      }else if(token->isIdSet()){
+        String id = String(token->getId());
         sent = sendUid(id); 
       }
       if(sent){
-        String audio = token.isLaunchAudioSet() ? String(token.getLaunchAudio()) : "";
+        String audio = token->isLaunchAudioSet() ? String(token->getLaunchAudio()) : "";
         successActions(audio);
       }
     }else if(!present && inserted){ //Must have been removed
       String removeAudio = "";
-      if(token.isRemoveAudioSet()){
-        removeAudio = token.getRemoveAudio();
+      if(token->isRemoveAudioSet()){
+        removeAudio = token->getRemoveAudio();
       }
       cardRemovedActions(removeAudio);
-      if(reset_on_remove_enabled && !SERIAL_ONLY && token.isPayloadSet()){
-        String payloadAsString = String(token.getPayload());
+      if(reset_on_remove_enabled && !SERIAL_ONLY && token->isPayloadSet()){
+        String payloadAsString = String(token->getPayload());
         if(!payloadAsString.startsWith("steam://")){
           ZapClient.stop();
         }
