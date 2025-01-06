@@ -46,7 +46,6 @@ String ZAP_URL = "ws://<replace>:7497";
 ZaparooToken token;
 bool inserted = false;
 bool isPN532 = false;
-int idLoop = 0;
 int timeoutLoop =0;
 float val_AUDIO_GAIN = 1;
 bool isConnected = false;
@@ -223,7 +222,7 @@ void expressError(int code){
   }
 }
 
-void successActions(String audioPath){
+void successActions(String& audioPath){
   launchLedOn(0);  
   if(audioPath.length() > 0){    
     playAudio(audioPath);
@@ -243,7 +242,7 @@ void successActions(String audioPath){
   launchLedOff(0,0);
 }
 
-void playAudio(String PrefString){
+void playAudio(String& PrefString){
   if(audio_enabled){
     if(PrefString.length() > 0){
       const char* launchAudio = PrefString.c_str();
@@ -289,7 +288,7 @@ void cardInsertedActions(){
   motorOff(100);
 }
 
-void cardRemovedActions(String audioRemPath){
+void cardRemovedActions(String& audioRemPath){
   String tmpPath = audioRemPath;
   inserted = false;
   if(audioRemPath.length() > 0){
@@ -304,7 +303,7 @@ void cardRemovedActions(String audioRemPath){
   motorOff(100);
 }
 
-void notifyClients(String txtMsgToSend) {
+void notifyClients(const String& txtMsgToSend) {
   Serial.println(txtMsgToSend);
   if(isWebLog){
     JsonDocument msgJson;
@@ -541,43 +540,67 @@ void setPref_Float(const String key, float valFloat){
 }
 
 bool send(String& gamePath){
-  String newURL = ZAP_URL;
-  if(gamePath.startsWith("steam://")){
-    newURL.replace("<replace>", SteamIP);
+  String message ={};
+  bool sent = false;
+  if(SERIAL_ONLY){
+    Serial.println("SCAN\t" + gamePath);
+    Serial.flush();
+    message = "Sent game path to serial: " + gamePath; 
+    sent = true;
   }else{
-    newURL.replace("<replace>", ZapIP);
+    String message ={};
+    String newURL = ZAP_URL;
+    if(gamePath.startsWith("steam://")){
+      newURL.replace("<replace>", SteamIP);
+    }else{
+      newURL.replace("<replace>", ZapIP);
+    }
+    ZapClient.url(newURL);
+    int code = ZapClient.launch(gamePath);
+    if(code > 0){
+      expressError(code);
+      message = "Zaparoo Error Launching Game " + gamePath + " | Error Code: " + code;
+    }else{
+      message = "Launched Game: " + gamePath;
+      sent = true;
+    }
   }
-  ZapClient.url(newURL);
-  int code = ZapClient.launch(gamePath);
-  if(code > 0){
-    expressError(code);
-    notifyClients("Zaparoo Error Launching Game - Error Code: " + code);
-  }
-  notifyClients("Launched Game: " + gamePath);
-  return code == 0;
+  notifyClients(message);
+  return sent;
 }
 
 bool sendUid(String& uid){
-  //not possible to determine if steam game from UID so always default to MiSTer if enabled
-  String newURL = ZAP_URL;
-  if(mister_enabled){
-     newURL.replace("<replace>", ZapIP);
+  String message ={};
+  bool sent = false;
+  if(SERIAL_ONLY){
+    Serial.println("SCAN\tuid=" + uid);
+    Serial.flush();
+    message = "Sent Card/Tag UID: " + uid; 
+    sent = true;
   }else{
-    newURL.replace("<replace>", SteamIP);
+    //not possible to determine if steam game from UID so always default to MiSTer if enabled
+    String newURL = ZAP_URL;
+    if(mister_enabled){
+      newURL.replace("<replace>", ZapIP);
+    }else{
+      newURL.replace("<replace>", SteamIP);
+    }
+    ZapClient.url(newURL);
+    int code = ZapClient.launchUid(uid);
+    if(code > 0){
+      expressError(code);
+      message = "Zaparoo Error Sending Card/Tag UID "+ uid +" | Error Code: " + code;
+    }else{
+      message = "Sent Card/Tag UID: " + uid;
+      sent = true;
+    }
   }
-  ZapClient.url(newURL);
-  int code = ZapClient.launchUid(uid);
-  if(code > 0){
-    expressError(code);
-    notifyClients("Zaparoo Error Sending Card/Tag UID - Error Code: " + code);
-  }else{
-    notifyClients("Sent Card/Tag UID");
-  }
-  return code == 0;
+  notifyClients(message);
+  return sent;
 }
 
 
-void writeTagLaunch(String launchCmd, String audioLaunchFile, String audioRemoveFile){
+void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRemoveFile){
   String tmpLaunchCmd = launchCmd;
   tmpLaunchCmd.replace("launch_cmd::", "");
   if (tokenScanner->tokenPresent()) {
@@ -594,12 +617,10 @@ void writeTagLaunch(String launchCmd, String audioLaunchFile, String audioRemove
 }
 
 
-bool readNFC() {
-  //while(!preferences.getBool("En_NFC_Wr", false)){
+bool readScanner() {
   for(int i=0; i < 20 && !preferences.getBool("En_NFC_Wr", false); i++){
     if (tokenScanner->tokenPresent()) {
       if(tokenScanner->isNewToken()){
-        idLoop = 0;
         ZaparooToken parsed = tokenScanner->getToken();
         if(!parsed.getValid()){
           inserted = false;
@@ -608,37 +629,21 @@ bool readNFC() {
         }
         token = parsed;
         cardInsertedActions();
+        bool sent = false;
         if(token.isPayloadSet()){
-            String payload = String(token.getPayload());
-            bool sent = true;
-            if(!SERIAL_ONLY){
-              sent = send(payload);
-            }else{
-              Serial.print("SCAN\t" + payload + "\n");
-              Serial.flush();
-            }
-            if(sent){
-              String audio = "";
-              if(token.isLaunchAudioSet()){
-                audio = String(token.getLaunchAudio());
-              }
-               successActions(audio);
-            }
-          }else if(token.isIdSet()){
-            String toSend = String(token.getId());
-            toSend.toLowerCase();
-            bool sent = true;
-            if(!SERIAL_ONLY){
-              sent = sendUid(toSend);
-            }else{
-              Serial.print("SCAN\tuid=" + toSend+ "\n");
-              Serial.flush();
-            }
-            if(sent){
-            successActions("");
-            notifyClients("Sent: " + toSend);
-            }   
+          String payload = String(token.getPayload());
+          sent = send(payload);
+        }else if(token.isIdSet()){
+          String toSend = String(token.getId());
+          sent = sendUid(toSend); 
+        }
+        if(sent){
+          String audio = "";
+          if(token.isLaunchAudioSet()){
+            audio = String(token.getLaunchAudio());
           }
+          successActions(audio);
+        }
       }
     }else if(inserted){ //Must have been removed
       String removeAudio = "";
@@ -653,8 +658,7 @@ bool readNFC() {
           ZapClient.stop();
         }
       }
-      notifyClients("Tag Removed!");
-      idLoop = 0;
+      notifyClients("Tag Removed");
       tokenScanner->halt();
       return true;
     }
@@ -663,16 +667,10 @@ bool readNFC() {
   return false;
 }
 
-void loop()
-{ 
-  bool connected = connectWifi();
-  if (isConnected != connected){
-    isConnected = connected;
-  }
-  if (isConnected) {
-    if(!preferences.getBool("En_NFC_Wr", false)){
-        bool bReadCard = readNFC();
-    }
+void loop() {
+  isConnected = connectWifi();
+  if (isConnected && !preferences.getBool("En_NFC_Wr", false)) {
+    readScanner();
   }
   delay(50);
 }
