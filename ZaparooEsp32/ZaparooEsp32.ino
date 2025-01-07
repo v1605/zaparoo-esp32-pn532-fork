@@ -87,7 +87,10 @@ void setup() {
   tokenScanner = rcScanner;
   isPN532 = false;
 #endif
-  tokenScanner->init();
+  //Check for PN532 Card Initalisation Failure and reset if in error
+  if(!tokenScanner->init() && isPN532){
+    tokenScanner->reset();
+  }
   preferences.begin("qrplay", false);
   setPref_Bool("En_NFC_Wr", false);
   setupPins();
@@ -224,10 +227,14 @@ void successActions(const String& audioPath) {
   const String& pathToPlay = !audioPath.isEmpty() ? audioPath : defAudioPath;
   motorOn(0);
   if (!pathToPlay.isEmpty()) {
-    playAudio(pathToPlay);
-  } else {
-    delay(1000);
-  }
+      motorOn(0);
+      motorOff(100);
+      playAudio(pathToPlay);
+    }else{
+      motorOn(0);
+      delay(1000);
+      motorOff(100);
+    }    
   motorOff(100);
   launchLedOff(0, 0);
 }
