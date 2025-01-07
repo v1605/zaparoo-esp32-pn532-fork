@@ -94,8 +94,7 @@ void setup() {
   preferences.begin("qrplay", false);
   setPref_Bool("En_NFC_Wr", false);
   setupPins();
-  bool connected = connectWifi();
-
+  
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html, index_html_len);
     response->addHeader("Content-Encoding", "gzip");
