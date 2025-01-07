@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "..\ZaparooScanner.cpp"
-#include "..\ZaparooToken.h"
+#include "../ZaparooScanner.cpp"
+#include "../ZaparooToken.h"
 #include <SecData.h>
 #include <Wire.h>
 #include "AudioFileSourceSD.h"

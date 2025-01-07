@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "..\ZaparooScanner.cpp"
-#include "..\ZaparooToken.h"
+#include "../ZaparooScanner.cpp"
+#include "../ZaparooToken.h"
 #include <MFRC522.h>
 
 #include <NfcAdapter.h>
