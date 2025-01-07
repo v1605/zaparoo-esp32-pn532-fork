@@ -41,7 +41,7 @@ ZaparooLaunchApi ZapClient;
 ZaparooScanner* tokenScanner = NULL;
 
 //globals
-String ZAP_URL = "ws://<replace>:7497";
+String ZAP_URL = "ws://<replace>:7497/api/v0.1";
 ZaparooToken* token = NULL;
 bool inserted = false;
 bool isPN532 = false;
@@ -61,6 +61,10 @@ bool steamOS_enabled = false;
 bool sdCard_enabled = false;
 bool systemAudio_enabled = false;
 bool gameAudio_enabled = false;
+bool buzz_on_detect_enabled = true;
+bool buzz_on_launch_enabled = true;
+bool buzz_on_remove_enabled = true;
+bool buzz_on_error_enabled = true;
 String SteamIP = "steamOS.local";
 String defAudioPath = "";
 String defDetectAudioPath = "";
@@ -133,6 +137,10 @@ void setup() {
   systemAudio_enabled = preferences.getBool("En_SysAudio", false);
   gameAudio_enabled = preferences.getBool("En_GameAudio", false);
   SteamIP = preferences.getString("SteamIP", "steamOS.local");
+  buzz_on_detect_enabled = preferences.getBool("En_Buzz_Det", true);
+  buzz_on_launch_enabled = preferences.getBool("En_Buzz_Lau", true);
+  buzz_on_remove_enabled = preferences.getBool("En_Buzz_Rem", true);
+  buzz_on_error_enabled = preferences.getBool("En_Buzz_Err", true);
 }
 
 void setupPins() {
@@ -214,9 +222,11 @@ void wifiLedOff() {
 
 void expressError(int code) {
   for (int i = 0; i < code; i++) {
-    motorOn();
     launchLedOn();
-    motorOff(800);
+    if(buzz_on_error_enabled){
+        motorOn(0);
+        motorOff(800);
+    }
     launchLedOff(0, 400);
   }
 }
@@ -224,17 +234,18 @@ void expressError(int code) {
 void successActions(const String& audioPath) {
   launchLedOn(0);
   const String& pathToPlay = !audioPath.isEmpty() ? audioPath : defAudioPath;
-  motorOn(0);
   if (!pathToPlay.isEmpty()) {
-      motorOn(0);
-      motorOff(100);
+      if(buzz_on_launch_enabled){
+        motorOn(0);
+        motorOff(100);
+      }
       playAudio(pathToPlay);
     }else{
-      motorOn(0);
-      delay(1000);
-      motorOff(100);
+      if(buzz_on_launch_enabled){
+        motorOn(0);
+        motorOff(1000);
+      }
     }    
-  motorOff(100);
   launchLedOff(0, 0);
 }
 
@@ -312,8 +323,10 @@ void cardInsertedActions() {
   if (defDetectAudioPath.length() > 0) {
     playAudio(defDetectAudioPath);
   }
-  motorOn(0);
-  motorOff(100);
+  if(buzz_on_detect_enabled){
+    motorOn(0);
+    motorOff(100);
+  }
 }
 
 void cardRemovedActions(const String& audioRemPath) {
@@ -322,8 +335,10 @@ void cardRemovedActions(const String& audioRemPath) {
   if (!pathToPlay.isEmpty()) {
     playAudio(pathToPlay);
   }
-  motorOn(0);
-  motorOff(100);
+  if(buzz_on_remove_enabled){
+    motorOn(0);
+    motorOff(100);
+  }
 }
 
 void notifyClients(const String& txtMsgToSend) {
@@ -493,6 +508,10 @@ void getWebConfigData() {
   configData["data"]["defRemoveAudioPath"] = preferences.getString("Audio_R_Path", "");
   configData["data"]["systemAudio_enabled"] = preferences.getBool("En_SysAudio", false);
   configData["data"]["gameAudio_enabled"] = preferences.getBool("En_GameAudio", false);
+  configData["data"]["buzz_on_detect_enabled"] = preferences.getBool("En_Buzz_Det", true);
+  configData["data"]["buzz_on_launch_enabled"] = preferences.getBool("En_Buzz_Lau", true);
+  configData["data"]["buzz_on_remove_enabled"] = preferences.getBool("En_Buzz_Rem", true);
+  configData["data"]["buzz_on_error_enabled"] = preferences.getBool("En_Buzz_Err", true);
   configData["data"]["PN532_module"] = isPN532;
   cmdClients(configData);
 }
@@ -532,6 +551,10 @@ void setWebConfigData(JsonDocument cfgData) {
   setPref_Str("Audio_R_Path", cfgData["data"]["defRemoveAudioPath"]);
   setPref_Bool("En_SysAudio", cfgData["data"]["systemAudio_enabled"]);
   setPref_Bool("En_GameAudio", cfgData["data"]["gameAudio_enabled"]);
+  setPref_Bool("En_Buzz_Det", cfgData["data"]["buzz_on_detect_enabled"]);
+  setPref_Bool("En_Buzz_Lau", cfgData["data"]["buzz_on_launch_enabled"]);
+  setPref_Bool("En_Buzz_Rem", cfgData["data"]["buzz_on_remove_enabled"]);
+  setPref_Bool("En_Buzz_Err", cfgData["data"]["buzz_on_error_enabled"]);
   notifyClients("closeWS");
 }
 
@@ -564,10 +587,11 @@ bool send(String& gamePath) {
     String newURL = ZAP_URL;
     newURL.replace("<replace>", gamePath.startsWith("steam://") ? SteamIP : ZapIP);
     ZapClient.url(newURL);
+    notifyClients("URL: " + newURL);
     int code = ZapClient.launch(gamePath);
     if (code > 0) {
       expressError(code);
-      message = "Zaparoo Error Launching Game " + gamePath + " | Error Code: " + code;
+      message = "Zaparoo Error Launching Game: " + gamePath + " | Error Code: " + code;
     } else {
       message = "Launched Game: " + gamePath;
       sent = true;
