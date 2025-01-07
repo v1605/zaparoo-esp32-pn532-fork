@@ -21,13 +21,13 @@
 #include "ZaparooScanner.cpp"
 
 #ifdef PN532
-  #include "scanners/ZaparooPN532Scanner.cpp"
-  PN532_I2C pn532_i2c(Wire);
+#include "scanners/ZaparooPN532Scanner.cpp"
+PN532_I2C pn532_i2c(Wire);
 #endif
 
 #ifdef RC522
-  #include "scanners/ZaparooRC522Scanner.cpp"
-  MFRC522 mfrc522(SS_PIN, RST_PIN);
+#include "scanners/ZaparooRC522Scanner.cpp"
+MFRC522 mfrc522(SS_PIN, RST_PIN);
 #endif
 
 //Common Setup
@@ -45,7 +45,7 @@ String ZAP_URL = "ws://<replace>:7497";
 ZaparooToken* token = NULL;
 bool inserted = false;
 bool isPN532 = false;
-int timeoutLoop =0;
+int timeoutLoop = 0;
 float val_AUDIO_GAIN = 1;
 bool isConnected = false;
 bool isWebLog = false;
@@ -66,49 +66,48 @@ String defAudioPath = "";
 String defDetectAudioPath = "";
 String defRemoveAudioPath = "";
 String ZapIP = "mister.local";
+const char* uidAudio = "/uidAudioMappings.csv";
 
 
-
-void setup()
-{
+void setup() {
   Serial.begin(115200);
   SPI.begin();
-  #ifdef PN532
-    Wire.begin();
-    ZaparooPN532Scanner* pnScanner = new ZaparooPN532Scanner();
-    pnScanner->setConfig(pn532_i2c);
-    pnScanner->setResetPin(PN532_RST_PIN);
-    tokenScanner = pnScanner;
-    isPN532 = true;
-  #endif
-  #ifdef RC522
-    ZaparooRC522Scanner* rcScanner = new ZaparooRC522Scanner();
-    rcScanner->setConfig(mfrc522);
-    mfrc522.PCD_Init();
-    tokenScanner = rcScanner;
-    isPN532 = false;
-  #endif
+#ifdef PN532
+  Wire.begin();
+  ZaparooPN532Scanner* pnScanner = new ZaparooPN532Scanner();
+  pnScanner->setConfig(pn532_i2c);
+  pnScanner->setResetPin(PN532_RST_PIN);
+  tokenScanner = pnScanner;
+  isPN532 = true;
+#endif
+#ifdef RC522
+  ZaparooRC522Scanner* rcScanner = new ZaparooRC522Scanner();
+  rcScanner->setConfig(mfrc522);
+  mfrc522.PCD_Init();
+  tokenScanner = rcScanner;
+  isPN532 = false;
+#endif
   tokenScanner->init();
   preferences.begin("qrplay", false);
   setPref_Bool("En_NFC_Wr", false);
   setupPins();
   bool connected = connectWifi();
-  
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", index_html, index_html_len);
+
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html, index_html_len);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
-  server.on("/qrcode.js", HTTP_GET, [](AsyncWebServerRequest *request){
-    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/plain", qrcode_js, qrcode_js_len);
+  server.on("/qrcode.js", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/plain", qrcode_js, qrcode_js_len);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
-  if(preferences.getBool("En_SDCard", false)){
+  if (preferences.getBool("En_SDCard", false)) {
     Serial.println("SD CARD MODE");
     fileManager.initFileSystem(ESPWebFileManager::FS_SD_CARD, true);
     fileManager.setServer(&server);
-  }else{
+  } else {
     Serial.println("LITTLEFS MODE");
     fileManager.initFileSystem(ESPWebFileManager::FS_LITTLEFS, true);
     fileManager.setServer(&server);
@@ -132,88 +131,87 @@ void setup()
   systemAudio_enabled = preferences.getBool("En_SysAudio", false);
   gameAudio_enabled = preferences.getBool("En_GameAudio", false);
   SteamIP = preferences.getString("SteamIP", "steamOS.local");
-
 }
 
-void setupPins(){
-  if(preferences.getBool("En_Motor", false)){
-    #define MOTOR_PIN preferences.getInt("MOTOR_PIN", 32)
+void setupPins() {
+  if (preferences.getBool("En_Motor", false)) {
+#define MOTOR_PIN preferences.getInt("MOTOR_PIN", 32)
     pinMode(MOTOR_PIN, OUTPUT);
   }
-  if(preferences.getBool("En_Wifi_LED", false)){
-    #define WIFI_LED_PIN preferences.getInt("WIFI_LED_PIN", 2)
+  if (preferences.getBool("En_Wifi_LED", false)) {
+#define WIFI_LED_PIN preferences.getInt("WIFI_LED_PIN", 2)
     pinMode(WIFI_LED_PIN, OUTPUT);
   }
-  if(preferences.getBool("En_Lnch_LED", false)){
-    #define LAUNCH_LED_PIN preferences.getInt("LAUNCH_LED_PIN", 33)
+  if (preferences.getBool("En_Lnch_LED", false)) {
+#define LAUNCH_LED_PIN preferences.getInt("LAUNCH_LED_PIN", 33)
     pinMode(LAUNCH_LED_PIN, OUTPUT);
   }
-  if(preferences.getBool("En_EPwr_LED", false)){
-    #define EXTERNAL_POWER_LED preferences.getInt("EXT_PWRLED_PIN", 15)
+  if (preferences.getBool("En_EPwr_LED", false)) {
+#define EXTERNAL_POWER_LED preferences.getInt("EXT_PWRLED_PIN", 15)
     pinMode(EXTERNAL_POWER_LED, OUTPUT);
     digitalWrite(EXTERNAL_POWER_LED, HIGH);
   }
-  if(preferences.getBool("En_Audio", false)){
-    #define I2S_DOUT preferences.getInt("I2S_DOUT", 25)
-    #define I2S_BCLK preferences.getInt("I2S_BCLK", 27)
-    #define I2S_LRC preferences.getInt("I2S_LRC", 26)
+  if (preferences.getBool("En_Audio", false)) {
+#define I2S_DOUT preferences.getInt("I2S_DOUT", 25)
+#define I2S_BCLK preferences.getInt("I2S_BCLK", 27)
+#define I2S_LRC preferences.getInt("I2S_LRC", 26)
     out = new AudioOutputI2S();
     out->SetPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     out->SetChannels(1);
     out->SetGain(preferences.getFloat("AUDIO_GAIN", 1));
-    #ifdef PN532
-      if(preferences.getBool("En_SDCard", false)){
-        if (!SD.begin(SS_PIN)) { 
-          Serial.println(F("failed to do SD Card"));
-        }
+#ifdef PN532
+    if (preferences.getBool("En_SDCard", false)) {
+      if (!SD.begin(SS_PIN)) {
+        Serial.println(F("failed to do SD Card"));
       }
-    #endif
+    }
+#endif
   }
 }
 
-void motorOn(int predelay=0){
-  if(motor_enabled){
+void motorOn(int predelay = 0) {
+  if (motor_enabled) {
     delay(predelay);
     analogWrite(MOTOR_PIN, 255);
   }
 }
 
-void motorOff(int predelay=0){
-  if(motor_enabled){
+void motorOff(int predelay = 0) {
+  if (motor_enabled) {
     delay(predelay);
     analogWrite(MOTOR_PIN, 0);
   }
 }
 
-void launchLedOn(int predelay=0){
-  if(launch_led_enabled){
+void launchLedOn(int predelay = 0) {
+  if (launch_led_enabled) {
     delay(predelay);
     digitalWrite(LAUNCH_LED_PIN, HIGH);
   }
 }
 
-void launchLedOff(int predelay=0, int postDelay=0){
-  if(launch_led_enabled){
+void launchLedOff(int predelay = 0, int postDelay = 0) {
+  if (launch_led_enabled) {
     delay(predelay);
     digitalWrite(LAUNCH_LED_PIN, LOW);
     delay(postDelay);
   }
 }
 
-void wifiLedOn(){
-  if(wifi_led_enabled){
+void wifiLedOn() {
+  if (wifi_led_enabled) {
     digitalWrite(WIFI_LED_PIN, HIGH);
   }
 }
 
-void wifiLedOff(){
-  if(wifi_led_enabled){
+void wifiLedOff() {
+  if (wifi_led_enabled) {
     digitalWrite(WIFI_LED_PIN, LOW);
   }
 }
 
-void expressError(int code){
-  for(int i=0; i < code; i++){
+void expressError(int code) {
+  for (int i = 0; i < code; i++) {
     motorOn();
     launchLedOn();
     motorOff(800);
@@ -222,16 +220,55 @@ void expressError(int code){
 }
 
 void successActions(const String& audioPath) {
-    launchLedOn(0);
-    const String& pathToPlay = !audioPath.isEmpty() ? audioPath : defAudioPath;
-    motorOn(0);
-    if (!pathToPlay.isEmpty()) {
-      playAudio(pathToPlay);
-    }else{
-      delay(1000);
+  launchLedOn(0);
+  const String& pathToPlay = !audioPath.isEmpty() ? audioPath : defAudioPath;
+  motorOn(0);
+  if (!pathToPlay.isEmpty()) {
+    playAudio(pathToPlay);
+  } else {
+    delay(1000);
+  }
+  motorOff(100);
+  launchLedOff(0, 0);
+}
+
+void setUidAudioMappings(ZaparooToken* obj) {
+  if(!audio_enabled) return;
+  File file;
+  if (sdCard_enabled && SD.exists(uidAudio)) {
+    file = SD.open(uidAudio, FILE_READ);
+  } else if (LittleFS.exists(uidAudio)) {
+    file = LittleFS.open(uidAudio, "r");
+  } else {
+    return;
+  }
+  String uid = String(obj->getId());
+  while (file.available()) {
+    String line = file.readStringUntil('\n');
+    line.trim();
+    if (line.length() == 0) {
+      continue;
     }
-    motorOff(100);
-    launchLedOff(0, 0);
+    int firstComma = line.indexOf(',');
+    int secondComma = line.indexOf(',', firstComma + 1);
+    if (firstComma < 0 || secondComma < 0) {
+      continue;  // Skip malformed lines
+    }
+    String uidColumn = line.substring(0, firstComma);
+    uidColumn.trim();
+    if (uid.equals(uidColumn)) {
+      String launchAudioColumn = line.substring(firstComma + 1, secondComma);
+      String removeAudioColumn = line.substring(secondComma + 1);
+      launchAudioColumn.trim();
+      removeAudioColumn.trim();
+      obj->setLaunchAudio(launchAudioColumn.c_str());
+      obj->setRemoveAudio(removeAudioColumn.c_str());
+      file.close();
+      return;
+    }
+  }
+  file.close();
+  return;
 }
 
 void playAudio(const String& PrefString) {
@@ -248,7 +285,7 @@ void playAudio(const String& PrefString) {
     AudioFileSourceLittleFS* source = new AudioFileSourceLittleFS(launchAudio);
     file = source;
   }
-  if(file->getSize() == 0){
+  if (file->getSize() == 0) {
     notifyClients("Audio file did not exist, check path: " + PrefString);
     delete file;
     file = NULL;
@@ -264,20 +301,20 @@ void playAudio(const String& PrefString) {
   file = NULL;
 }
 
-void cardInsertedActions(){
+void cardInsertedActions() {
   inserted = true;
-  if(defDetectAudioPath.length() > 0){
+  if (defDetectAudioPath.length() > 0) {
     playAudio(defDetectAudioPath);
   }
   motorOn(0);
   motorOff(100);
 }
 
-void cardRemovedActions(const String& audioRemPath){
+void cardRemovedActions(const String& audioRemPath) {
   inserted = false;
   const String& pathToPlay = !audioRemPath.isEmpty() ? audioRemPath : defRemoveAudioPath;
   if (!pathToPlay.isEmpty()) {
-      playAudio(pathToPlay);
+    playAudio(pathToPlay);
   }
   motorOn(0);
   motorOff(100);
@@ -285,7 +322,7 @@ void cardRemovedActions(const String& audioRemPath){
 
 void notifyClients(const String& txtMsgToSend) {
   Serial.println(txtMsgToSend);
-  if(isWebLog){
+  if (isWebLog) {
     JsonDocument msgJson;
     msgJson["msgType"] = "notify";
     msgJson["data"] = txtMsgToSend;
@@ -293,18 +330,18 @@ void notifyClients(const String& txtMsgToSend) {
     serializeJson(msgJson, output);
     delay(200);
     ws.textAll(output.c_str());
-    if(txtMsgToSend == "closeWS"){
+    if (txtMsgToSend == "closeWS") {
       delay(100);
       ESP.restart();
     }
-  }else{
-    if(txtMsgToSend == "closeWS"){
+  } else {
+    if (txtMsgToSend == "closeWS") {
       ESP.restart();
     }
-  }  
+  }
 }
 
-void cmdClients(JsonDocument cmdJson){
+void cmdClients(JsonDocument cmdJson) {
   String output;
   serializeJson(cmdJson, output);
   Serial.print("WS MSG SENT: ");
@@ -313,8 +350,8 @@ void cmdClients(JsonDocument cmdJson){
   ws.textAll(output.c_str());
 }
 
-void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
-             void *arg, uint8_t *data, size_t len) {
+void onEvent(AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type,
+             void* arg, uint8_t* data, size_t len) {
   switch (type) {
     case WS_EVT_CONNECT:
       Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
@@ -367,62 +404,62 @@ bool connectWifi() {
   return true;
 }
 
-void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
-  AwsFrameInfo *info = (AwsFrameInfo*)arg;
+void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
+  AwsFrameInfo* info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     data[len] = 0;
-    String webCmd = String((char *)data);
+    String webCmd = String((char*)data);
     JsonDocument root;
     DeserializationError error = deserializeJson(root, webCmd);
-    if (error){      
+    if (error) {
       notifyClients("Failed to Parse JSON");
       return;
-    }else{
+    } else {
       //WebUI has changed to tag creation mode
-      if(root["cmd"] == "set_WriteMode"){
-        if(root["data"]){
+      if (root["cmd"] == "set_WriteMode") {
+        if (root["data"]) {
           notifyClients("NFC Tag Write Mode Enabled");
           setPref_Bool("En_NFC_Wr", true);
-        }else{
+        } else {
           notifyClients("NFC Tag Write Mode Disabled");
           setPref_Bool("En_NFC_Wr", false);
-        }        
+        }
       }
       //Write launch game command to tag
-      if(root["cmd"] == "write_Tag_Launch_Game"){
+      if (root["cmd"] == "write_Tag_Launch_Game") {
         notifyClients("NFG Tag Writing the Launch Game Command");
         String tmpRetDataStr = root["launchData"];
         String tmpRetAudioLaunchStr = root["audioLaunchPath"];
         String tmpRetAudioRemStr = root["audioRemovePath"];
-        if(preferences.getBool("En_NFC_Wr", false)){
+        if (preferences.getBool("En_NFC_Wr", false)) {
           writeTagLaunch(tmpRetDataStr, tmpRetAudioLaunchStr, tmpRetAudioRemStr);
         }
       }
       //Get current config data for Web Page
-      if(root["cmd"] == "get_Current_Config"){     
+      if (root["cmd"] == "get_Current_Config") {
         getWebConfigData();
       }
       //Set current config data from Web Page
-      if(root["cmd"] == "set_Current_Config"){
-        setWebConfigData(root);     
+      if (root["cmd"] == "set_Current_Config") {
+        setWebConfigData(root);
       }
       //Test Launch A game
-      if(root["cmd"] == "Test_Tag_Launch_Game"){
+      if (root["cmd"] == "Test_Tag_Launch_Game") {
         String tmpPath = root["data"];
         notifyClients("Test Launching Game");
-        send(tmpPath);     
+        send(tmpPath);
       }
       //Close WebSocket
-      if(root["cmd"] == "closeWS"){
+      if (root["cmd"] == "closeWS") {
         setPref_Bool("En_NFC_Wr", false);
         ws.closeAll();
-        ws.cleanupClients();   
+        ws.cleanupClients();
       }
     }
   }
 }
 
-void getWebConfigData(){
+void getWebConfigData() {
   notifyClients("Retrieving Current Zap ESP Config Data");
   JsonDocument configData;
   configData["msgType"] = "ConfigData";
@@ -454,15 +491,15 @@ void getWebConfigData(){
   cmdClients(configData);
 }
 
-void setWebConfigData(JsonDocument cfgData){
+void setWebConfigData(JsonDocument cfgData) {
   notifyClients("ZAP ESP Now Saving Config Data");
-  if(!cfgData["data"]["wifi_led_enabled"]){
+  if (!cfgData["data"]["wifi_led_enabled"]) {
     wifiLedOff();
   }
-  if(!cfgData["data"]["launch_led_enabled"]){
+  if (!cfgData["data"]["launch_led_enabled"]) {
     launchLedOff();
   }
-  if(!cfgData["data"]["pwr_led_enabled"] && preferences.getBool("En_EPwr_LED", false)){
+  if (!cfgData["data"]["pwr_led_enabled"] && preferences.getBool("En_EPwr_LED", false)) {
     digitalWrite(EXTERNAL_POWER_LED, LOW);
   }
   setPref_Bool("En_Wifi_LED", cfgData["data"]["wifi_led_enabled"]);
@@ -492,40 +529,40 @@ void setWebConfigData(JsonDocument cfgData){
   notifyClients("closeWS");
 }
 
-void setPref_Bool(const String& key, bool valBool){
+void setPref_Bool(const String& key, bool valBool) {
   preferences.putBool(key.c_str(), valBool);
 }
 
-void setPref_Int(const String& key, int valInt){
+void setPref_Int(const String& key, int valInt) {
   preferences.putInt(key.c_str(), valInt);
 }
 
-void setPref_Str(const String& key, const String& valStr){
+void setPref_Str(const String& key, const String& valStr) {
   preferences.putString(key.c_str(), valStr);
 }
 
-void setPref_Float(const String& key, float valFloat){
+void setPref_Float(const String& key, float valFloat) {
   preferences.putFloat(key.c_str(), valFloat);
 }
 
-bool send(String& gamePath){
+bool send(String& gamePath) {
   String message;
   bool sent = false;
-  if(SERIAL_ONLY){
+  if (SERIAL_ONLY) {
     Serial.print("SCAN\t");
     Serial.println(gamePath);
     Serial.flush();
-    message = "Sent game path to serial: " + gamePath; 
+    message = "Sent game path to serial: " + gamePath;
     sent = true;
-  }else{
+  } else {
     String newURL = ZAP_URL;
     newURL.replace("<replace>", gamePath.startsWith("steam://") ? SteamIP : ZapIP);
     ZapClient.url(newURL);
     int code = ZapClient.launch(gamePath);
-    if(code > 0){
+    if (code > 0) {
       expressError(code);
       message = "Zaparoo Error Launching Game " + gamePath + " | Error Code: " + code;
-    }else{
+    } else {
       message = "Launched Game: " + gamePath;
       sent = true;
     }
@@ -534,25 +571,25 @@ bool send(String& gamePath){
   return sent;
 }
 
-bool sendUid(String& uid){
+bool sendUid(String& uid) {
   String message;
   bool sent = false;
-  if(SERIAL_ONLY){
+  if (SERIAL_ONLY) {
     Serial.print("SCAN\tuid=");
     Serial.println(uid);
     Serial.flush();
-    message = "Sent Card/Tag UID: " + uid; 
+    message = "Sent Card/Tag UID: " + uid;
     sent = true;
-  }else{
+  } else {
     //not possible to determine if steam game from UID so always default to MiSTer if enabled
     String newURL = ZAP_URL;
     newURL.replace("<replace>", mister_enabled ? ZapIP : SteamIP);
     ZapClient.url(newURL);
     int code = ZapClient.launchUid(uid);
-    if(code > 0){
+    if (code > 0) {
       expressError(code);
-      message = "Zaparoo Error Sending Card/Tag UID "+ uid +" | Error Code: " + code;
-    }else{
+      message = "Zaparoo Error Sending Card/Tag UID " + uid + " | Error Code: " + code;
+    } else {
       message = "Sent Card/Tag UID: " + uid;
       sent = true;
     }
@@ -562,17 +599,17 @@ bool sendUid(String& uid){
 }
 
 
-void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRemoveFile){
+void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRemoveFile) {
   String tmpLaunchCmd = launchCmd;
   tmpLaunchCmd.replace("launch_cmd::", "");
   if (tokenScanner->tokenPresent()) {
     bool success = tokenScanner->writeLaunch(launchCmd, audioLaunchFile, audioRemoveFile);
-    if(success){
+    if (success) {
       notifyClients("Data sucessfully written. Remove the Tag/Card and close 'Creation Mode' before testing.");
-    }else{
+    } else {
       notifyClients("Data write failed. Resetting the NFC device! Remove the Tag/Card and try again.");
     }
-  }else{
+  } else {
     notifyClients("No NFC Tag/Card detected - Aborting Write - Please insert a Valid NFC Tag/Card");
   }
   tokenScanner->halt();
@@ -580,11 +617,11 @@ void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRem
 
 //Loop 20 times per read to break out and run other loop code
 bool readScanner() {
-  for(int i=0; i < 20 && !preferences.getBool("En_NFC_Wr", false); i++){
+  for (int i = 0; i < 20 && !preferences.getBool("En_NFC_Wr", false); i++) {
     bool present = tokenScanner->tokenPresent();
     ZaparooToken* parsed = present ? tokenScanner->getNewToken() : NULL;
     if (present && parsed) {
-      if(!parsed->getValid()){
+      if (!parsed->getValid()) {
         inserted = false;
         delete parsed;
         delay(10);
@@ -595,26 +632,27 @@ bool readScanner() {
       token = parsed;
       cardInsertedActions();
       bool sent = false;
-      if(token->isPayloadSet()){
+      if (token->isPayloadSet()) {
         String payload = String(token->getPayload());
         sent = send(payload);
-      }else if(token->isIdSet()){
+      } else if (token->isIdSet()) {
+        setUidAudioMappings(token);
         String id = String(token->getId());
-        sent = sendUid(id); 
+        sent = sendUid(id);
       }
-      if(sent){
+      if (sent) {
         String audio = token->isLaunchAudioSet() ? String(token->getLaunchAudio()) : "";
         successActions(audio);
       }
-    }else if(!present && inserted){ //Must have been removed
+    } else if (!present && inserted) {  //Must have been removed
       String removeAudio = "";
-      if(token->isRemoveAudioSet()){
+      if (token->isRemoveAudioSet()) {
         removeAudio = token->getRemoveAudio();
       }
       cardRemovedActions(removeAudio);
-      if(reset_on_remove_enabled && !SERIAL_ONLY && token->isPayloadSet()){
+      if (reset_on_remove_enabled && !SERIAL_ONLY && token->isPayloadSet()) {
         String payloadAsString = String(token->getPayload());
-        if(!payloadAsString.startsWith("steam://")){
+        if (!payloadAsString.startsWith("steam://")) {
           ZapClient.stop();
         }
       }
