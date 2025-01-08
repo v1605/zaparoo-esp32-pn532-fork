@@ -13,6 +13,7 @@
 #include <LittleFS.h>
 #include <ESPWebFileManager.h>
 #include <NfcAdapter.h>
+#include <ESPmDNS.h>
 #include <ZaparooLaunchApi.h>
 #include <ZaparooRestResult.h>
 #include "index.h"
@@ -412,6 +413,13 @@ bool connectWifi() {
   if (WiFi.status() != WL_CONNECTED) {
     return false;
   }
+  // Initialize mDNS
+  retries = 10;
+  while (!MDNS.begin("zapesp") && retries--) { 
+    Serial.println("Error setting up MDNS responder!");
+    delay(1000);
+  }
+  Serial.println("mDNS started - access the web UI @ http://zapesp.local");
   Serial.print("WiFi connected - Zap ESP IP = ");
   Serial.println(WiFi.localIP());
   WiFi.setSleep(false);
