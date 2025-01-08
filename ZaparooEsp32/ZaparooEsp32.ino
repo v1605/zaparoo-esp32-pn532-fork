@@ -41,7 +41,7 @@ ZaparooLaunchApi ZapClient;
 ZaparooScanner* tokenScanner = NULL;
 
 //globals
-String ZAP_URL = "ws://<replace>:7497/api/v0.1";
+String ZAP_URL = "ws://<replace>:7497" + String(ZaparooLaunchApi::wsPath);
 ZaparooToken* token = NULL;
 bool inserted = false;
 bool isPN532 = false;
