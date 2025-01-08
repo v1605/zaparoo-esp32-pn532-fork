@@ -1280,7 +1280,8 @@
 			}
 
 			function doSettingsSave() {
-				
+				// Force all elements to lose focus
+				document.activeElement.blur();
 				console.log("Settings Save");
 				var currMisterVal = document.getElementById("misterIP").value;
 				if(!currMisterVal){currMisterVal = "mister.local"};
