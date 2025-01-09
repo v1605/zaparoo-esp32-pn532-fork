@@ -789,7 +789,7 @@
 					}else{
 						currIP = document.getElementById("misterIP").value;
 					}
-					let socket = new WebSocket(`ws://${currIP}:7497/`);
+					let socket = new WebSocket(`ws://${currIP}:7497/api/v0.1`);
 
 					socket.onopen = function(e) {
 						console.log("[open] Connection established 1");
@@ -904,7 +904,7 @@
 				
 				if(document.getElementById("selEnSteamMode").checked)	{
 					var currSteamOSIP = document.getElementById("steamIP").value;
-					let socket = new WebSocket(`ws://${currSteamOSIP}:7497/`);
+					let socket = new WebSocket(`ws://${currSteamOSIP}:7497/api/v0.1`);
 					socket.onopen = function(e) {
 						console.log("Connection established To SteamOS");
 						addLogLine("Connection to SteamOS Established!")
@@ -924,7 +924,7 @@
 
 				if(document.getElementById("selEnMisterMode").checked)	{
 					var currMistIP = document.getElementById("misterIP").value;	
-					let socket = new WebSocket(`ws://${currMistIP}:7497/`);
+					let socket = new WebSocket(`ws://${currMistIP}:7497/api/v0.1`);
 					socket.onopen = function(e) {
 						console.log("Connection established to MiSTER");
 						addLogLine("Connection to MiSTer Established!")
@@ -1001,7 +1001,7 @@
 					currIP = document.getElementById("misterIP").value;
 					strIndexingSystem = "MiSTer"
 				}
-				let socket = new WebSocket(`ws://${currIP}:7497/`);
+				let socket = new WebSocket(`ws://${currIP}:7497/api/v0.1`);
 				socket.onopen = function(e) {
 					console.log("Index [open] Connection established");
 					let wscmd = {

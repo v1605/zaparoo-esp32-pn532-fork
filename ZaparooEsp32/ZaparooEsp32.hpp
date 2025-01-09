@@ -4,15 +4,15 @@
   //*********************Reguired Configuration******************************
   
   //uncomment for RC522----------------------------------------------------
-  #define RC522
+  //#define RC522
   //-----------------------------------------------------------------------
 
 
   //uncomment for PN532----------------------------------------------------
-  //#define PN532
+  #define PN532
   //The GPIO pin the PN532 RSTPDN Pin is connected to ((***NOT THE PN532 RSTO PIN***)). 
   //This is essential for stability and recovery after an esp32 soft reset.
-  //#define PN532_RST_PIN 32
+  #define PN532_RST_PIN 13
   //------------------------------------------------------------------------
 
   //Common Config----------------------------------------------------------
@@ -23,8 +23,8 @@
 
 
   //Wifi information--------------------------------------------------------
-const char* ssid = "***************";
-const char* password = "**************";
+  const char* ssid = "********";
+  const char* password = "*********";
   //------------------------------------------------------------------------
 
   //Set True for serial only-----------------------------------------------
@@ -51,15 +51,15 @@ const char* password = "**************";
 // MISO           19
 // RST            4 (Can be reassigned above with RST_PIN)
 
-// LED's
+// LED's          !!Configurable in Web UI!!
 // WIFI           2 (This is normally replicates the cards wifi led, but it may be a different gpio on your esp32)
 // PWR            15
 // Launch         33
 
-// Rumble Motor
+// Rumble Motor   !!Configurable in Web UI!!
 // Motor          32
 
-// Audio MAX98357 Module
+// Audio MAX98357 Module   !!Configurable in Web UI!!
 // DOUT           25
 // BCLK           27
 // LRC            26
