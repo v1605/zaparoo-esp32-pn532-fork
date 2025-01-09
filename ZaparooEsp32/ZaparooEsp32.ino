@@ -18,6 +18,8 @@
 #include <ZaparooRestResult.h>
 #include "index.h"
 #include "qr_code_js.h"
+#include "main_js.h"
+#include "style_css.h"
 #include "ZaparooEsp32.hpp"
 #include "ZaparooScanner.cpp"
 
@@ -70,6 +72,7 @@ String SteamIP = "steamOS.local";
 String defAudioPath = "";
 String defDetectAudioPath = "";
 String defRemoveAudioPath = "";
+String defErrAudioPath = "";
 String ZapIP = "mister.local";
 const char* uidAudio = "/uidAudioMappings.csv";
 
@@ -110,6 +113,16 @@ void setup() {
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
   });
+  server.on("/main.js", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/plain", main_js, main_js_len);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+  });
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/css", style_css, style_css_len);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+  });
   if (preferences.getBool("En_SDCard", false)) {
     Serial.println("SD CARD MODE");
     fileManager.initFileSystem(ESPWebFileManager::FS_SD_CARD, true);
@@ -130,6 +143,7 @@ void setup() {
   defAudioPath = preferences.getString("Audio_F_Path", "");
   defDetectAudioPath = preferences.getString("Audio_D_Path", "");
   defRemoveAudioPath = preferences.getString("Audio_R_Path", "");
+  defErrAudioPath = preferences.getString("Audio_E_Path", "");
   ZapIP = preferences.getString("ZapIP", "mister.local");
   val_AUDIO_GAIN = preferences.getFloat("AUDIO_GAIN", 1);
   mister_enabled = preferences.getBool("En_Mister", true);
@@ -227,6 +241,9 @@ void expressError(int code) {
     if(buzz_on_error_enabled){
         motorOn(0);
         motorOff(800);
+    }
+    if (defErrAudioPath.length() > 0) {
+      playAudio(defErrAudioPath);
     }
     launchLedOff(0, 400);
   }
@@ -514,6 +531,7 @@ void getWebConfigData() {
   configData["data"]["SteamIP"] = preferences.getString("SteamIP", "steamOS.local");
   configData["data"]["defDetectAudioPath"] = preferences.getString("Audio_D_Path", "");
   configData["data"]["defRemoveAudioPath"] = preferences.getString("Audio_R_Path", "");
+  configData["data"]["defErrAudioPath"] = preferences.getString("Audio_E_Path", "");
   configData["data"]["systemAudio_enabled"] = preferences.getBool("En_SysAudio", false);
   configData["data"]["gameAudio_enabled"] = preferences.getBool("En_GameAudio", false);
   configData["data"]["buzz_on_detect_enabled"] = preferences.getBool("En_Buzz_Det", true);
@@ -558,6 +576,7 @@ void setWebConfigData(JsonDocument cfgData) {
   setPref_Str("SteamIP", cfgData["data"]["SteamIP"]);
   setPref_Str("Audio_D_Path", cfgData["data"]["defDetectAudioPath"]);
   setPref_Str("Audio_R_Path", cfgData["data"]["defRemoveAudioPath"]);
+  setPref_Str("Audio_E_Path", cfgData["data"]["defErrAudioPath"]);
   setPref_Bool("En_SysAudio", cfgData["data"]["systemAudio_enabled"]);
   setPref_Bool("En_GameAudio", cfgData["data"]["gameAudio_enabled"]);
   setPref_Bool("En_Buzz_Det", cfgData["data"]["buzz_on_detect_enabled"]);

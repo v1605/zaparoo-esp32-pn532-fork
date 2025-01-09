@@ -1,358 +1,30 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="EN" lang="EN">
   <head>
-	<style>
-		.switch {
-		  position: relative;
-		  display: inline-block;
-		  width: 60px;
-		  height: 34px;
-		}
-		
-		.switch input { 
-		  opacity: 0;
-		  width: 0;
-		  height: 0;
-		}
-		
-		.slider {
-		  position: absolute;
-		  cursor: pointer;
-		  top: 0;
-		  left: 0;
-		  right: 0;
-		  bottom: 0;
-		  background-color: #ccc;
-		  -webkit-transition: .4s;
-		  transition: .4s;
-		}
-		
-		.slider:before {
-		  position: absolute;
-		  content: "";
-		  height: 26px;
-		  width: 26px;
-		  left: 4px;
-		  bottom: 4px;
-		  background-color: white;
-		  -webkit-transition: .4s;
-		  transition: .4s;
-		}
-		
-		input:checked + .slider {
-		  background-color: #2196F3;
-		}
-		
-		input:focus + .slider {
-		  box-shadow: 0 0 1px #2196F3;
-		}
-		
-		input:checked + .slider:before {
-		  -webkit-transform: translateX(26px);
-		  -ms-transform: translateX(26px);
-		  transform: translateX(26px);
-		}
-
-		.input {
-			max-width: 190px;
-			height: 44px;
-			background-color: #05060f3d;
-			border-radius: .5rem;
-			padding: 0 1rem;
-			border: 2px solid transparent;
-			font-size: 1rem;
-			transition: border-color .3s cubic-bezier(.25,.01,.25,1) 0s, color .3s cubic-bezier(.25,.01,.25,1) 0s,background .2s cubic-bezier(.25,.01,.25,1) 0s;
-		}
-
-		.label {
-			display: block;
-			margin-bottom: .3rem;
-			font-size: .9rem;
-			font-weight: bold;
-			color: whitesmoke;
-			transition: color .3s cubic-bezier(.25,.01,.25,1) 0s;
-		}
-
-		.input:hover, .input:focus, .input-group:hover .input {
-			outline: none;
-			border-color: whitesmoke;
-		}
-
-		.select {
-			max-width: 190px;
-			height: 44px;
-			background-color: #05060f3d;
-			border-radius: .5rem;
-			padding: 0 1rem;
-			border: 2px solid transparent;
-			font-size: 1rem;
-			transition: border-color .3s cubic-bezier(.25,.01,.25,1) 0s, color .3s cubic-bezier(.25,.01,.25,1) 0s,background .2s cubic-bezier(.25,.01,.25,1) 0s;
-		}
-
-		.select:hover, .select:focus, .select-group:hover .select {
-			outline: none;
-			border-color: whitesmoke;
-		}
-
-		.select-group:hover .label, .select:focus {
-			color: whitesmoke;
-		}
-
-		select option {
-			background: rgba(0, 0, 0, 0.3);
-			color: #fff;
-			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
-		}
-		
-		/* Rounded sliders */
-		.slider.round {
-		  border-radius: 34px;
-		}
-		
-		.slider.round:before {
-		  border-radius: 50%;
-		}
-
-		.grade {
-			background: rgb(29,41,218);
-			background: linear-gradient(9deg, rgba(29,41,218,1) 0%, rgba(115,9,121,1) 57%, rgba(255,0,38,1) 100%);
-			height: 100vh;
-			width: 95vw;
-			overflow:hidden;
-		}
-
-		.labelText {
-			color: whitesmoke;
-		}
-
-		.labelDiv {
-			color: whitesmoke;
-			position: fixed;
-			bottom: 210px;
-		}
-
-		.mondiv {
-			color:yellowgreen; 
-			width:80%; 
-			max-height:180px;
-			min-height: 180px; 
-			margin-top:15px; 
-			overflow:auto; 
-			overflow-x:hidden;
-			display: flex; 
-			flex-direction: column-reverse;
-			position: fixed;
-			bottom: 30px;
-			border-color: #2196F3;
-			border-style: double;
-		}
-
-		td {
-			vertical-align: middle;
-			text-align: left;
-		}
-
-		td a, td input, td img {
-			vertical-align: middle;
-			display: inline-block;
-		}
-
-		.mybutton {
-			align-items: center;
-			background-image: linear-gradient(144deg, #af40ff, #5b42f3 50%, #00ddeb);
-			border: 0;
-			border-radius: 8px;
-			box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
-			box-sizing: border-box;
-			color: #ffffff;
-			display: flex;
-			font-size: 18px;
-			justify-content: center;
-			line-height: 1em;
-			max-width: 100%;
-			min-width: 140px;
-			padding: 3px;
-			text-decoration: none;
-			user-select: none;
-			-webkit-user-select: none;
-			touch-action: manipulation;
-			white-space: nowrap;
-			cursor: pointer;
-			transition: all 0.3s;
-			margin-top: 21px;
-		}
-
-		.mybutton:active,
-		.mybutton:hover {
-			outline: 0;
-		}
-
-		.mybutton span {
-			background-color: rgb(5, 6, 45);
-			padding: 16px 24px;
-			border-radius: 6px;
-			width: 100%;
-			height: 100%;
-			transition: 300ms;
-		}
-
-		.mybutton:hover span {
-			background: none;
-		}
-
-		.mybutton:active {
-			transform: scale(0.9);
-		}
-
-		.btnSearch{
-			background-color: #2196F3;
-			height: 44px;
-			width: 44px;
-			border: 0;
-			border-radius: 8px;
-			margin-top: 21px;
-			cursor: pointer;
-		}
-
-		.btnIndx{
-			background-color: #2196F3;
-			height: 44px;
-			width: 84px;
-			border: 0;
-			border-radius: 8px;
-			margin-top: 21px;
-			cursor: pointer;
-		}
-
-		.settingsDiv {
-			position: fixed;
-			display: none;
-			width: 80%;
-			height: 60%;
-			top: 10%;
-			left: 10%;
-			right: 10%;
-			bottom: 10%;
-			border-radius: 24px;
-			box-shadow: rgba(151, 65, 252, 0.2) 0 15px 30px -5px;
-			box-sizing: border-box;
-			background: rgb(29,41,218);
-			background: linear-gradient(9deg, rgba(255,0,38,1) 0%, rgba(115,9,121,1) 57%, rgba(29,41,218,1) 100%);
-			z-index: 5;
-			/* cursor: pointer; */
-			text-align: center;
-			align-content: center;
-		}
-		.settingsHeaderDiv {
-			width: 100%;
-			text-align: center;
-			align-content: center;
-			color: whitesmoke;
-			margin: auto;
-			position: absolute;
-			top: 10px;
-		}
-
-		.settingsTableDiv {
-			width: 90%;
-			margin: auto;
-			text-align: center;
-			align-content: center;
-		}
-
-		.nfcTableDiv {
-			width: 90%;
-			margin: auto;
-			margin-top: 0%;
-			text-align: center;
-			align-content: center;
-			position: absolute;
-			top: 50px;
-		}
-
-		.settingsTable {
-			min-width: 100%;
-			margin: auto;
-		}
-
-		.settingsSaveDiv {
-			width: 100%;
-			text-align: center;
-			align-content: center;
-			margin: auto;
-			position: absolute;
-			bottom: 10px;
-		}
-		
-		#innerFMDiv {
-			display: flex; 
-			width: 90%; height: 90%; 
-			flex-direction: column; 
-			overflow: hidden;
-			margin: auto;
-		}
-
-		#innerFMIfrm{
-			flex-grow: 1; 
-			border: none; 
-			margin: 0; 
-			padding: 0;
-		}
-		#mainDiv {
-			position:fixed;
-			width: 80%;
-			height: 100%;
-			left: 10%;
-			right: 10%;
-		}
-	</style>
     <title>ZAP ESP</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
     <script type="text/javascript" src="qrcode.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
   </head>
   <body class="grade">
 	<div id="mainDiv">
-		<table>
-			<tr>
-				<td width="75%">
-					<h1 class="labelText">ZAP ESP</h1>
-				</td>
-				<td width="1%" >
-					<button onclick="toggleNFCMode()" class="mybutton" id="NFCButton">
-						<span class="text">Toggle NFC Write Mode</span>
-					</button>
-				</td>
-				<td width="1%" >
-					<div id="zapSettingsBtnDiv">
-						<button onclick="toggleZapSettingsMode()" class="mybutton" id="ZAPButton">
-							<span class="text">Zaparoo Settings</span>
-						</button>
-					</div>
-				</td>
-				<td width="1%" >
-					<div id="esp32SettingsBtnDiv">
-						<button onclick="toggleSettingsMode()" class="mybutton" id="ESP32Button">
-							<span class="text">ESP32 Settings</span>
-						</button>
-					</div>
-				</td>
-				<td width="1%" >
-					<div id="audioBtnDiv" style="display: none;">
-						<button onclick="toggleAudioSettingsMode()" class="mybutton" id="AudioButton">
-							<span class="text">Audio Settings</span>
-						</button>
-					</div>
-				</td>
-				<td width="1%">
-					<div id="FMBtnDiv" style="display: none;">
-						<button onclick="toggleFileManMode()" class="mybutton" id="FMButton">
-							<span class="text">File Manager</span>
-						</button>
-					</div>
-				</td>
-			</tr>
-		</table>		
+		<nav>
+			<input type="checkbox" id="check">
+			<label for="check" class="checkbtn">
+			  <i class="fas fa-bars"></i>
+			</label>
+			<label class="logo">ZapESP</label>
+			<ul>
+			  <li onclick="toggleNFCMode()" id="NFCButton"><a href="#">Create <i class="fa-brands fa-nfc-symbol"></i></a></li>
+			  <!-- <li onclick="toggleUIDMode()" id="UIDButton" class="disabledli"><a href="#">UID Control <i class="fa-solid fa-music"></i></a></li> -->
+			  <li onclick="toggleZapSettingsMode()" id="ZAPButton"><a href="#">Zaparoo <i class="fa-solid fa-gear"></i></a></li>
+			  <li onclick="toggleSettingsMode()" id="ESP32Button"><a href="#">ESP32 <i class="fa-solid fa-wrench"></i></a></li>
+			  <li onclick="toggleDefSettingsMode()" id="DefaultsButton" class="disabledli"><a href="#">Defaults <i class="fa-solid fa-sliders"></i></a></li>
+			  <li onclick="toggleFileManMode()" id="FMButton" class="disabledli"><a href="#">Files <i class="fa-solid fa-folder"></i></a></li>
+			</ul>
+		  </nav>
 		<div id="FileManDiv" class="settingsDiv">
 			<div id="innerFMDiv">
 				<iframe src="/file" id="innerFMIfrm"></iframe>
@@ -698,18 +370,64 @@
 				</div>
 			</div>
 		</div>
-		<div id="AudioSettingsDiv" class="settingsDiv">
+		<div id="DefSettingsDiv" class="settingsDiv">
 			<div style="margin: auto;">
 				<div class="settingsHeaderDiv">
-					<h2 class="labelText">Audio Settings</h2>
+					<h2 class="labelText">Default Settings</h2>
 				</div>
-				<div class="settingsTableDiv">
+				<div class="settingsTableDiv" id="rumbleDefDiv">
 					<table class="settingsTable">
 						<tr style="height: 100px;">
 							<td>
 								<div class="input-group">
-									<label class="label">Audio Gain (0.1 - 4)</label>
-									<input autocomplete="off" name="audioGainInp" id="audioGainInp" class="input labelText" type="number">
+									<label class="label">Rumble On Error</label>
+									<label class="switch">
+										<input type="checkbox" name="selEnRumErr" id="selEnRumErr">
+										<span class="slider round"></span>
+									</label>
+									<div></div>
+								</div>
+							</td>
+							<td>
+								<div class="input-group">
+									<label class="label">Rumble On Launch</label>
+									<label class="switch">
+										<input type="checkbox" name="selEnRumLaunch" id="selEnRumLaunch">
+										<span class="slider round"></span>
+									</label>
+									<div></div>
+								</div>
+							</td>
+							<td>
+								<div class="input-group">
+									<label class="label">Rumble On Detect</label>
+									<label class="switch">
+										<input type="checkbox" name="selEnRumDet" id="selEnRumDet">
+										<span class="slider round"></span>
+									</label>
+									<div></div>
+								</div>
+							</td>
+							<td>
+								<div class="input-group">
+									<label class="label">Rumble On Remove</label>
+									<label class="switch">
+										<input type="checkbox" name="selEnRumRem" id="selEnRumRem">
+										<span class="slider round"></span>
+									</label>
+									<div></div>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="settingsTableDiv" id="audioDefFilesDiv">
+					<table class="settingsTable">
+						<tr style="height: 100px;">
+							<td>
+								<div class="input-group">
+									<label class="label">Launch Error Audio File</label>
+									<input autocomplete="off" name="audioErrFilePath" id="audioErrFilePath" class="input labelText" type="text">
 									<div></div>
 								</div>
 							</td>
@@ -737,6 +455,19 @@
 						</tr>
 					</table>
 				</div>
+				<div class="settingsTableDiv" id="audioDefGainDiv">
+					<table class="settingsTable">	
+						<tr style="height: 100px;">
+							<td width="100%">
+								<div class="input-group" style="text-align: center;">
+									<label class="label">Audio Gain (0.1 - 4)</label>
+									<input autocomplete="off" name="audioGainInp" id="audioGainInp" class="input labelText" type="number">
+									<div></div>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
 				<div class="settingsSaveDiv">
 					<table>
 						<tr>
@@ -756,691 +487,7 @@
 		</div>	
 		<h4 class="labelDiv">Zap ESP Monitor</h4>
 		<div id="logDiv" name="logDiv" class="mondiv" style="margin-top:-15px;"></div>
-		<script type="text/javascript">
-			
-			var qrcode = new QRCode(document.getElementById("qrcode"), {
-				width : 125,
-				height : 125,
-				useSVG: false
-			});
-
-			var currConfig = null;
-			var bSteamOSConnected = false;
-			var bMisterConnected = false;
-			var bWriteMode = false;
-
-			var gateway = `ws://${window.location.hostname}/ws`;
-			var websocket;
-			window.addEventListener('load', doOnload);
-			window.addEventListener("beforeunload", doUnload);
-			
-			function buildZapSocket(ip){
-				return new WebSocket(`ws://${ip}:7497${currConfig.zap_ws_path}`);
-			}
-
-			function runSearch() {				
-				var sGame = document.getElementById("searchGame").value;
-				var sSys = this.getSelectedSystemsValue();
-				var elwrDiv = document.getElementById("wrTagDiv");
-				elwrDiv.style.display = "none";
-				document.getElementById("searchResults").innerHTML = `<h4>Searching....</h4>`;
-				if(sSys == "*"){sSys = ""};
-				if(sGame){								
-					var currIP = "";
-					if(sSys == "steam"){
-						currIP = document.getElementById("steamIP").value;
-						sSys = ""
-					}else{
-						currIP = document.getElementById("misterIP").value;
-					}
-					let socket = buildZapSocket(currIP);
-
-					socket.onopen = function(e) {
-						console.log("[open] Connection established 1");
-						let wscmd = {
-							jsonrpc: "2.0",
-							id: "47f80537-7a5d-11ef-9c7b-020304050607",
-							method: "media.search",
-							params: {
-								query: sGame,
-								maxResults: 250
-							}	
-						};
-						if(sSys != ""){wscmd.params.systems = [sSys]};
-						socket.send(JSON.stringify(wscmd));
-					};
-					socket.onmessage = function(event) {
-						//console.log(`[message] Data received from server: ${event.data}`);
-						var strGames = event.data;;
-						var objGames = JSON.parse(strGames);
-						//console.log("objGames", objGames.result)
-
-						if(objGames.result.total > 0) {
-						
-							var resultsDiv = document.getElementById("searchResults");
-
-							document.getElementById("searchResults").innerHTML = "";
-							
-							var resultsLabel = document.createElement("h3");
-							if(objGames.result.total > 250) {
-								resultsLabel.innerText = "Search Results (" + objGames.result.total + ") - Max 250 shown - Please refine your search!";
-							}
-							else{
-								resultsLabel.innerText = "Search Results (" + objGames.result.total + ")";
-							}
-							resultsDiv.appendChild(resultsLabel);
-							
-							var resultsOptionDiv = document.createElement("div");
-							resultsOptionDiv.className = "select-group";
-
-							var resultsLabel = document.createElement("label");
-							resultsLabel.innerText = "Select a Game to write to the Tag/Card";
-							resultsLabel.className = "label";
-
-							resultsOptionDiv.appendChild(resultsLabel);
-
-
-							//resultsDiv.appendChild(resultsLabel);
-							
-							var resultsSelect = document.createElement("select");
-							resultsSelect.className = "input labelText"
-							resultsSelect.id = "resSel";
-							resultsSelect.name = "resSel";
-							resultsOptionDiv.appendChild
-
-							resultsOptionDiv.appendChild(resultsSelect);
-							resultsDiv.appendChild(resultsOptionDiv);
-
-							document.getElementById("resSel").style = "min-width: 60vw"
-
-							let topel = document.createElement("option");
-							topel.textContent = "Choose Game";
-							topel.value = "null";
-							document.getElementById("resSel").appendChild(topel);
-
-							document.getElementById("resSel").addEventListener("change", makeCode, false);
-							
-							var sysItem = 0;
-							for(sysItem in objGames.result.results){
-								let optionTxt = objGames.result.results[sysItem].system.name + ": " + objGames.result.results[sysItem].name;
-								let optionVal = objGames.result.results[sysItem].path;
-								let el = document.createElement("option");
-								el.textContent = optionTxt;
-								el.value = optionVal;
-								document.getElementById("resSel").appendChild(el);
-							}
-						}
-						else{
-							var resultsDiv = document.getElementById("searchResults");
-							var resultsLabel = document.createElement("h2");
-							resultsLabel.innerText = "Search Results (0)";
-							resultsDiv.appendChild(resultsLabel);
-						}
-						socket.close(1000, "Work complete");
-						qrcode.clear();
-						document.getElementById("qrcode").innerHTML = "";
-						qrcode = new QRCode(document.getElementById("qrcode"), {
-							width : 125,
-							height : 125,
-							useSVG: false
-						});
-						
-					};
-					socket.onclose = function(event) {
-						if (event.wasClean) {
-							console.log(`Search [close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
-						} else {
-							console.log('Search [close] Connection died');
-						}
-					};
-					socket.onerror = function(error) {
-						console.log(`[error]`);
-					};
-				}
-				else{
-					alert("Input Search Text");
-				}
-			}
-
-			function getIndexedSystems() {				
-				bSteamOSConnected = false;
-				bMisterConnected = false;
-				
-				if(document.getElementById("selEnSteamMode").checked)	{
-					var currSteamOSIP = document.getElementById("steamIP").value;
-					let socket = buildZapSocket(currSteamOSIP);
-					socket.onopen = function(e) {
-						console.log("Connection established To SteamOS");
-						addLogLine("Connection to SteamOS Established!")
-						socket.close(1000, "Work complete");
-						bSteamOSConnected = true;
-						let select = document.getElementById("selSys");
-						let el = document.createElement("option");
-						el.textContent = "Steam";
-						el.value = "steam";
-						select.appendChild(el);
-					};
-					socket.onerror = function(error) {
-						console.log(`error connecting to Steam OS`, error);
-						addLogLine("Failed to Connect to SteamOS. Check SteamOS IP in settings.")
-					};
-				}
-
-				if(document.getElementById("selEnMisterMode").checked)	{
-					var currMistIP = document.getElementById("misterIP").value;
-					let socket = buildZapSocket(currMistIP);
-					socket.onopen = function(e) {
-						console.log("Connection established to MiSTER");
-						addLogLine("Connection to MiSTer Established!")
-						let wscmd = {
-							jsonrpc: "2.0",
-							id: "dbd312f3-7a5f-11ef-8f29-020304050607",
-							method: "systems"
-						};
-						bMisterConnected = true;
-						socket.send(JSON.stringify(wscmd));
-					};
-
-					socket.onmessage = function(event) {
-						//console.log(`[message] Data received from server: ${event.data}`);
-						var strSystems = event.data;
-						var objSystems = JSON.parse(strSystems);
-						//console.log("objSystems", objSystems.result)
-						let select = document.getElementById("selSys");
-						var sysItem = 0;					
-						objSystems.result.systems.sort(function (a, b) {
-							if (a.name < b.name) {
-								return -1;
-							}
-							if (a.name > b.name) {
-								return 1;
-							}
-							return 0;
-						});
-						let el = document.createElement("option");
-						el.textContent = "All MiSTer Systems";
-						el.value = "*";
-						select.appendChild(el);
-						for(sysItem in objSystems.result.systems){
-							let optionTxt = objSystems.result.systems[sysItem].name;
-							let optionVal = objSystems.result.systems[sysItem].id;
-							let el = document.createElement("option");
-							el.textContent = optionTxt;
-							el.value = optionVal;
-							select.appendChild(el);
-						}
-						var input = document.getElementById("searchGame");
-						input.addEventListener("keyup", function(event) {
-							if (event.key === "Enter") {
-								event.preventDefault();
-								document.getElementById("btnSearch").click();
-							}
-						});
-						socket.close(1000, "Work complete");
-					};
-
-					socket.onclose = function(event) {
-						if (event.wasClean) {
-							console.log(`Get Systems [close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
-						} else {
-							console.log('Get Systems [close] Connection died');
-						}
-					};
-					socket.onerror = function(error) {
-						console.log(`[error]`);
-						addLogLine("Failed to Connect to MiSTer. Check MiSTer IP in settings.")
-					};
-				}
-				
-			}
-
-			function mediaIndexSystems() {
-				var sSys = this.getSelectedSystemsValue();
-				var currIP = "";
-				var strIndexingSystem = ""
-				if(sSys == "steam"){
-					currIP = document.getElementById("steamIP").value;
-					strIndexingSystem = "SteamOS"
-				}else{
-					currIP = document.getElementById("misterIP").value;
-					strIndexingSystem = "MiSTer"
-				}
-				let socket = buildZapSocket(currIP);
-				socket.onopen = function(e) {
-					console.log("Index [open] Connection established");
-					let wscmd = {
-						jsonrpc: "2.0",
-						id: "6f20e07c-7a5e-11ef-84bb-020304050607",
-						method: "media.index"
-					};
-					socket.send(JSON.stringify(wscmd));
-				};
-				socket.onmessage = function(event) {
-					//console.log(`[message] Data received from server: ${event.data}`);
-					var strIndex = event.data;
-					var objIndex = JSON.parse(strIndex);
-					console.log("objIndex", objIndex)
-					if(objIndex.params.indexing) {
-						document.getElementById("indexingDiv").innerHTML = `<h4>Indexing ${strIndexingSystem} Games - Total To Index: ${objIndex.params.totalSteps}  -  Currently Processing: ${objIndex.params.currentStep}</h4>`;
-					}else{
-						document.getElementById("indexingDiv").innerHTML = `<h4>Indexing Complete - Refreshing List....</h4>`;
-						socket.close(1000, "Work complete");
-						setTimeout(function() {
-							document.getElementById("indexingDiv").innerHTML ="";
-						}, 2000);
-						this.getIndexedSystems();
-					}
-				};
-				socket.onclose = function(event) {
-					if (event.wasClean) {
-						console.log(`Index [close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
-					} else {
-						console.log('Index [close] Connection died');
-					}
-				};
-				socket.onerror = function(error) {
-					console.log(`[error]`);
-				};
-
-			}
-
-			//Get Index Systems and populate selection box
-			function getSysForSelect() {				
-				var strSystems = this.getIndexedSystems();
-				console.log("strSystems", strSystems)
-				var objSystems = JSON.parse(strSystems);
-				let select = document.getElementById("selSys");
-				var sysItem = 0;
-				for(sysItem in objSystems.systems){
-					let optionTxt = objSystems.systems[sysItem].name;
-					let optionVal = objSystems.systems[sysItem].id;
-					let el = document.createElement("option");
-					el.textContent = optionTxt;
-					el.value = optionVal;
-					select.appendChild(el);
-				}
-			}
-			
-			function getSelectedSystemsValue() {
-				var select = document.getElementById("selSys");
-				var selectedValue = select.value;
-				return selectedValue;
-			}
-
-			function doOnload(event) {
-				initWebSocket();
-			}
-
-			function doUnload(event){
-				var tmpLCMD = `{"cmd": "closeWS", "data": "closeWS"}`;
-				websocket.send(tmpLCMD);
-				setTimeout(function() {
-					websocket.close();
-				}, 1000);
-				setTimeout(function() {
-					addLogLine("Zap ESP will now close WS");
-				}, 1000);
-			}
-
-			function addLogLine(message){
-				var logger = document.getElementById('logDiv');
-				if (typeof message == 'object') {
-					logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : message) + '<br />';
-				} else {
-					logger.innerHTML += message + '<br />';
-				}
-			}
-
-			function initWebSocket() {
-				console.log('Trying to open a WebSocket connection to ZAP ESP…');
-				websocket = new WebSocket(gateway);
-				websocket.onopen    = onOpen;
-				websocket.onclose   = onClose;
-				websocket.onmessage = onMessage;
-			}
-
-			function onOpen(event) {
-				addLogLine('Connection to ZAP ESP opened');
-				console.log('Connection to ZAP ESP opened');
-				setTimeout(function() {
-					websocket.send("{'cmd': 'get_Current_Config'}");
-				}, 500);				
-			}
-
-			function onClose(event) {
-				addLogLine('Connection to ZAP ESP closed');
-				console.log('Connection to ZAP ESP closed');
-				setTimeout(initWebSocket, 5000);
-			}
-
-			function onMessage(event) {
-				console.log("received msg");
-				var msgData = JSON.parse(event.data);
-				console.log("event data: ", msgData);				
-				//notify msg only
-				if(msgData.msgType == "notify"){
-					addLogLine(msgData.data);
-				}
-				else if(msgData.msgType == "ConfigData"){
-					//addLogLine(JSON.stringify(msgData.data));
-					doSettingsReceive(msgData.data)
-				}
-			}
-
-			function setMenuButtons(){
-				if(currConfig){
-					console.log("currConfig.audio_enabled:", currConfig.audio_enabled)
-					if(currConfig.audio_enabled){
-						document.getElementById("audioBtnDiv").style.display = "block";
-						document.getElementById("FMBtnDiv").style.display = "block";
-					};
-				}
-			}
-			
-			function toggleAudioSettingsMode(){
-				var elSetDiv = document.getElementById("settingsDiv");
-				elSetDiv.style.display = "none";
-				var elFMDiv = document.getElementById("FileManDiv");
-				elFMDiv.style.display = "none";
-				var elZapDiv = document.getElementById("ZapSettingsDiv");
-				elZapDiv.style.display = "none";
-				var elTagDiv = document.getElementById("tagGenDiv");
-				elTagDiv.style.display = "none";
-				if(bWriteMode){websocket.send(
-					"{'cmd': 'set_WriteMode', 'data': false}")
-					bWriteMode = false;
-				}
-				var elAudioDiv = document.getElementById("AudioSettingsDiv");
-				if(elAudioDiv.style.display == "block"){
-					elAudioDiv.style.display = "none";
-				}else{
-					elAudioDiv.style.display = "block";
-				}
-			}
-			
-			function toggleZapSettingsMode(){
-				var elSetDiv = document.getElementById("settingsDiv");
-				elSetDiv.style.display = "none";
-				var elFMDiv = document.getElementById("FileManDiv");
-				elFMDiv.style.display = "none";
-				var elAudioDiv = document.getElementById("AudioSettingsDiv");
-				elAudioDiv.style.display = "none";
-				var elTagDiv = document.getElementById("tagGenDiv");
-				elTagDiv.style.display = "none";
-				if(bWriteMode){websocket.send(
-					"{'cmd': 'set_WriteMode', 'data': false}")
-					bWriteMode = false;
-				}
-				var elZapDiv = document.getElementById("ZapSettingsDiv");
-				if(elZapDiv.style.display == "block"){
-					elZapDiv.style.display = "none";
-				}else{
-					elZapDiv.style.display = "block";
-				}
-				
-			}
-			
-			function toggleSettingsMode() {				
-				var elFMDiv = document.getElementById("FileManDiv");
-				elFMDiv.style.display = "none";
-				var elAudioDiv = document.getElementById("AudioSettingsDiv");
-				elAudioDiv.style.display = "none";
-				var elZapDiv = document.getElementById("ZapSettingsDiv");
-				elZapDiv.style.display = "none";
-				var elTagDiv = document.getElementById("tagGenDiv");
-				elTagDiv.style.display = "none";
-				if(bWriteMode){websocket.send(
-					"{'cmd': 'set_WriteMode', 'data': false}")
-					bWriteMode = false;
-				}
-				var elSetDiv = document.getElementById("settingsDiv");
-				if(elSetDiv.style.display == "block"){
-					elSetDiv.style.display = "none";
-				}else{
-					elSetDiv.style.display = "block";
-				}
-			}
-
-			function toggleFileManMode(){
-				var elSetDiv = document.getElementById("settingsDiv");
-				elSetDiv.style.display = "none";
-				var elAudioDiv = document.getElementById("AudioSettingsDiv");
-				elAudioDiv.style.display = "none";
-				var elZapDiv = document.getElementById("ZapSettingsDiv");
-				elZapDiv.style.display = "none";
-				var elTagDiv = document.getElementById("tagGenDiv");
-				elTagDiv.style.display = "none";
-				var elFMDiv = document.getElementById("FileManDiv");
-				if(elFMDiv.style.display == "block"){
-					elFMDiv.style.display = "none";
-				}else{
-					elFMDiv.style.display = "block";
-				}
-			}
-
-			function toggleNFCMode(){
-				var elSetDiv = document.getElementById("settingsDiv");
-				elSetDiv.style.display = "none";
-				var elFMDiv = document.getElementById("FileManDiv");
-				elFMDiv.style.display = "none";
-				var elAudioDiv = document.getElementById("AudioSettingsDiv");
-				elAudioDiv.style.display = "none";
-				var elZapDiv = document.getElementById("ZapSettingsDiv");
-				elZapDiv.style.display = "none";
-				var elTagDiv = document.getElementById("tagGenDiv");
-				zapSettingsBtnDiv
-				esp32SettingsBtnDiv
-				audioBtnDiv
-				if(elTagDiv.style.display == "block"){
-					elTagDiv.style.display = "none";
-					websocket.send("{'cmd': 'set_WriteMode', 'data': false}");
-					bWriteMode = false;
-					var elZapButDiv = document.getElementById("zapSettingsBtnDiv");
-					elZapButDiv.style.display = "block";
-					var elEsp32ButDiv = document.getElementById("esp32SettingsBtnDiv");
-					elEsp32ButDiv.style.display = "block";
-					if(currConfig.audio_enabled){
-						var elAudioButDiv = document.getElementById("audioBtnDiv");
-						elAudioButDiv.style.display = "block";
-					}
-				}else{
-					elTagDiv.style.display = "block";
-					getIndexedSystems();
-					websocket.send("{'cmd': 'set_WriteMode', 'data': true}");
-					bWriteMode = true;
-					var elZapButDiv = document.getElementById("zapSettingsBtnDiv");
-					elZapButDiv.style.display = "none";
-					var elEsp32ButDiv = document.getElementById("esp32SettingsBtnDiv");
-					elEsp32ButDiv.style.display = "none";
-					if(currConfig.audio_enabled){
-						var elAudioButDiv = document.getElementById("audioBtnDiv");
-						elAudioButDiv.style.display = "none";
-					}
-				}
-
-			}
-
-			function closeAllDivs(){
-				var elSetDiv = document.getElementById("settingsDiv");
-				elSetDiv.style.display = "none";
-				var elFMDiv = document.getElementById("FileManDiv");
-				elFMDiv.style.display = "none";
-				var elAudioDiv = document.getElementById("AudioSettingsDiv");
-				elAudioDiv.style.display = "none";
-				var elZapDiv = document.getElementById("ZapSettingsDiv");
-				elZapDiv.style.display = "none";
-				var elTagDiv = document.getElementById("tagGenDiv");
-				elTagDiv.style.display = "none";
-			}
-
-			function validateAudioPath(audioFilePath){
-				if(audioFilePath.length > 0){
-					var firstChar = audioFilePath.charAt(0);
-					if(firstChar != "/"){
-						audioFilePath = "/" + audioFilePath
-					}
-				}
-				return audioFilePath;
-			}
-
-			function doSettingsSave() {
-				// Force all elements to lose focus
-				document.activeElement.blur();
-				console.log("Settings Save");
-				var currMisterVal = document.getElementById("misterIP").value;
-				if(!currMisterVal){currMisterVal = "mister.local"};
-				var currRetRem = true;				
-				if(!document.getElementById("selResetOnRem").checked){currRetRem = false;};
-				var currSelEnWiFiLED = false;
-				if(document.getElementById("selEnWiFiLED").checked){currSelEnWiFiLED = true;}
-				var currSelEnLaunchLED = false;
-				if(document.getElementById("selEnLaunchLED").checked){currSelEnLaunchLED = true;}
-				var currSelEnPowerLED = false;
-				if(document.getElementById("selEnPowerLED").checked){currSelEnPowerLED = true;}
-				var currSelEnMotor = false;
-				if(document.getElementById("selEnMotor").checked){currSelEnMotor = true;}
-				var currSelEnAudio = false;
-				if(document.getElementById("selEnAudio").checked){currSelEnAudio = true;}
-				var currwiFiLEDPin = document.getElementById("wiFiLEDPin").value;
-				if(!currwiFiLEDPin){currwiFiLEDPin = 4;}
-				var currlaunchLEDPin = document.getElementById("launchLEDPin").value;
-				if(!currlaunchLEDPin){currlaunchLEDPin = 33;}
-				var currpowerLEDPin = document.getElementById("powerLEDPin").value;
-				if(!currpowerLEDPin){currpowerLEDPin = 22;}
-				var currmotorPin = document.getElementById("motorPin").value;
-				if(!currmotorPin){currmotorPin = 25;}
-				var currI2SDOUTPin = document.getElementById("I2SDOUTPin").value;
-				if(!currI2SDOUTPin){currI2SDOUTPin = 26;}
-				var currI2SBCLKPin = document.getElementById("I2SBCLKPin").value;
-				if(!currI2SBCLKPin){currI2SBCLKPin = 17;}
-				var currI2SLRCPin = document.getElementById("I2SLRCPin").value;
-				if(!currI2SLRCPin){currI2SLRCPin = 21;}
-				var curraudioGainInp = document.getElementById("audioGainInp").value;
-				if(!curraudioGainInp){curraudioGainInp = 1;}
-				var curraudioFilePath = document.getElementById("audioFilePath").value;
-				if(!curraudioFilePath){curraudioFilePath = "";}else{curraudioFilePath = validateAudioPath(curraudioFilePath)}
-				var curraudioDetFilePath = document.getElementById("audioDetectedFilePath").value;
-				if(!curraudioDetFilePath){curraudioDetFilePath = "";}else{curraudioDetFilePath = validateAudioPath(curraudioDetFilePath)}
-				var curraudioRemFilePath = document.getElementById("audioRemovedFilePath").value;
-				if(!curraudioRemFilePath){curraudioRemFilePath = "";}else{curraudioRemFilePath = validateAudioPath(curraudioRemFilePath)}
-				var currSteamVal = document.getElementById("steamIP").value;
-				if(!currSteamVal){currSteamVal = "steamOS.local"};
-				var currSelSteamOS = true;				
-				if(!document.getElementById("selEnSteamMode").checked){currSelSteamOS = false;};
-				var currSelMister = true;				
-				if(!document.getElementById("selEnMisterMode").checked){currSelMister = false;};
-				var currSelSDCard = true;				
-				if(!document.getElementById("selEnSDCard").checked){currSelSDCard = false;};		
-				var currSettings = {
-					cmd: "set_Current_Config",
-					data: {
-						wifi_led_enabled: currSelEnWiFiLED,
-						motor_enabled: currSelEnMotor,
-						launch_led_enabled: currSelEnLaunchLED,
-						audio_enabled: currSelEnAudio,
-						pwr_led_enabled: currSelEnPowerLED,
-						reset_on_remove_enabled: currRetRem,
-						defAudioPath: curraudioFilePath,
-						ZapIP: currMisterVal,
-						pin_I2S_DOUT: currI2SDOUTPin,
-						pin_I2S_BCLK: currI2SBCLKPin,
-						pin_I2S_LRC: currI2SLRCPin,
-						val_AUDIO_GAIN: curraudioGainInp,
-						pin_MOTOR_PIN: currmotorPin,
-						pin_WIFI_LED_PIN: currwiFiLEDPin,
-						pin_LAUNCH_LED_PIN: currlaunchLEDPin,
-						pin_EXTERNAL_POWER_LED: currpowerLEDPin,
-						defDetectAudioPath: curraudioDetFilePath,
-						defRemoveAudioPath: curraudioRemFilePath,
-						systemAudio_enabled: false,
-						gameAudio_enabled: false,
-						sdCard_enabled: currSelSDCard,
-						steamOS_enabled: currSelSteamOS,
-						SteamIP: currSteamVal,
-						mister_enabled: currSelMister
-					}
-				}
-				console.log("Data: ", currSettings);
-				websocket.send(JSON.stringify(currSettings));
-				var elSetDiv = document.getElementById("settingsDiv");
-				elSetDiv.style.display = "none";
-				setTimeout(function() {
-					addLogLine("Zap ESP will now reboot. This page will auto refresh in 5 seconds");
-				}, 1000);
-				setTimeout(function() {
-					window.location.reload();
-				}, 5000);
-			}
-			
-			function doSettingsReceive(cfgDataJson){
-				addLogLine("Settings Received from Zap ESP");
-				document.getElementById("misterIP").value = cfgDataJson.ZapIP;
-				document.getElementById("selResetOnRem").checked = cfgDataJson.reset_on_remove_enabled;
-				document.getElementById("selEnWiFiLED").checked = cfgDataJson.wifi_led_enabled;
-				document.getElementById("selEnLaunchLED").checked = cfgDataJson.launch_led_enabled;
-				document.getElementById("selEnPowerLED").checked = cfgDataJson.pwr_led_enabled;
-				document.getElementById("selEnMotor").checked = cfgDataJson.motor_enabled;
-				document.getElementById("selEnAudio").checked = cfgDataJson.audio_enabled;
-				document.getElementById("wiFiLEDPin").value = cfgDataJson.pin_WIFI_LED_PIN;
-				document.getElementById("launchLEDPin").value = cfgDataJson.pin_LAUNCH_LED_PIN;
-				document.getElementById("powerLEDPin").value = cfgDataJson.pin_EXTERNAL_POWER_LED;
-				document.getElementById("motorPin").value = cfgDataJson.pin_MOTOR_PIN;
-				document.getElementById("I2SDOUTPin").value = cfgDataJson.pin_I2S_DOUT;
-				document.getElementById("I2SBCLKPin").value = cfgDataJson.pin_I2S_BCLK;
-				document.getElementById("I2SLRCPin").value = cfgDataJson.pin_I2S_LRC;
-				document.getElementById("audioGainInp").value = cfgDataJson.val_AUDIO_GAIN;
-				document.getElementById("audioFilePath").value = cfgDataJson.defAudioPath;
-				document.getElementById("audioDetectedFilePath").value = cfgDataJson.defDetectAudioPath;
-				document.getElementById("audioRemovedFilePath").value = cfgDataJson.defRemoveAudioPath;
-				document.getElementById("steamIP").value = cfgDataJson.SteamIP;
-				document.getElementById("selEnSteamMode").checked = cfgDataJson.steamOS_enabled;
-				document.getElementById("selEnMisterMode").checked = cfgDataJson.mister_enabled;
-				document.getElementById("selEnSDCard").checked = cfgDataJson.sdCard_enabled;
-				if(!cfgDataJson.PN532_module){
-					document.getElementById("selEnSDCard").checked = false;
-					document.getElementById("selEnSDCard").disabled = true;
-				};
-				//set the global currConfig
-				currConfig = cfgDataJson;
-				setMenuButtons();
-			}
-
-			function makeCode () {		
-				var elText = document.getElementById("resSel").value;
-				var mip = document.getElementById("misterIP").value;
-				var tmpText = "http://" + mip + ":7497/l/" + elText;
-				console.log("QRCode Data", encodeURI(tmpText))
-				if (elText == "null") {
-					alert("Select a Game");
-					elText.focus();
-					return;
-				}
-				qrcode.makeCode(encodeURI(tmpText));
-				var elwrDiv = document.getElementById("wrTagDiv");
-				elwrDiv.style.display = "block";
-				var elwrAudioDiv = document.getElementById("wrTagAudioDiv");
-				elwrAudioDiv.style.display = "block";
-				
-			}
-
-			function writeTag(){
-				var elText = document.getElementById("resSel").value;
-				var curraudioTAGRemFilePath = document.getElementById("audioTAGRemovedFilePath").value;
-				if(!curraudioTAGRemFilePath){curraudioTAGRemFilePath = "";}else{curraudioTAGRemFilePath = validateAudioPath(curraudioTAGRemFilePath)}
-				var curraudioTAGLaunchFilePath = document.getElementById("audioTAGGameLaunchFilePath").value;
-				if(!curraudioTAGLaunchFilePath){curraudioTAGLaunchFilePath = "";}else{curraudioTAGLaunchFilePath = validateAudioPath(curraudioTAGLaunchFilePath)}		
-				var tmpLCMD = `{"cmd": "write_Tag_Launch_Game", "launchData": "${elText}", "audioLaunchPath": "${curraudioTAGLaunchFilePath}", "audioRemovePath": "${curraudioTAGRemFilePath}"}`;
-				//console.log("Tag Data: ", tmpLCMD);
-				websocket.send(tmpLCMD);
-			}
-
-			function testLaunch(){
-				var elText = document.getElementById("resSel").value;
-				var tmpLCMD = `{"cmd": "Test_Tag_Launch_Game", "data": "${elText}"}`;
-				//console.log("Tag Data: ", tmpLCMD);
-				websocket.send(tmpLCMD);
-			}
-		</script>
+		<script type="text/javascript" src="main.js"></script>
 	</div>
   </body>
 </html>
