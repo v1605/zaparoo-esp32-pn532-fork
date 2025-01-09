@@ -521,6 +521,7 @@ void getWebConfigData() {
   configData["data"]["buzz_on_remove_enabled"] = preferences.getBool("En_Buzz_Rem", true);
   configData["data"]["buzz_on_error_enabled"] = preferences.getBool("En_Buzz_Err", true);
   configData["data"]["PN532_module"] = isPN532;
+  configData["data"]["zap_ws_path"] = ZaparooLaunchApi::wsPath;
   cmdClients(configData);
 }
 
