@@ -773,6 +773,10 @@
 			var websocket;
 			window.addEventListener('load', doOnload);
 			window.addEventListener("beforeunload", doUnload);
+			
+			function buildZapSocket(ip){
+				return new WebSocket(`ws://${ip}:7497${currConfig.zap_ws_path}`);
+			}
 
 			function runSearch() {				
 				var sGame = document.getElementById("searchGame").value;
@@ -789,7 +793,7 @@
 					}else{
 						currIP = document.getElementById("misterIP").value;
 					}
-					let socket = new WebSocket(`ws://${currIP}:7497/api/v0.1`);
+					let socket = buildZapSocket(currIP);
 
 					socket.onopen = function(e) {
 						console.log("[open] Connection established 1");
@@ -904,7 +908,7 @@
 				
 				if(document.getElementById("selEnSteamMode").checked)	{
 					var currSteamOSIP = document.getElementById("steamIP").value;
-					let socket = new WebSocket(`ws://${currSteamOSIP}:7497/api/v0.1`);
+					let socket = buildZapSocket(currSteamOSIP);
 					socket.onopen = function(e) {
 						console.log("Connection established To SteamOS");
 						addLogLine("Connection to SteamOS Established!")
@@ -923,8 +927,8 @@
 				}
 
 				if(document.getElementById("selEnMisterMode").checked)	{
-					var currMistIP = document.getElementById("misterIP").value;	
-					let socket = new WebSocket(`ws://${currMistIP}:7497/api/v0.1`);
+					var currMistIP = document.getElementById("misterIP").value;
+					let socket = buildZapSocket(currMistIP);
 					socket.onopen = function(e) {
 						console.log("Connection established to MiSTER");
 						addLogLine("Connection to MiSTer Established!")
@@ -1001,7 +1005,7 @@
 					currIP = document.getElementById("misterIP").value;
 					strIndexingSystem = "MiSTer"
 				}
-				let socket = new WebSocket(`ws://${currIP}:7497/api/v0.1`);
+				let socket = buildZapSocket(currIP);
 				socket.onopen = function(e) {
 					console.log("Index [open] Connection established");
 					let wscmd = {
@@ -1280,7 +1284,8 @@
 			}
 
 			function doSettingsSave() {
-				
+				// Force all elements to lose focus
+				document.activeElement.blur();
 				console.log("Settings Save");
 				var currMisterVal = document.getElementById("misterIP").value;
 				if(!currMisterVal){currMisterVal = "mister.local"};
