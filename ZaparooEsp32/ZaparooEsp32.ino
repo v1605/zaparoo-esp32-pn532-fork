@@ -68,6 +68,7 @@ bool buzz_on_detect_enabled = true;
 bool buzz_on_launch_enabled = true;
 bool buzz_on_remove_enabled = true;
 bool buzz_on_error_enabled = true;
+bool UID_ScanMode_enabled = false;
 String SteamIP = "steamOS.local";
 String defAudioPath = "";
 String defDetectAudioPath = "";
@@ -75,6 +76,7 @@ String defRemoveAudioPath = "";
 String defErrAudioPath = "";
 String ZapIP = "mister.local";
 const char* uidAudio = "/uidAudioMappings.csv";
+const char* uidExtdRecFile = "/uidExtdRecord.json";
 
 
 void setup() {
@@ -101,38 +103,10 @@ void setup() {
   }
   preferences.begin("qrplay", false);
   setPref_Bool("En_NFC_Wr", false);
+  UID_ScanMode_enabled = false;
   setupPins();
-  
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html, index_html_len);
-    response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
-  server.on("/qrcode.js", HTTP_GET, [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/plain", qrcode_js, qrcode_js_len);
-    response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
-  server.on("/main.js", HTTP_GET, [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/plain", main_js, main_js_len);
-    response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
-  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest* request) {
-    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/css", style_css, style_css_len);
-    response->addHeader("Content-Encoding", "gzip");
-    request->send(response);
-  });
-  if (preferences.getBool("En_SDCard", false)) {
-    Serial.println("SD CARD MODE");
-    fileManager.initFileSystem(ESPWebFileManager::FS_SD_CARD, true);
-    fileManager.setServer(&server);
-  } else {
-    Serial.println("LITTLEFS MODE");
-    fileManager.initFileSystem(ESPWebFileManager::FS_LITTLEFS, true);
-    fileManager.setServer(&server);
-  }
 
+  
   //set globals to reduce the number of call to preference library (performance)
   wifi_led_enabled = preferences.getBool("En_Wifi_LED", false);
   motor_enabled = preferences.getBool("En_Motor", false);
@@ -156,6 +130,59 @@ void setup() {
   buzz_on_launch_enabled = preferences.getBool("En_Buzz_Lau", true);
   buzz_on_remove_enabled = preferences.getBool("En_Buzz_Rem", true);
   buzz_on_error_enabled = preferences.getBool("En_Buzz_Err", true);
+
+  if (preferences.getBool("En_SDCard", false)) {
+    Serial.println("SD CARD MODE");
+    fileManager.initFileSystem(ESPWebFileManager::FS_SD_CARD, true);
+    fileManager.setServer(&server);
+  } else {
+    Serial.println("LITTLEFS MODE");
+    fileManager.initFileSystem(ESPWebFileManager::FS_LITTLEFS, true);
+    fileManager.setServer(&server);
+  }
+
+  //check if uidExtdRecord.json file exists and if not create it
+  JsonDocument tmpDoc;
+  tmpDoc["UID_ExtdRecs"][0]["UID"] = "";
+  tmpDoc["UID_ExtdRecs"][0]["launchAudio"] = "";
+  tmpDoc["UID_ExtdRecs"][0]["removeAudio"] = "";
+  String tmpJSONStr = "";
+  serializeJson(tmpDoc, tmpJSONStr);
+  if (sdCard_enabled){
+    if(!SD.exists(uidExtdRecFile)){
+      File UIDfile;
+      UIDfile = SD.open(uidExtdRecFile, FILE_WRITE);
+      UIDfile.print(tmpJSONStr);
+      UIDfile.close();
+    }
+  }else if(!LittleFS.exists(uidExtdRecFile)){
+    File UIDfile;
+    UIDfile = LittleFS.open(uidExtdRecFile, FILE_WRITE);
+    UIDfile.print(tmpJSONStr);
+    UIDfile.close();
+  }
+
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html, index_html_len);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+  });
+  server.on("/qrcode.js", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/plain", qrcode_js, qrcode_js_len);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+  });
+  server.on("/main.js", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/plain", main_js, main_js_len);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+  });
+  server.on("/style.css", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse_P(200, "text/css", style_css, style_css_len);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+  });
+
 }
 
 void setupPins() {
@@ -270,41 +297,32 @@ void successActions(const String& audioPath) {
 void setUidAudioMappings(ZaparooToken* obj) {
   if(!audio_enabled) return;
   File file;
-  if (sdCard_enabled && SD.exists(uidAudio)) {
-    file = SD.open(uidAudio, FILE_READ);
-  } else if (LittleFS.exists(uidAudio)) {
-    file = LittleFS.open(uidAudio, "r");
+  JsonDocument UIDFile;
+  if (sdCard_enabled && SD.exists(uidExtdRecFile)) {
+    file = SD.open(uidExtdRecFile, FILE_READ);
+  } else if (LittleFS.exists(uidExtdRecFile)) {
+    file = LittleFS.open(uidExtdRecFile, "r");
   } else {
     return;
   }
   String uid = String(obj->getId());
   while (file.available()) {
-    String line = file.readStringUntil('\n');
-    line.trim();
-    if (line.length() == 0) {
-      continue;
-    }
-    int firstComma = line.indexOf(',');
-    int secondComma = line.indexOf(',', firstComma + 1);
-    if (firstComma < 0 || secondComma < 0) {
-      continue;  // Skip malformed lines
-    }
-    String uidColumn = line.substring(0, firstComma);
-    uidColumn.trim();
-    if (uid.equals(uidColumn)) {
-      String launchAudioColumn = line.substring(firstComma + 1, secondComma);
-      String removeAudioColumn = line.substring(secondComma + 1);
-      launchAudioColumn.trim();
-      removeAudioColumn.trim();
-      obj->setLaunchAudio(launchAudioColumn.c_str());
-      obj->setRemoveAudio(removeAudioColumn.c_str());
-      file.close();
-      return;
+    DeserializationError error = deserializeJson(UIDFile, file);
+    if(!error){
+      for(JsonObject item : UIDFile["UID_ExtdRecs"].as<JsonArray>()){
+        if(item["UID"] == uid){
+          obj->setLaunchAudio(item["launchAudio"]);
+          obj->setRemoveAudio(item["removeAudio"]);
+          file.close();
+          return;
+        }
+      }
     }
   }
   file.close();
   return;
 }
+
 
 void playAudio(const String& PrefString) {
   if (!audio_enabled || PrefString.isEmpty()) {
@@ -501,8 +519,77 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
         ws.closeAll();
         ws.cleanupClients();
       }
+      //Get uidExtdRecord.json file
+      if (root["cmd"] == "getUIDExtdRec") {
+        notifyClients("Retrieving UIDExtdRec Data");
+        getUIDExtdRec();
+      }
+      //Scan UID mode for uidExtdRecord management
+      if (root["cmd"] == "set_UIDMode") {
+        if (root["data"]) {
+          notifyClients("UID Scanning Mode Enabled");
+          UID_ScanMode_enabled = true;
+        } else {
+          notifyClients("UID Scanning Mode Disabled");
+          UID_ScanMode_enabled = false;
+        }
+      }
+      //Get uidExtdRecord.json file
+      if (root["cmd"] == "saveUIDExtdRec") {
+        notifyClients("Saving UIDExtdRec Data");
+        saveUIDExtdRec(root["data"]);
+      }
     }
   }
+}
+
+//Save the UIDExtdRec.json received from Web Client
+void saveUIDExtdRec(JsonDocument newUIDExtdRec){
+  File file;
+  if(sdCard_enabled && SD.exists(uidExtdRecFile)){
+    file = SD.open(uidExtdRecFile, FILE_WRITE);
+  }else if(LittleFS.exists(uidExtdRecFile)){
+    file = LittleFS.open(uidExtdRecFile, FILE_WRITE);
+  }
+  while (file.available()) {
+    serializeJson(newUIDExtdRec, file);
+    file.close();
+    return;
+  }
+  file.close();
+  return;
+}
+
+//Load the UIDExtdRec.json and pass to Web Client
+void getUIDExtdRec(){
+  JsonDocument UIDData;
+  JsonDocument UIDFile;
+  File file;
+  UIDData["msgType"] = "getUIDExtdRec";
+  if(sdCard_enabled && SD.exists(uidExtdRecFile)){
+    file = SD.open(uidExtdRecFile, FILE_READ);
+  }else if(LittleFS.exists(uidExtdRecFile)){
+    file = LittleFS.open(uidExtdRecFile, "r");
+  }
+  while (file.available()) { 
+    DeserializationError error = deserializeJson(UIDFile, file);
+    if(!error){
+      UIDData["data"] = UIDFile;
+      cmdClients(UIDData);
+      file.close();
+      return;
+    }
+  }
+  file.close();
+  return;
+}
+
+//Send the detected UID to Web Client for Audio Mapping
+void sendUIDtoWeb(String UIDStr){
+  JsonDocument UIDData;
+  UIDData["msgType"] = "UIDTokenID";
+  UIDData["data"] = UIDStr;
+  cmdClients(UIDData);
 }
 
 void getWebConfigData() {
@@ -690,15 +777,18 @@ bool readScanner() {
       token = parsed;
       cardInsertedActions();
       bool sent = false;
-      if (token->isPayloadSet()) {
+      if (token->isPayloadSet() && !UID_ScanMode_enabled) {
         String payload = String(token->getPayload());
         sent = send(payload);
-      } else if (token->isIdSet()) {
+      } else if (token->isIdSet() && !UID_ScanMode_enabled) {
         setUidAudioMappings(token);
         String id = String(token->getId());
         sent = sendUid(id);
+      }else if(token->isIdSet() && UID_ScanMode_enabled){
+        String id = String(token->getId());
+        sendUIDtoWeb(id);
       }
-      if (sent) {
+      if(sent && !UID_ScanMode_enabled) {
         String audio = token->isLaunchAudioSet() ? String(token->getLaunchAudio()) : "";
         successActions(audio);
       }

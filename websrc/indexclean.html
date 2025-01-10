@@ -15,16 +15,79 @@
 			<label for="check" class="checkbtn">
 			  <i class="fas fa-bars"></i>
 			</label>
-			<label class="logo">ZapESP</label>
 			<ul>
-			  <li onclick="toggleNFCMode()" id="NFCButton"><a href="#">Create <i class="fa-brands fa-nfc-symbol"></i></a></li>
-			  <!-- <li onclick="toggleUIDMode()" id="UIDButton" class="disabledli"><a href="#">UID Control <i class="fa-solid fa-music"></i></a></li> -->
-			  <li onclick="toggleZapSettingsMode()" id="ZAPButton"><a href="#">Zaparoo <i class="fa-solid fa-gear"></i></a></li>
-			  <li onclick="toggleSettingsMode()" id="ESP32Button"><a href="#">ESP32 <i class="fa-solid fa-wrench"></i></a></li>
-			  <li onclick="toggleDefSettingsMode()" id="DefaultsButton" class="disabledli"><a href="#">Defaults <i class="fa-solid fa-sliders"></i></a></li>
-			  <li onclick="toggleFileManMode()" id="FMButton" class="disabledli"><a href="#">Files <i class="fa-solid fa-folder"></i></a></li>
+			  <li onclick="toggleNFCMode()" id="NFCButton"><a href="#" tabindex="1">Create <i class="fa-brands fa-nfc-symbol"></i></a></li>
+			  <li onclick="toggleUIDMode()" id="UIDButton" class="disabledli"><a href="#" tabindex="2">UID Control <i class="fa-solid fa-music"></i></a></li>
+			  <li onclick="toggleZapSettingsMode()" id="ZAPButton"><a href="#" tabindex="3">Zaparoo <i class="fa-solid fa-gear"></i></a></li>
+			  <li onclick="toggleSettingsMode()" id="ESP32Button"><a href="#" tabindex="4">ESP32 <i class="fa-solid fa-wrench"></i></a></li>
+			  <li onclick="toggleDefSettingsMode()" id="DefaultsButton" class="disabledli"><a href="#" tabindex="5">Defaults <i class="fa-solid fa-sliders"></i></a></li>
+			  <li onclick="toggleFileManMode()" id="FMButton" class="disabledli"><a href="#" tabindex="6">Files <i class="fa-solid fa-folder"></i></a></li>
 			</ul>
-		  </nav>
+		</nav>
+		<div id="UIDExtDiv" class="settingsDiv">
+			<div class="settingsHeaderDiv" style=" margin-bottom: 0px;">
+				<h2 class="labelText">UID Control Mode</h2>
+			</div>
+			<div style=" margin-bottom: 20px;">
+				<h3 class="labelText">Scan RFID card/tag/amiibo to add or edit launch & remove audio file names</h3>
+			</div>
+			<div id="UIDExtDataDiv">
+				<table class="settingsTable" style="margin-left: 10%;">	
+					<tr>
+						<td width="30%">
+							<div id="readTagAudioDiv" class="labelText">
+								<table class="settingsTable">
+									<tr>
+										<td>
+											<div class="input-group">
+												<label class="label">RFID UID</label>
+												<input disabled autocomplete="off" name="RFIDUID" id="RFIDUID" class="input labelText" type="text">
+												<div></div>
+											</div>
+										</td>
+										<td>
+											<div class="input-group">
+												<label class="label">Launch Audio File</label>
+												<input autocomplete="off" name="UIDaudioTAGGameLaunchFilePath" id="UIDaudioTAGGameLaunchFilePath" class="input labelText" type="text">
+												<div></div>
+											</div>
+										</td>
+										<td>
+											<div class="input-group">
+												<label class="label">Remove Audio File</label>
+												<input autocomplete="off" name="UIDaudioTAGRemovedFilePath" id="UIDaudioTAGRemovedFilePath" class="input labelText" type="text">
+												<div></div>
+											</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="UIDExtGetDataDiv">
+				<table>
+					<tr>
+						<td width="48%"></td>
+						<td width="2%">
+							<div>
+								<button onclick="saveUIDExtdRecData()" class="mybutton">
+									<span class="text">Save</span>
+								</button>
+							</div>
+						</td>
+						<td width="48%"></td>
+					</tr>
+				</table>
+			</div>
+			<div style=" margin-top: 20px;">
+				<h4 class="labelText">Click Save for each scanned card/tag/amiibo.</h4>
+			</div>
+			<div class="botdivtext">
+				<h4 class="labelText">Click "UID Control" menu item to exit UID Control mode.</h4>
+			</div>	
+		</div>
 		<div id="FileManDiv" class="settingsDiv">
 			<div id="innerFMDiv">
 				<iframe src="/file" id="innerFMIfrm"></iframe>
@@ -134,7 +197,10 @@
 								<td width="20%"></td>
 							</tr>
 						</table>
-					</div>							
+					</div>								
+				</div>
+				<div class="botdivtext">
+					<h4 class="labelText" >Click "CREATE" menu item to exit Generator Mode.</h4>
 				</div>
 			</div>
 		</div>

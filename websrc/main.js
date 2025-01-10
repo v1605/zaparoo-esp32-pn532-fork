@@ -5,12 +5,13 @@ var qrcode = new QRCode(document.getElementById("qrcode"), {
 });
 
 var currConfig = null;
+var currUIDExtdRecs = null;
 var bSteamOSConnected = false;
 var bMisterConnected = false;
 var bWriteMode = false;
+var bUIDMode = false;
 
-//var gateway = `ws://${window.location.hostname}/ws`;
-var gateway = `ws://10.66.2.168/ws`;
+var gateway = `ws://${window.location.hostname}/ws`;
 var websocket;
 window.addEventListener('load', doOnload);
 window.addEventListener("beforeunload", doUnload);
@@ -323,6 +324,55 @@ function doUnload(event){
     }, 1000);
 }
 
+function doUIDExtGetData(){
+    websocket.send("{'cmd': 'getUIDExtdRec'}");
+}
+
+function saveUIDExtdRecData(){
+    var tmpUID = document.getElementById('RFIDUID').value;
+    var bDidUpdate = false;
+    if(tmpUID.length > 0){
+        for (var i = 0; i < currUIDExtdRecs.UID_ExtdRecs.length; i++) {
+            if(currUIDExtdRecs.UID_ExtdRecs[i].UID == tmpUID){
+                //record exists so update
+                currUIDExtdRecs.UID_ExtdRecs[i].launchAudio = validateAudioPath(document.getElementById('UIDaudioTAGGameLaunchFilePath').value);
+                currUIDExtdRecs.UID_ExtdRecs[i].removeAudio = validateAudioPath(document.getElementById('UIDaudioTAGRemovedFilePath').value);
+                bDidUpdate = true;
+            }
+        }
+        if(!bDidUpdate){
+            //new record
+            var tmpRecord = {};
+            tmpRecord.UID = tmpUID;
+            tmpRecord.launchAudio = validateAudioPath(document.getElementById('UIDaudioTAGGameLaunchFilePath').value);
+            tmpRecord.removeAudio = validateAudioPath(document.getElementById('UIDaudioTAGRemovedFilePath').value);
+            currUIDExtdRecs.UID_ExtdRecs.push(tmpRecord)
+        }
+        //console.log("Updated currUIDExtdRecs:", currUIDExtdRecs);
+        var tmpLCMD = `{"cmd": "saveUIDExtdRec", "data": ${JSON.stringify(currUIDExtdRecs)}}`;
+        websocket.send(tmpLCMD);
+    }
+
+}
+
+function processUIDExtData(dataReceived){
+    currUIDExtdRecs = dataReceived;
+    addLogLine("UID Database retrieved");
+    addLogLine("Scan an RFID tag/card/amibo to continue");
+}
+
+function doReceiveUID(UIDStr){
+    document.getElementById('RFIDUID').value = UIDStr;
+    var UID_Record = currUIDExtdRecs.UID_ExtdRecs.filter(item => item.UID == UIDStr);
+    if(UID_Record.length > 0){
+        document.getElementById('UIDaudioTAGGameLaunchFilePath').value = UID_Record[0].launchAudio;
+        document.getElementById('UIDaudioTAGRemovedFilePath').value = UID_Record[0].removeAudio;
+    }else {
+        document.getElementById('UIDaudioTAGGameLaunchFilePath').value = "";
+        document.getElementById('UIDaudioTAGRemovedFilePath').value = "";
+    }
+}
+
 function addLogLine(message){
     var logger = document.getElementById('logDiv');
     if (typeof message == 'object') {
@@ -358,13 +408,20 @@ function onMessage(event) {
     console.log("received msg");
     var msgData = JSON.parse(event.data);
     console.log("event data: ", msgData);				
-    //notify msg only
-    if(msgData.msgType == "notify"){
-        addLogLine(msgData.data);
-    }
-    else if(msgData.msgType == "ConfigData"){
-        //addLogLine(JSON.stringify(msgData.data));
-        doSettingsReceive(msgData.data)
+    switch(msgData.msgType){
+        case "notify":
+            addLogLine(msgData.data);
+            break;
+        case "ConfigData":
+            doSettingsReceive(msgData.data);
+            break;
+        case "getUIDExtdRec":
+            //console.log('msgData.data',msgData.data);
+            processUIDExtData(msgData.data);
+            break;
+        case "UIDTokenID":
+            doReceiveUID(msgData.data);
+            break;
     }
 }
 
@@ -372,12 +429,12 @@ function setMenuButtons(){
     if(currConfig){
         //console.log("currConfig.audio_enabled:", currConfig.audio_enabled)
         if(currConfig.audio_enabled){
-            document.getElementById("FMButton").classList.toggle('disabledli');
-            document.getElementById("DefaultsButton").classList.toggle('disabledli');
-            //document.getElementById("UIDButton").classList.toggle('disabledli');
+            document.getElementById("FMButton").classList.remove('disabledli');
+            document.getElementById("DefaultsButton").classList.remove('disabledli');
+            document.getElementById("UIDButton").classList.remove('disabledli');
             setDefaultsDivs();						
         }else if(!currConfig.audio_enabled && currConfig.motor_enabled){
-            document.getElementById("DefaultsButton").classList.toggle('disabledli');
+            document.getElementById("DefaultsButton").classList.remove('disabledli');
             setDefaultsDivs();					
         }
 
@@ -403,8 +460,14 @@ function toggleDefSettingsMode(){
     elZapDiv.style.display = "none";
     var elTagDiv = document.getElementById("tagGenDiv");
     elTagDiv.style.display = "none";
+    var elUIDDiv = document.getElementById("UIDExtDiv");
+    elUIDDiv.style.display = "none";
     if(bWriteMode){websocket.send(
         "{'cmd': 'set_WriteMode', 'data': false}")
+        bWriteMode = false;
+    }
+    if(bUIDMode){websocket.send(
+        "{'cmd': 'set_UIDMode', 'data': false}")
         bWriteMode = false;
     }
     var elAudioDiv = document.getElementById("DefSettingsDiv");
@@ -412,6 +475,45 @@ function toggleDefSettingsMode(){
         elAudioDiv.style.display = "none";
     }else{
         elAudioDiv.style.display = "block";
+    }
+}
+
+function toggleUIDMode(){
+    var elSetDiv = document.getElementById("settingsDiv");
+    elSetDiv.style.display = "none";
+    var elFMDiv = document.getElementById("FileManDiv");
+    elFMDiv.style.display = "none";
+    var elZapDiv = document.getElementById("ZapSettingsDiv");
+    elZapDiv.style.display = "none";
+    var elTagDiv = document.getElementById("tagGenDiv");
+    elTagDiv.style.display = "none";
+    var elAudioDiv = document.getElementById("DefSettingsDiv");
+    elAudioDiv.style.display = "none";
+    if(bWriteMode){websocket.send(
+        "{'cmd': 'set_WriteMode', 'data': false}")
+        bWriteMode = false;
+    }
+    var elUIDDiv = document.getElementById("UIDExtDiv");
+    if(elUIDDiv.style.display == "block"){
+        elUIDDiv.style.display = "none";
+        websocket.send("{'cmd': 'set_UIDMode', 'data': false}");
+        bUIDMode = false;
+        document.activeElement.blur();
+        document.getElementById("ZAPButton").classList.remove('disabledli');
+        document.getElementById("ESP32Button").classList.remove('disabledli');
+        document.getElementById("DefaultsButton").classList.remove('disabledli');
+        document.getElementById("NFCButton").classList.remove('disabledli');
+    }else{
+        elUIDDiv.style.display = "block";
+        if(!bUIDMode){
+            websocket.send("{'cmd': 'set_UIDMode', 'data': true}");
+            bUIDMode = true;
+            doUIDExtGetData();
+        }
+        document.getElementById("ZAPButton").classList.add('disabledli');
+        document.getElementById("ESP32Button").classList.add('disabledli');
+        document.getElementById("DefaultsButton").classList.add('disabledli');
+        document.getElementById("NFCButton").classList.add('disabledli');
     }
 }
 
@@ -424,13 +526,20 @@ function toggleZapSettingsMode(){
     elAudioDiv.style.display = "none";
     var elTagDiv = document.getElementById("tagGenDiv");
     elTagDiv.style.display = "none";
+    var elUIDDiv = document.getElementById("UIDExtDiv");
+    elUIDDiv.style.display = "none";
     if(bWriteMode){websocket.send(
         "{'cmd': 'set_WriteMode', 'data': false}")
+        bWriteMode = false;
+    }
+    if(bUIDMode){websocket.send(
+        "{'cmd': 'set_UIDMode', 'data': false}")
         bWriteMode = false;
     }
     var elZapDiv = document.getElementById("ZapSettingsDiv");
     if(elZapDiv.style.display == "block"){
         elZapDiv.style.display = "none";
+        document.activeElement.blur();
     }else{
         elZapDiv.style.display = "block";
     }
@@ -446,13 +555,20 @@ function toggleSettingsMode() {
     elZapDiv.style.display = "none";
     var elTagDiv = document.getElementById("tagGenDiv");
     elTagDiv.style.display = "none";
+    var elUIDDiv = document.getElementById("UIDExtDiv");
+    elUIDDiv.style.display = "none";
     if(bWriteMode){websocket.send(
         "{'cmd': 'set_WriteMode', 'data': false}")
+        bWriteMode = false;
+    }
+    if(bUIDMode){websocket.send(
+        "{'cmd': 'set_UIDMode', 'data': false}")
         bWriteMode = false;
     }
     var elSetDiv = document.getElementById("settingsDiv");
     if(elSetDiv.style.display == "block"){
         elSetDiv.style.display = "none";
+        document.activeElement.blur();
     }else{
         elSetDiv.style.display = "block";
     }
@@ -467,9 +583,12 @@ function toggleFileManMode(){
     elZapDiv.style.display = "none";
     var elTagDiv = document.getElementById("tagGenDiv");
     elTagDiv.style.display = "none";
+    var elUIDDiv = document.getElementById("UIDExtDiv");
+    elUIDDiv.style.display = "none";
     var elFMDiv = document.getElementById("FileManDiv");
     if(elFMDiv.style.display == "block"){
         elFMDiv.style.display = "none";
+        document.activeElement.blur();
     }else{
         elFMDiv.style.display = "block";
     }
@@ -484,24 +603,31 @@ function toggleNFCMode(){
     elAudioDiv.style.display = "none";
     var elZapDiv = document.getElementById("ZapSettingsDiv");
     elZapDiv.style.display = "none";
+    var elUIDDiv = document.getElementById("UIDExtDiv");
+    elUIDDiv.style.display = "none";
     var elTagDiv = document.getElementById("tagGenDiv");
+    if(bUIDMode){websocket.send(
+        "{'cmd': 'set_UIDMode', 'data': false}")
+        bWriteMode = false;
+    }
     if(elTagDiv.style.display == "block"){
         elTagDiv.style.display = "none";
         websocket.send("{'cmd': 'set_WriteMode', 'data': false}");
         bWriteMode = false;
-        document.getElementById("ZAPButton").classList.toggle('disabledli');
-        document.getElementById("ESP32Button").classList.toggle('disabledli');
-        document.getElementById("DefaultsButton").classList.toggle('disabledli');
-        //document.getElementById("UIDButton").classList.toggle('disabledli');
+        document.activeElement.blur();
+        document.getElementById("ZAPButton").classList.remove('disabledli');
+        document.getElementById("ESP32Button").classList.remove('disabledli');
+        document.getElementById("DefaultsButton").classList.remove('disabledli');
+        document.getElementById("UIDButton").classList.remove('disabledli');
     }else{
         elTagDiv.style.display = "block";
         getIndexedSystems();
-        websocket.send("{'cmd': 'set_WriteMode', 'data': true}");
+        if(!bWriteMode){websocket.send("{'cmd': 'set_WriteMode', 'data': true}");}
         bWriteMode = true;
-        document.getElementById("ZAPButton").classList.toggle('disabledli');
-        document.getElementById("ESP32Button").classList.toggle('disabledli');
-        document.getElementById("DefaultsButton").classList.toggle('disabledli');
-        //document.getElementById("UIDButton").classList.toggle('disabledli');
+        document.getElementById("ZAPButton").classList.add('disabledli');
+        document.getElementById("ESP32Button").classList.add('disabledli');
+        document.getElementById("DefaultsButton").classList.add('disabledli');
+        document.getElementById("UIDButton").classList.add('disabledli');
     }
 
 }
