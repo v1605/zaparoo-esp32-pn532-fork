@@ -1,11 +1,23 @@
 <script lang="ts">
-  import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
+    import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
     import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
-  let isOpen: boolean = false;
-
-  const toggleNavbar = (): void => {
-    isOpen = !isOpen;
-  };
+    import type { NavBarLink } from './types/NavBarLink';
+    let isOpen: boolean = false;
+    let activeLink: string = "zaparoo"; 
+    const links: NavBarLink[] = [
+      { name: 'CREATE', id: 'create', icon: ['fab', 'nfc-symbol'] },
+      { name: 'UID CONTROL', id: 'uid-control', icon: 'music' },
+      { name: 'ZAPAROO', id: 'zaparoo', icon: 'gear' },
+      { name: 'ESP32', id: 'esp32', icon: 'wrench' },
+      { name: 'DEFAULTS', id: 'defaults', icon: 'sliders' },
+      { name: 'FILES', id: 'files', icon: 'folder' },
+    ];
+    const toggleNavbar = (): void => {
+      isOpen = !isOpen;
+    };
+    const setActiveLink = (linkId: string): void => {
+      activeLink = linkId;
+    };
 </script>
 
 <main>
@@ -16,27 +28,22 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav" class:show={isOpen}>
       <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">About</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Contact</a>
-        </li>
+        {#each links as { name, id, icon }}
+          <li class="nav-item">
+            <a class="nav-link {activeLink === id ? 'active' : ''}" href="#"  on:click={() => setActiveLink(id)}>
+              {name} <FontAwesomeIcon icon={icon}></FontAwesomeIcon>
+            </a>
+          </li>
+        {/each}
       </ul>
     </div>
   </nav>
   <div class="container pt-5 mt-5">
     <div class="row justify-content-center">
       <div class="col-md-8 col-lg-6">
-        <ZaparooConfig></ZaparooConfig>
-        <!--<div class="text-center mb-4">
-          <h1 class="display-4 text-primary">Welcome to the Svelte ESP32 Web App</h1>
-          <p class="lead text-muted">A modern web interface powered by Svelte and Bootstrap</p>
-        </div>
-        <button class="btn btn-primary btn-lg btn-block">Press me <FontAwesomeIcon icon="home" /> </button>-->
+        {#if activeLink === 'zaparoo'}
+          <ZaparooConfig></ZaparooConfig>
+        {/if}
       </div>
     </div>
   </div>

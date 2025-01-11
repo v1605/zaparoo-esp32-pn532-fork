@@ -1,20 +1,23 @@
 <script lang="ts">
+    import { ConfigUtils } from "../backend/ConfigUtils";
+
      // Define variables for the input and toggle switch
-  let misterAddress = '192';
+  let misterAddress = '';
   let isEnabled = false;
 
   // Optional: Handle form submission
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: Event) => {
     event.preventDefault();
+    ConfigUtils.updateConfig({mister_enabled: isEnabled, ZapIP: misterAddress});
     console.log('Mister Address:', misterAddress);
     console.log('Is Enabled:', isEnabled);
   };
 </script>
-
+<h2>Zaparoo Settings</h2>
 <form on:submit={handleSubmit}>
     <div class="input-group">
       <div class="form-floating">
-        <input type="text" class="form-control" id="misterIp" placeholder="Enter Mister Address" bind:value={misterAddress} disabled={!isEnabled} />
+        <input type="text" class="form-control" id="misterIp" placeholder="mister.local" bind:value={misterAddress} disabled={!isEnabled} />
         <label for="misterIp">Mister Address</label>
       </div>
       <div class="input-group-text">
