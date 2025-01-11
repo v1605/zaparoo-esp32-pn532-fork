@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { ConfigUtils } from "../backend/ConfigUtils";
+    import { EspUtils } from "../backend/EspUtils";
+
+    
 
      // Define variables for the input and toggle switch
   let strDefLaunchPath = "";
@@ -16,7 +18,7 @@
   // Optional: Handle form submission
   const handleSubmit = (event: Event) => {
     event.preventDefault();
-    ConfigUtils.updateConfig({
+    EspUtils.updateConfig({
       defDetectAudioPath: strDefDetectPath,
       defRemoveAudioPath: strDefRemovePath,
       defErrAudioPath: strDefErrorPath,
@@ -26,7 +28,7 @@
       buzz_on_remove_enabled: isBuzzRemoveEnabled,
       buzz_on_error_enabled: isBuzzErrorEnabled,
       sdCard_enabled: isSDCardEnabled,
-      val_AUDIO_GAIN: intAudioGain
+      //val_AUDIO_GAIN: intAudioGain
     });
   };
 </script>

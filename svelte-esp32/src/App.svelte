@@ -6,9 +6,6 @@
     import CreateMode from './configTemplates/CreateMode.svelte';
     import UidMode from './configTemplates/UIDMode.svelte';
     import type { NavBarLink } from './types/NavBarLink';
-    let isOpen: boolean = false;
-    let activeLink: string = "zaparoo"; 
-    import type { NavBarLink } from './types/NavBarLink';
     import { EspUtils } from './backend/EspUtils';
     let isOpen: boolean = false;
     let activeLink: string = "zaparoo"; 
