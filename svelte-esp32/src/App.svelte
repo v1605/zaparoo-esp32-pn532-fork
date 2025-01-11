@@ -2,6 +2,7 @@
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
     import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
     import Esp32Config from './configTemplates/Esp32Config.svelte';
+    import Esp32Defaults from './configTemplates/Esp32Defaults.svelte';
     import type { NavBarLink } from './types/NavBarLink';
     let isOpen: boolean = false;
     let activeLink: string = "zaparoo"; 
@@ -41,14 +42,21 @@
   </nav>
   <div class="container pt-5 mt-5">
     <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
         {#if activeLink === 'zaparoo'}
-          <ZaparooConfig></ZaparooConfig>
+          <div class="col-md-8 col-lg-6">
+            <ZaparooConfig></ZaparooConfig>
+          </div>
         {/if}
         {#if activeLink === 'esp32'}
-          <Esp32Config></Esp32Config>
+          <div class="col-md-8 col-lg-6">
+            <Esp32Config></Esp32Config>
+          </div>
         {/if}
-      </div>
+        {#if activeLink === 'defaults'}
+          <div class="col-md-8 col-lg-8">  
+            <Esp32Defaults></Esp32Defaults>
+          </div>
+        {/if}
     </div>
   </div>
 </main>
