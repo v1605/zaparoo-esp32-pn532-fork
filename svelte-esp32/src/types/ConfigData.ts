@@ -1,4 +1,5 @@
-export interface CofigMessage{
+
+export interface ConfigMessage{
   msgType: "ConfigData";
   data: ConfigData
 }
@@ -12,14 +13,14 @@ export interface ConfigData {
   reset_on_remove_enabled: boolean;
   defAudioPath: string;
   ZapIP: string;
-  pin_I2S_DOUT: number | null;
-  pin_I2S_BCLK: number | null;
-  pin_I2S_LRC: number | null;
-  val_AUDIO_GAIN: number | null;
-  pin_MOTOR_PIN: number | null;
-  pin_WIFI_LED_PIN: number | null;
-  pin_LAUNCH_LED_PIN: number | null;
-  pin_EXTERNAL_POWER_LED: number | null;
+  pin_I2S_DOUT: number;
+  pin_I2S_BCLK: number;
+  pin_I2S_LRC: number;
+  val_AUDIO_GAIN: number;
+  pin_MOTOR_PIN: number;
+  pin_WIFI_LED_PIN: number;
+  pin_LAUNCH_LED_PIN: number;
+  pin_EXTERNAL_POWER_LED: number;
   mister_enabled: boolean;
   steamOS_enabled: boolean;
   sdCard_enabled: boolean;

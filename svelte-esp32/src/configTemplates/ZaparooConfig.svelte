@@ -1,26 +1,13 @@
 <script lang="ts">
-    import { ConfigUtils } from "../backend/ConfigUtils";
-
-     // Define variables for the input and toggle switch
-  let misterAddress = '';
-  let isMisterEnabled = false;
-  let steamAddress = '';
-  let isSteamEnabled = false;
-  let isRRoREnabled = false;
-
-  // Optional: Handle form submission
-  const handleSubmit = (event: Event) => {
-    event.preventDefault();
-    ConfigUtils.updateConfig({
-      mister_enabled: isMisterEnabled, 
-      ZapIP: misterAddress,
-      SteamIP: steamAddress,
-      steamOS_enabled: isSteamEnabled,
-      reset_on_remove_enabled: isRRoREnabled
-    });
-    console.log('Mister Address:', misterAddress);
-    console.log('Is Enabled:', isMisterEnabled);
-  };
+    import { EspUtils } from "../backend/EspUtils";
+    import type { ConfigData } from "../types/ConfigData";
+    let config: ConfigData = EspUtils.getBlank();
+    EspUtils.config().subscribe(value=> config = value);
+    const handleSubmit = (event: Event) => {
+      event.preventDefault();
+      const update: Partial<ConfigData> = {ZapIP: config.ZapIP, mister_enabled: config.mister_enabled};
+        EspUtils.updateConfig(update);
+    };
 </script>
 <div class="text-center">
   <h2>Zaparoo Settings</h2>

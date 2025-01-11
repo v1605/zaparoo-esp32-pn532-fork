@@ -8,12 +8,18 @@
     import type { NavBarLink } from './types/NavBarLink';
     let isOpen: boolean = false;
     let activeLink: string = "zaparoo"; 
+    import type { NavBarLink } from './types/NavBarLink';
+    import { EspUtils } from './backend/EspUtils';
+    let isOpen: boolean = false;
+    let activeLink: string = "zaparoo"; 
+    EspUtils.initWebSocket();
     const links: NavBarLink[] = [
       { name: 'CREATE', id: 'create', icon: ['fab', 'nfc-symbol'] },
       { name: 'UID CONTROL', id: 'uid-control', icon: 'music' },
       { name: 'ZAPAROO', id: 'zaparoo', icon: 'gear' },
       { name: 'ESP32', id: 'esp32', icon: 'wrench' },
-      { name: 'DEFAULTS', id: 'defaults', icon: 'sliders' }
+      { name: 'DEFAULTS', id: 'defaults', icon: 'sliders' },
+      { name: 'FILES', id: 'files', icon: 'folder' },
     ];
     const toggleNavbar = (): void => {
       isOpen = !isOpen;
