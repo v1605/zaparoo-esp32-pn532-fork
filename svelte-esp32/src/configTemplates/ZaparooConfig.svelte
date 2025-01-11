@@ -14,7 +14,7 @@
 <form on:submit={handleSubmit}>
     <div class="input-group">
       <div class="form-floating">
-        <input type="text" class="form-control" id="misterIp" placeholder="Enter Mister Address" bind:value={misterAddress}/>
+        <input type="text" class="form-control" id="misterIp" placeholder="Enter Mister Address" bind:value={misterAddress} disabled={!isEnabled} />
         <label for="misterIp">Mister Address</label>
       </div>
       <div class="input-group-text">
