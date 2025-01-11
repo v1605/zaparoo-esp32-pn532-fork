@@ -1,6 +1,7 @@
 <script lang="ts">
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
     import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
+    import Esp32Config from './configTemplates/Esp32Config.svelte';
     import type { NavBarLink } from './types/NavBarLink';
     let isOpen: boolean = false;
     let activeLink: string = "zaparoo"; 
@@ -43,6 +44,9 @@
       <div class="col-md-8 col-lg-6">
         {#if activeLink === 'zaparoo'}
           <ZaparooConfig></ZaparooConfig>
+        {/if}
+        {#if activeLink === 'esp32'}
+          <Esp32Config></Esp32Config>
         {/if}
       </div>
     </div>
