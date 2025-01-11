@@ -22,8 +22,10 @@
     console.log('Is Enabled:', isMisterEnabled);
   };
 </script>
-<h2>Zaparoo Settings</h2>
-<form on:submit={handleSubmit} class="row g-2">
+<div class="text-center">
+  <h2>Zaparoo Settings</h2>
+</div>
+  <form on:submit={handleSubmit} class="row g-2">
   <div class="col-12"> 
     <div class="input-group">
       <div class="input-group-text">

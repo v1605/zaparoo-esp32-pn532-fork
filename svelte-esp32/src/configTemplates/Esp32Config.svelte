@@ -37,7 +37,9 @@
     });
   };
 </script>
-<h2>ESP32 Settings</h2>
+<div class="text-center"> 
+  <h2>ESP32 Settings</h2>
+</div>
 <form on:submit={handleSubmit} class="row g-4">
   <div class="col-6"> 
     <div class="input-group">

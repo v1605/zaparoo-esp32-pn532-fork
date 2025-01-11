@@ -30,7 +30,9 @@
     });
   };
 </script>
-<h2>ESP32 Defaults</h2>
+<div class="text-center">
+  <h2>ESP32 Defaults</h2>
+</div>
 <form on:submit={handleSubmit} class="row g-4">
   <div class="col-12"> 
     <div class="input-group">
@@ -90,5 +92,5 @@
       </div>
     </div>
 </div>
-  <button type="submit" class="btn btn-primary mt-3">Save</button>
+<button type="submit" class="btn btn-primary mt-3">Save</button>
 </form>

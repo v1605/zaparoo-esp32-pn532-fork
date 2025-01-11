@@ -3,6 +3,8 @@
     import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
     import Esp32Config from './configTemplates/Esp32Config.svelte';
     import Esp32Defaults from './configTemplates/Esp32Defaults.svelte';
+    import CreateMode from './configTemplates/CreateMode.svelte';
+    import UidMode from './configTemplates/UIDMode.svelte';
     import type { NavBarLink } from './types/NavBarLink';
     let isOpen: boolean = false;
     let activeLink: string = "zaparoo"; 
@@ -11,8 +13,7 @@
       { name: 'UID CONTROL', id: 'uid-control', icon: 'music' },
       { name: 'ZAPAROO', id: 'zaparoo', icon: 'gear' },
       { name: 'ESP32', id: 'esp32', icon: 'wrench' },
-      { name: 'DEFAULTS', id: 'defaults', icon: 'sliders' },
-      { name: 'FILES', id: 'files', icon: 'folder' },
+      { name: 'DEFAULTS', id: 'defaults', icon: 'sliders' }
     ];
     const toggleNavbar = (): void => {
       isOpen = !isOpen;
@@ -55,6 +56,16 @@
         {#if activeLink === 'defaults'}
           <div class="col-md-8 col-lg-8">  
             <Esp32Defaults></Esp32Defaults>
+          </div>
+        {/if}
+        {#if activeLink === 'create'}
+          <div class="col-md-8 col-lg-8">  
+            <CreateMode></CreateMode>
+          </div>
+        {/if}
+        {#if activeLink === 'uid-control'}
+          <div class="col-md-8 col-lg-8">  
+            <UidMode></UidMode>
           </div>
         {/if}
     </div>
