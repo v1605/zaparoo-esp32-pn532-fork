@@ -2,8 +2,10 @@
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
     import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
     import type { NavBarLink } from './types/NavBarLink';
+    import { EspUtils } from './backend/EspUtils';
     let isOpen: boolean = false;
     let activeLink: string = "zaparoo"; 
+    EspUtils.initWebSocket();
     const links: NavBarLink[] = [
       { name: 'CREATE', id: 'create', icon: ['fab', 'nfc-symbol'] },
       { name: 'UID CONTROL', id: 'uid-control', icon: 'music' },

@@ -1,4 +1,4 @@
-export interface CofigMessage{
+export interface ConfigMessage{
   msgType: "ConfigData";
   data: ConfigData
 }
