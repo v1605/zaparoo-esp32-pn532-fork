@@ -1,6 +1,13 @@
 <script lang="ts">
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
     import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
+    import Esp32Config from './configTemplates/Esp32Config.svelte';
+    import Esp32Defaults from './configTemplates/Esp32Defaults.svelte';
+    import CreateMode from './configTemplates/CreateMode.svelte';
+    import UidMode from './configTemplates/UIDMode.svelte';
+    import type { NavBarLink } from './types/NavBarLink';
+    let isOpen: boolean = false;
+    let activeLink: string = "zaparoo"; 
     import type { NavBarLink } from './types/NavBarLink';
     import { EspUtils } from './backend/EspUtils';
     let isOpen: boolean = false;
@@ -42,11 +49,31 @@
   </nav>
   <div class="container pt-5 mt-5">
     <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
         {#if activeLink === 'zaparoo'}
-          <ZaparooConfig></ZaparooConfig>
+          <div class="col-md-8 col-lg-6">
+            <ZaparooConfig></ZaparooConfig>
+          </div>
         {/if}
-      </div>
+        {#if activeLink === 'esp32'}
+          <div class="col-md-8 col-lg-6">
+            <Esp32Config></Esp32Config>
+          </div>
+        {/if}
+        {#if activeLink === 'defaults'}
+          <div class="col-md-8 col-lg-8">  
+            <Esp32Defaults></Esp32Defaults>
+          </div>
+        {/if}
+        {#if activeLink === 'create'}
+          <div class="col-md-8 col-lg-8">  
+            <CreateMode></CreateMode>
+          </div>
+        {/if}
+        {#if activeLink === 'uid-control'}
+          <div class="col-md-8 col-lg-8">  
+            <UidMode></UidMode>
+          </div>
+        {/if}
     </div>
   </div>
 </main>

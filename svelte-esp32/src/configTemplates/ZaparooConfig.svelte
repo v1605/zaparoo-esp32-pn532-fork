@@ -9,19 +9,43 @@
         EspUtils.updateConfig(update);
     };
 </script>
-<h2>Zaparoo Settings</h2>
-<form on:submit={handleSubmit}>
+<div class="text-center">
+  <h2>Zaparoo Settings</h2>
+</div>
+  <form on:submit={handleSubmit} class="row g-2">
+  <div class="col-12"> 
     <div class="input-group">
-      <div class="form-floating">
-        <input type="text" class="form-control" id="misterIp" placeholder="mister.local" bind:value={config.ZapIP} disabled={!config.mister_enabled} />
-        <label for="misterIp">Mister Address</label>
-      </div>
       <div class="input-group-text">
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableMister" bind:checked={config.mister_enabled}/>
+        <div class="form-check form-switch col-2">
+          <input class="form-check-input" type="checkbox" role="switch" id="enableMister" bind:checked={isMisterEnabled}/>
           <label class="form-check-label visually-hidden" for="enableMister">Enable Mister</label>
         </div>
       </div>
+      <div class="form-floating">
+        <input type="text" class="form-control col-6" id="misterIp" placeholder="mister.local" bind:value={misterAddress} disabled={!isMisterEnabled} />
+        <label for="misterIp">Mister Address</label>
+      </div>
+      <div class="input-group-text">
+        <div class="form-check form-switch col-4">
+          <input class="form-check-input" type="checkbox" role="switch" id="enableRRoR" bind:checked={isRRoREnabled} disabled={!isMisterEnabled}/>
+          <label class="form-check-label" for="enableRRoR">Reset On Remove</label>
+        </div>
+      </div>
     </div>
-    <button type="submit" class="btn btn-primary mt-3">Save</button>
-  </form>
+  </div>
+  <div>
+    <div class="input-group">
+      <div class="input-group-text">
+        <div class="form-check form-switch col-2">
+          <input class="form-check-input" type="checkbox" role="switch" id="enableSteam" bind:checked={isSteamEnabled}/>
+          <label class="form-check-label visually-hidden" for="enableSteam">Enable SteamOS</label>
+        </div>
+      </div>
+      <div class="form-floating">
+        <input type="text" class="form-control" id="steamIp" placeholder="steam.local" bind:value={steamAddress} disabled={!isSteamEnabled} />
+        <label for="steamIp">Steam Address</label>
+      </div>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary mt-3">Save</button>
+</form>

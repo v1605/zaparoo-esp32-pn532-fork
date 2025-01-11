@@ -1,3 +1,4 @@
+
 export interface ConfigMessage{
   msgType: "ConfigData";
   data: ConfigData
