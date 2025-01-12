@@ -13,7 +13,6 @@ export default defineConfig({
   plugins: [svelte(), viteSingleFile()],
   server: {
     proxy: {
-      // Proxy all requests starting with "/api" to the backend
       '/ws': {
         target: getBackendIP(), // Backend server URL
         changeOrigin: true, // Adjust the `Host` header to match the target,
