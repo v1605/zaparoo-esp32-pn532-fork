@@ -6,6 +6,8 @@ export class EspUtils{
     private static currentConfig: Writable<ConfigData> = writable({} as ConfigData);
     private static websocket: WebSocket;
     private static connected: Writable<boolean> = writable();
+    private static intialLoad = false;
+    private static updating = false;
 
 
     static initWebSocket() {
@@ -19,15 +21,13 @@ export class EspUtils{
     private static onOpen() {
         LogUtils.addLogLine('Connection to ZAP ESP opened');
         console.log('Connection to ZAP ESP opened');
-        setTimeout(() =>{
-            this.websocket.send("{'cmd': 'get_Current_Config'}");
-        }, 500);				
+        this.websocket.send("{'cmd': 'get_Current_Config'}");			
     }
     
     private static onClose() {
         LogUtils.addLogLine('Connection to ZAP ESP closed');
         console.log('Connection to ZAP ESP closed');
-        setTimeout(()=> this.initWebSocket(), 5000);
+        setTimeout(()=> this.initWebSocket(), 2000);
     }
     
     private static onMessage(event: MessageEvent) {
@@ -37,8 +37,9 @@ export class EspUtils{
                 LogUtils.addLogLine(msgData.data);
                 break;
             case "ConfigData":
-                //Object.assign(this.currentConfig, (msgData as ConfigMessage).data);
                 this.currentConfig.set((msgData as ConfigMessage).data)
+                LogUtils.notify(`Settings ${this.intialLoad ? "Updated" : "Loaded"}`);
+                this.intialLoad = true;
                 break;
             case "getUIDExtdRec":
                 //console.log('msgData.data',msgData.data);
@@ -65,6 +66,8 @@ export class EspUtils{
     }
 
     static updateConfig(update: Partial<ConfigData>){
+        if(this.updating) return true;
+        this.updating = true;
         this.currentConfig.subscribe((conf=>{
             const data = Object.assign({...conf}, update);
             const payload = {
@@ -72,6 +75,11 @@ export class EspUtils{
                 data: data
             };
             this.websocket.send(JSON.stringify(payload));
+            LogUtils.notify("Settings updated, ESP will reload");
+            this.updating = false;
+            this.websocket.onclose = null;
+            this.websocket.close();
+            setTimeout(()=> this.initWebSocket(), 2000);
         }))();
     }
 }
