@@ -1,10 +1,11 @@
-import { writable, type Writable } from "svelte/store";
+import { writable, type Readable, type Writable } from "svelte/store";
 import type { ConfigData, ConfigMessage } from "../types/ConfigData";
 import { LogUtils } from "./LogUtils";
 
 export class EspUtils{
     private static currentConfig: Writable<ConfigData> = writable({} as ConfigData);
     private static websocket: WebSocket;
+    private static connected: Writable<boolean> = writable();
 
 
     static initWebSocket() {
@@ -51,7 +52,7 @@ export class EspUtils{
 
     static async loadConfig(){}
 
-    static config(): Writable<ConfigData>{
+    static config(): Readable<ConfigData>{
         return this.currentConfig;
     }
 
@@ -59,7 +60,18 @@ export class EspUtils{
         return {} as ConfigData;
     }
 
-    static async updateConfig(update: Partial<ConfigData>){
+    static getConntected(): Readable<boolean>{
+        return this.connected;
+    }
 
+    static updateConfig(update: Partial<ConfigData>){
+        this.currentConfig.subscribe((conf=>{
+            const data = Object.assign({...conf}, update);
+            const payload = {
+                cmd: "set_Current_Config",
+                data: data
+            };
+            this.websocket.send(JSON.stringify(payload));
+        }))();
     }
 }
