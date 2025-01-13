@@ -6,14 +6,23 @@
     import CreateMode from './configTemplates/CreateMode.svelte';
     import UidMode from './configTemplates/UIDMode.svelte';
     import type { NavBarLink } from './types/NavBarLink';
+    import { EspUtils } from './backend/EspUtils';
+    import { Toast } from 'bootstrap';
+    import { onMount } from 'svelte';
+    import { LogUtils } from './backend/LogUtils';
     let isOpen: boolean = false;
     let activeLink: string = "zaparoo"; 
+    EspUtils.initWebSocket();
+    let toastElement: HTMLElement | null = null;
+    let toastInstance: Toast | null = null;
+    let alertText = "";
     const links: NavBarLink[] = [
       { name: 'CREATE', id: 'create', icon: ['fab', 'nfc-symbol'] },
       { name: 'UID CONTROL', id: 'uid-control', icon: 'music' },
       { name: 'ZAPAROO', id: 'zaparoo', icon: 'gear' },
       { name: 'ESP32', id: 'esp32', icon: 'wrench' },
-      { name: 'DEFAULTS', id: 'defaults', icon: 'sliders' }
+      { name: 'DEFAULTS', id: 'defaults', icon: 'sliders' },
+      { name: 'FILES', id: 'files', icon: 'folder' },
     ];
     const toggleNavbar = (): void => {
       isOpen = !isOpen;
@@ -21,6 +30,20 @@
     const setActiveLink = (linkId: string): void => {
       activeLink = linkId;
     };
+    const showToast = () => {
+      if (toastElement) {
+        toastInstance = new Toast(toastElement);
+        toastInstance.show();
+      }
+    };
+    LogUtils.getNotification().subscribe(value=>{
+      if(value){
+        alertText = value;
+        showToast();
+      }
+    });
+
+
 </script>
 
 <main>
@@ -41,6 +64,18 @@
       </ul>
     </div>
   </nav>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div bind:this={toastElement} id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+      <div class="toast-header">
+        <strong class="me-auto">Notification</strong>
+        <small>now</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        {alertText}
+      </div>
+    </div>
+  </div>
   <div class="container pt-5 mt-5">
     <div class="row justify-content-center">
         {#if activeLink === 'zaparoo'}

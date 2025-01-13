@@ -4,15 +4,11 @@
     import FileManager from './FileManager.svelte';
     import type { NavBarLink } from '../types/NavBarLink';
     
-    let isOpen: boolean = false;
     let activeLink: string = "nfc"; 
     const links: NavBarLink[] = [
       { name: 'NFC', id: 'nfc', icon: ['fab', 'nfc-symbol'] },
       { name: 'FILE MANAGER', id: 'fileMan', icon: 'folder' }
     ];
-    // const toggleNavbar = (): void => {
-    //   isOpen = !isOpen;
-    // };
     const setActiveLink = (linkId: string): void => {
       activeLink = linkId;
     };
