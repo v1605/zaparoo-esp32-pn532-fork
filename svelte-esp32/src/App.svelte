@@ -45,7 +45,6 @@
 
 
 </script>
-
 <main>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm fixed-top">
     <a class="navbar-brand" href="/">Zap Esp32</a>
@@ -76,8 +75,8 @@
       </div>
     </div>
   </div>
-  <div class="container pt-5 mt-5">
-    <div class="row justify-content-center">
+  <div id="mmenu_screen" class="container-fluid main_container d-flex pt-5 mt-5">
+    <div class="row justify-content-center flex-fill">
         {#if activeLink === 'zaparoo'}
           <div class="col-md-8 col-lg-6">
             <ZaparooConfig></ZaparooConfig>
@@ -94,12 +93,12 @@
           </div>
         {/if}
         {#if activeLink === 'create'}
-          <div class="col-md-8 col-lg-8">  
+          <div class="col-md-10 col-lg-10">  
             <CreateMode></CreateMode>
           </div>
         {/if}
         {#if activeLink === 'uid-control'}
-          <div class="col-md-8 col-lg-8">  
+          <div class="col-md-10 col-lg-10">  
             <UidMode></UidMode>
           </div>
         {/if}
