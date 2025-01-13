@@ -52,20 +52,22 @@
 
 <main>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm fixed-top">
-    <a class="navbar-brand" href="/">Zap Esp32</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav" bind:this={navbarElement}>
-      <ul class="navbar-nav ms-auto">
-        {#each links as { name, id, icon }}
-          <li class="nav-item">
-            <a class="nav-link {activeLink === id ? 'active' : ''}" href="#"  on:click={(e) => setActiveLink(id)}>
-              {name} <FontAwesomeIcon icon={icon}></FontAwesomeIcon>
-            </a>
-          </li>
-        {/each}
-      </ul>
+    <div class="container">
+      <a class="navbar-brand" href="/">Zap Esp32</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav" bind:this={navbarElement}>
+        <ul class="navbar-nav ms-auto">
+          {#each links as { name, id, icon }}
+            <li class="nav-item">
+              <a class="nav-link {activeLink === id ? 'active' : ''}" href="#" on:click={(e) => setActiveLink(id)}>
+                {name} <FontAwesomeIcon icon={icon}></FontAwesomeIcon>
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </div>
     </div>
   </nav>
   <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11">
@@ -80,7 +82,7 @@
       </div>
     </div>
   </div>
-  <div class="container pt-5 mt-5">
+  <div class="container pt-3 mt-5">
     <div class="row justify-content-center">
         {#if activeLink === 'zaparoo'}
           <div class="col-md-8 col-lg-6">
