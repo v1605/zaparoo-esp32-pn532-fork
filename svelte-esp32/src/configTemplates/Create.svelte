@@ -5,7 +5,6 @@
     </script>
 </svelte:head>
 <script lang="ts">
-    import { ConfigUtils } from "../backend/ConfigUtils";
 
      // Define variables for the input and toggle switch
     let misterAddress = '';
