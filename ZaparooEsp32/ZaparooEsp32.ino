@@ -806,7 +806,7 @@ void setup() {
 
 void loop() {
   connectWifi();
-  if (preferences.getBool("En_NFC_Wr", false)) {
+  if (!preferences.getBool("En_NFC_Wr", false)) {
     readScanner();
   }
   delay(50);
