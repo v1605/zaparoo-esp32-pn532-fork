@@ -11,7 +11,7 @@
     import { LogUtils } from './backend/LogUtils';
     import WifiConfig from './configTemplates/WifiConfig.svelte';
 
-    let activeLink: string = "zaparoo"; 
+    let activeLink: string = ""; 
     EspUtils.initWebSocket();
     let toastElement: HTMLElement | null = null;
     let toastInstance: Toast | null = null;
@@ -22,7 +22,6 @@
       { name: 'ZAPAROO', id: 'zaparoo', icon: 'gear' },
       { name: 'ESP32', id: 'esp32', icon: 'wrench' },
       { name: 'DEFAULTS', id: 'defaults', icon: 'sliders' },
-      { name: 'FILES', id: 'files', icon: 'folder' },
       { name: 'Wifi', id: 'wifi', icon: 'wifi' },
     ];
     let navbarElement: HTMLDivElement;
@@ -81,8 +80,8 @@
       </div>
     </div>
   </div>
-  <div class="container pt-3 mt-5">
-    <div class="row justify-content-center">
+  <div id="mmenu_screen" class="container-fluid main_container d-flex pt-5 mt-5">
+    <div class="row justify-content-center flex-fill">
         {#if activeLink === 'zaparoo'}
           <div class="col-md-8 col-lg-6">
             <ZaparooConfig></ZaparooConfig>

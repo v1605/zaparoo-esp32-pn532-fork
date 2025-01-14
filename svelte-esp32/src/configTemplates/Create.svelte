@@ -1,7 +1,7 @@
 
 <script lang="ts">
 
-    import QRCode from 'qrcode';
+    //import QRCode from 'qrcode';
 
      // Define variables for the input and toggle switch
     let misterAddress = '';
@@ -13,31 +13,31 @@
     const handleSubmit = (event: Event) => {
         event.preventDefault();
     };
-    import { onMount } from 'svelte';
-    let qrJSReady = false;
-    let mounted = false;
+    // import { onMount } from 'svelte';
+    // let qrJSReady = false;
+    // let mounted = false;
 
-    //QRCode.toCanvas();
+    // //QRCode.toCanvas();
 
-    onMount(() => {
-        // component is ready.
-        mounted = true;
-        if (qrJSReady) {
-            doClientSideCode();
-        }
-    });
+    // onMount(() => {
+    //     // component is ready.
+    //     mounted = true;
+    //     if (qrJSReady) {
+    //         doClientSideCode();
+    //     }
+    // });
 
-    function qrJSLoaded() {
-        // The QR javascript is ready.
-        qrJSReady = true;
-        if (mounted) {
-            doClientSideCode();
-        }
-    }
+    // function qrJSLoaded() {
+    //     // The QR javascript is ready.
+    //     qrJSReady = true;
+    //     if (mounted) {
+    //         doClientSideCode();
+    //     }
+    // }
 
-    function doClientSideCode() {
-        //do whatever here
-    } 
+    // function doClientSideCode() {
+    //     //do whatever here
+    // } 
 </script>
 <div class="text-center">
   <h2>Search</h2>
