@@ -7,10 +7,10 @@
     import UidMode from './configTemplates/UIDMode.svelte';
     import type { NavBarLink } from './types/NavBarLink';
     import { EspUtils } from './backend/EspUtils';
-    import { Toast } from 'bootstrap';
-    import { onMount } from 'svelte';
+    import { Toast, Collapse } from 'bootstrap';
     import { LogUtils } from './backend/LogUtils';
-    let isOpen: boolean = false;
+    import WifiConfig from './configTemplates/WifiConfig.svelte';
+
     let activeLink: string = "zaparoo"; 
     EspUtils.initWebSocket();
     let toastElement: HTMLElement | null = null;
@@ -23,13 +23,17 @@
       { name: 'ESP32', id: 'esp32', icon: 'wrench' },
       { name: 'DEFAULTS', id: 'defaults', icon: 'sliders' },
       { name: 'FILES', id: 'files', icon: 'folder' },
+      { name: 'Wifi', id: 'wifi', icon: 'wifi' },
     ];
-    const toggleNavbar = (): void => {
-      isOpen = !isOpen;
-    };
+    let navbarElement: HTMLDivElement;
     const setActiveLink = (linkId: string): void => {
+      const collapse = Collapse.getInstance(navbarElement);
+      if (collapse) {
+        collapse.hide();
+      }
       activeLink = linkId;
     };
+    
     const showToast = () => {
       if (toastElement) {
         toastInstance = new Toast(toastElement);
@@ -47,20 +51,22 @@
 </script>
 <main>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm fixed-top">
-    <a class="navbar-brand" href="/">Zap Esp32</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded={isOpen ? "true" : "false"} aria-label="Toggle navigation" on:click={toggleNavbar}>
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav" class:show={isOpen}>
-      <ul class="navbar-nav ms-auto">
-        {#each links as { name, id, icon }}
-          <li class="nav-item">
-            <a class="nav-link {activeLink === id ? 'active' : ''}" href="#"  on:click={() => setActiveLink(id)}>
-              {name} <FontAwesomeIcon icon={icon}></FontAwesomeIcon>
-            </a>
-          </li>
-        {/each}
-      </ul>
+    <div class="container">
+      <a class="navbar-brand" href="/">Zap Esp32</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav" bind:this={navbarElement}>
+        <ul class="navbar-nav ms-auto">
+          {#each links as { name, id, icon }}
+            <li class="nav-item">
+              <a class="nav-link {activeLink === id ? 'active' : ''}" href="#" on:click={(e) => setActiveLink(id)}>
+                {name} <FontAwesomeIcon icon={icon}></FontAwesomeIcon>
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </div>
     </div>
   </nav>
   <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11">
@@ -75,8 +81,8 @@
       </div>
     </div>
   </div>
-  <div id="mmenu_screen" class="container-fluid main_container d-flex pt-5 mt-5">
-    <div class="row justify-content-center flex-fill">
+  <div class="container pt-3 mt-5">
+    <div class="row justify-content-center">
         {#if activeLink === 'zaparoo'}
           <div class="col-md-8 col-lg-6">
             <ZaparooConfig></ZaparooConfig>
@@ -100,6 +106,11 @@
         {#if activeLink === 'uid-control'}
           <div class="col-md-10 col-lg-10">  
             <UidMode></UidMode>
+          </div>
+        {/if}
+        {#if activeLink === 'wifi'}
+          <div class="col-md-8 col-lg-8">  
+            <WifiConfig></WifiConfig>
           </div>
         {/if}
     </div>

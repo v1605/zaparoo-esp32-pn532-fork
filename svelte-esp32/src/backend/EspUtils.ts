@@ -82,4 +82,16 @@ export class EspUtils{
             setTimeout(()=> this.initWebSocket(), 2000);
         }))();
     }
+
+    static updateWifi(ssid: string, password: string){
+        const payload = {
+            cmd: "wifi",
+            data: {
+                ssid: ssid,
+                password: password
+            }
+        };
+        this.websocket.send(JSON.stringify(payload));
+        LogUtils.notify("Updated Wifi, ESP will now attempt to reconnect");
+    }
 }
