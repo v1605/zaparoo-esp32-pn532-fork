@@ -49,7 +49,6 @@
 
 
 </script>
-
 <main>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm fixed-top">
     <div class="container">
@@ -100,12 +99,12 @@
           </div>
         {/if}
         {#if activeLink === 'create'}
-          <div class="col-md-8 col-lg-8">  
+          <div class="col-md-10 col-lg-10">  
             <CreateMode></CreateMode>
           </div>
         {/if}
         {#if activeLink === 'uid-control'}
-          <div class="col-md-8 col-lg-8">  
+          <div class="col-md-10 col-lg-10">  
             <UidMode></UidMode>
           </div>
         {/if}

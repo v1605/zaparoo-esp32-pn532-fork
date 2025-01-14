@@ -15,7 +15,7 @@
     };
 </script>
 
-<div>
+<div class="h-100">
   <div class="text-center"> 
     <h2>UID Control Mode</h2>
   </div>
@@ -28,15 +28,15 @@
       </li>
     {/each}
   </ul>
-  <div class="container pt-5 mt-5">
-    <div class="row justify-content-center">
+  <div class="container pt-1 mt-1 h-100">
+    <div class="row justify-content-center h-100">
         {#if activeLink === 'uid'}
-          <div class="col-md-8 col-lg-6">
+          <div class="col-md-12 col-lg-12">
             <UidExtdRec></UidExtdRec>
           </div>
         {/if}
         {#if activeLink === 'fileMan'}
-          <div class="col-md-8 col-lg-6">
+          <div class="col-md-12 col-lg-12 h-100">
             <FileManager></FileManager>
           </div>
         {/if}
