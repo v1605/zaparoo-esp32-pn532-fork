@@ -1,6 +1,7 @@
 import { writable, type Readable, type Writable } from "svelte/store";
 import type { ConfigData, ConfigMessage } from "../types/ConfigData";
 import { LogUtils } from "./LogUtils";
+import { UIDUtils } from "./UIDUtils";
 
 export class EspUtils{
     private static currentConfig: Writable<ConfigData> = writable({} as ConfigData);
@@ -8,6 +9,8 @@ export class EspUtils{
     private static connected: Writable<boolean> = writable();
     private static intialLoad = false;
     private static updating = false;
+    private static isUIDModeEnabled= false;
+    
 
 
     static initWebSocket() {
@@ -42,13 +45,18 @@ export class EspUtils{
                 this.intialLoad = true;
                 break;
             case "getUIDExtdRec":
-                //console.log('msgData.data',msgData.data);
-                //processUIDExtData(msgData.data);
+                UIDUtils.processUIDExtData(msgData);
                 break;
             case "UIDTokenID":
                 //doReceiveUID(msgData.data);
                 break;
         }
+    }
+
+    static toggleUIDMode(){
+        this.isUIDModeEnabled = !this.isUIDModeEnabled;
+        console.log(`Setting UID Editing Mode : ${this.isUIDModeEnabled}`);
+        this.websocket.send(`{'cmd': 'set_UIDMode', 'data': ${this.isUIDModeEnabled}}`);
     }
 
     static async loadConfig(){}
@@ -94,4 +102,6 @@ export class EspUtils{
         this.websocket.send(JSON.stringify(payload));
         LogUtils.notify("Updated Wifi, ESP will now attempt to reconnect");
     }
+
+    
 }

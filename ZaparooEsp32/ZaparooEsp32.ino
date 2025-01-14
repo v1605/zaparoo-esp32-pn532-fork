@@ -620,6 +620,8 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     bool enableUIDMode = root["data"];
     notifyClients(enableUIDMode ? "UID Scanning Mode Enabled" : "UID Scanning Mode Disabled");
     UID_ScanMode_enabled = enableUIDMode;
+    //get UIDExtdRec data if enabling UID mode
+    if(enableUIDMode){getUIDExtdRec();}
   } else if (command == "saveUIDExtdRec") {
     notifyClients("Saving UIDExtdRec Data");
     saveUIDExtdRec(root["data"]);

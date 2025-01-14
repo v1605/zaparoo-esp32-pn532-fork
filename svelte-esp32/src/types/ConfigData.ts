@@ -4,6 +4,16 @@ export interface ConfigMessage{
   data: ConfigData
 }
 
+export interface UIDExtdRecsMessage{
+  msgType: "getUIDExtdRec";
+  data: UIDExtdRecords;
+}
+
+export interface pushedUIDTokenMessage{
+  msgType: "UIDTokenID";
+  data: pushedUIDTokenID;
+}
+
 export interface ConfigData {
   wifi_led_enabled: boolean;
   motor_enabled: boolean;
@@ -37,3 +47,38 @@ export interface ConfigData {
   PN532_module: boolean;
   zap_ws_path: string;
 };
+
+export interface UIDExtdRecord {
+  UID: string;
+  launchAudio: string;
+  removeAudio: string;
+};
+
+export interface UIDExtdRecords {
+  UID_ExtdRecs: Array<UIDExtdRecord>;
+}
+
+export interface zapSystem {
+  id: string;
+  name: string;
+  category: string;
+};
+
+export interface zapSystems {
+  systems: Array<zapSystem>
+}
+
+export interface zapSearchResult {
+  system: Array<zapSystem>;
+  name: string;
+  path: string;
+}
+
+export interface zapSearchResults {
+  results: Array<zapSearchResult>;
+  total: number;
+}
+
+export interface pushedUIDTokenID {
+  UID: string;
+}
