@@ -11,7 +11,7 @@ export interface UIDExtdRecsMessage{
 
 export interface pushedUIDTokenMessage{
   msgType: "UIDTokenID";
-  data: pushedUIDTokenID;
+  data: string;
 }
 
 export interface ConfigData {
@@ -77,8 +77,4 @@ export interface zapSearchResult {
 export interface zapSearchResults {
   results: Array<zapSearchResult>;
   total: number;
-}
-
-export interface pushedUIDTokenID {
-  UID: string;
 }

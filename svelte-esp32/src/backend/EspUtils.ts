@@ -48,7 +48,7 @@ export class EspUtils{
                 UIDUtils.processUIDExtData(msgData);
                 break;
             case "UIDTokenID":
-                //doReceiveUID(msgData.data);
+                UIDUtils.processPushedUID(msgData);
                 break;
         }
     }

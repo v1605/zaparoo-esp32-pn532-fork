@@ -1,22 +1,31 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { UIDExtdRecords, UIDExtdRecord, UIDExtdRecsMessage } from "../types/ConfigData";
+import type { UIDExtdRecords, UIDExtdRecord, UIDExtdRecsMessage, pushedUIDTokenMessage } from "../types/ConfigData";
 
 export class UIDUtils{
-    private static currentUIDData: Writable<UIDExtdRecords> = writable({} as UIDExtdRecords);
+    private static currentUIDData: UIDExtdRecords;
+    private static currentUIDRecord: Writable<UIDExtdRecord> = writable({} as UIDExtdRecord);
 
-    private static notification:Writable<string> = writable("");
-
-    static getBlank(): UIDExtdRecords{
-        return {} as UIDExtdRecords;
+    static getBlank(): UIDExtdRecord{
+        return {} as UIDExtdRecord;
     }
-
-    static UIDRecords(): Readable<UIDExtdRecords> {
-        return this.currentUIDData;
+    
+    static UIDRecord(): Readable<UIDExtdRecord> {
+        return this.currentUIDRecord;
     }
 
     static processUIDExtData(UIDData: UIDExtdRecsMessage){
         console.log("UIDData:", UIDData)
-        this.currentUIDData.set((UIDData as UIDExtdRecsMessage).data);
+        let currData: UIDExtdRecords = UIDData.data;
+        this.currentUIDData = currData;
+        console.log("currentUIDData:", this.currentUIDData);
+    }
+
+    static processPushedUID(PushedUIDRecord: pushedUIDTokenMessage){
+        console.log("PushedUIDRecord:", PushedUIDRecord)
+        let curRec = this.currentUIDData.UID_ExtdRecs.filter((item: {UID: String}) => (item.UID == PushedUIDRecord.data));
+        if(curRec.length !== 0){
+            this.currentUIDRecord.set(curRec[0]);
+        }
     }
 
 }
