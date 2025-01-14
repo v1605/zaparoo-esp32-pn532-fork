@@ -349,12 +349,13 @@ void initWebSocket() {
 void startApMode() {
   server.end();
   WiFi.disconnect();
-  WiFi.mode(WIFI_AP);
+  //WiFi.mode(WIFI_MODE_AP);
   WiFi.softAP("zapesp32", "zapesp32");
   Serial.println("Starting AP Mode:");
   Serial.println(WiFi.softAPIP());
   server.begin();
   initWebSocket();
+  MDNS.begin("zapesp");
 }
 
 void connectWifi() {
@@ -362,7 +363,8 @@ void connectWifi() {
     return;
   }
   WiFi.disconnect();
-  WiFi.mode(WIFI_STA);
+  MDNS.end();
+  //WiFi.mode(WIFI_STA);
   String ssid = preferences.getString("Wifi_SSID", "");
   if(ssid.isEmpty()){
     startApMode();
