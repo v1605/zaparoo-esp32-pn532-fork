@@ -1,10 +1,7 @@
-<svelte:head>
-  <script src="http://zapesp.local/qrcode.js" on:load={qrJSLoaded}></script>
-    <script>
-        
-    </script>
-</svelte:head>
+
 <script lang="ts">
+
+    import QRCode from 'qrcode';
 
      // Define variables for the input and toggle switch
     let misterAddress = '';
@@ -19,6 +16,8 @@
     import { onMount } from 'svelte';
     let qrJSReady = false;
     let mounted = false;
+
+    //QRCode.toCanvas();
 
     onMount(() => {
         // component is ready.
