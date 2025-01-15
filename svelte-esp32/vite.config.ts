@@ -16,8 +16,7 @@ function getBackendHttp(){
 
 function getBackendIP() {
   const env = loadEnv("all", process.cwd());
-  const backendIP = env.VITE_ESP_IP || 'localhost:8080';
-  return backendIP;
+  return env.VITE_ESP_IP || 'localhost:8080';
 }
 
 export default defineConfig({
