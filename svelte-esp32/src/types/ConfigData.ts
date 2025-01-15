@@ -14,6 +14,11 @@ export interface pushedUIDTokenMessage{
   data: string;
 }
 
+export interface sendToESPMessage{
+  cmd: string;
+  data: any;
+}
+
 export interface ConfigData {
   wifi_led_enabled: boolean;
   motor_enabled: boolean;
@@ -50,8 +55,8 @@ export interface ConfigData {
 
 export interface UIDExtdRecord {
   UID: string;
-  launchAudio: string;
-  removeAudio: string;
+  launchAudio: string | null;
+  removeAudio: string | null;
 };
 
 export interface UIDExtdRecords {

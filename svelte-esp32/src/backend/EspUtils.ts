@@ -1,5 +1,5 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { ConfigData, ConfigMessage } from "../types/ConfigData";
+import type { ConfigData, ConfigMessage, sendToESPMessage } from "../types/ConfigData";
 import { LogUtils } from "./LogUtils";
 import { UIDUtils } from "./UIDUtils";
 
@@ -89,6 +89,11 @@ export class EspUtils{
             this.websocket.close();
             setTimeout(()=> this.initWebSocket(), 2000);
         }))();
+    }
+
+    static sendMessage(newMsg: sendToESPMessage){
+        this.websocket.send(JSON.stringify(newMsg));
+        LogUtils.notify(`Message Sent.. CMD:${newMsg.cmd}`);
     }
 
     static updateWifi(ssid: string, password: string){

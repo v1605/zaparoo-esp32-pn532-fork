@@ -9,7 +9,7 @@
     let isOpen: boolean = false;
     let activeLink: string = "uid"; 
     const links: NavBarLink[] = [
-      { name: 'UID Control', id: 'uid', icon: ['fab', 'nfc-symbol'] },
+      { name: 'UID Control', id: 'uid', icon: 'music' },
       { name: 'FILE MANAGER', id: 'fileMan', icon: 'folder' }
     ];
     const setActiveLink = (linkId: string): void => {
@@ -22,7 +22,7 @@
 
 <div class="h-100">
   <div class="text-center"> 
-    <h2>UID Control Mode</h2>
+    <h2>UID Control Mode <FontAwesomeIcon icon="music"></FontAwesomeIcon></h2>
   </div>
   <ul class="nav nav-tabs">
     {#each links as { name, id, icon }}
