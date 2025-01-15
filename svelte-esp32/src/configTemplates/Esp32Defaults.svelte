@@ -1,15 +1,16 @@
 <script lang="ts">
     import { EspUtils } from "../backend/EspUtils";
     import type { ConfigData } from "../types/ConfigData";
+    import { commonUtils } from "../backend/common";
     let config: ConfigData = EspUtils.getBlank();
     EspUtils.config().subscribe(value=> config = value);
     const handleSubmit = (event: Event) => {
       event.preventDefault();
       const update: Partial<ConfigData> = {
-        defDetectAudioPath: config.defDetectAudioPath,
-        defRemoveAudioPath: config.defRemoveAudioPath,
-        defErrAudioPath: config.defErrAudioPath,
-        defAudioPath: config.defAudioPath,
+        defDetectAudioPath: commonUtils.validateAudioPath(config.defDetectAudioPath),
+        defRemoveAudioPath: commonUtils.validateAudioPath(config.defRemoveAudioPath),
+        defErrAudioPath: commonUtils.validateAudioPath(config.defErrAudioPath),
+        defAudioPath: commonUtils.validateAudioPath(config.defAudioPath),
         buzz_on_detect_enabled: config.buzz_on_detect_enabled,
         buzz_on_launch_enabled: config.buzz_on_launch_enabled,
         buzz_on_remove_enabled: config.buzz_on_remove_enabled,

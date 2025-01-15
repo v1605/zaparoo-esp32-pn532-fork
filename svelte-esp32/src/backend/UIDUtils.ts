@@ -28,7 +28,7 @@ export class UIDUtils{
 
     static processPushedUID(PushedUIDRecord: pushedUIDTokenMessage){
         console.log("PushedUIDRecord:", PushedUIDRecord)
-        let curRec = this.currentUIDData.UID_ExtdRecs.filter((item: {UID: String}) => (item.UID == PushedUIDRecord.data));
+        let curRec = this.currentUIDData.UID_ExtdRecs.filter((item: {UID: string}) => (item.UID == PushedUIDRecord.data));
         if(curRec.length !== 0){
             this.currentUIDRecord.set(curRec[0]);
         }else{

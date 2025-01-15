@@ -33,8 +33,8 @@
 //DEFAULT ESP32S3 GPIO PIN ASSIGNMENTS
 // PN532 Module
 // (Check your ESP32's default I2C pins as the code uses them by default)
-// SDA            21
-// SCL            22
+// SDA            8
+// SCL            9
 // RSTPDN         36 (Can be reassigned above with PN532_RST_PIN)
 
 // SDCARD or RC522 Module
