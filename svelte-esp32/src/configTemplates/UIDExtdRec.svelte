@@ -1,14 +1,15 @@
 <script lang="ts">
     import { UIDUtils } from "../backend/UIDUtils";
     import type { UIDExtdRecord } from "../types/ConfigData";
+    import { commonUtils } from "../backend/common";
     let UIDRecord: UIDExtdRecord = UIDUtils.getBlank();
     UIDUtils.UIDRecord().subscribe(value=> UIDRecord = value);
     const handleSubmit = (event: Event) => {
         event.preventDefault();
         const updRec = UIDUtils.getBlank();
         updRec.UID = UIDRecord.UID;
-        updRec.launchAudio = UIDRecord.launchAudio;
-        updRec.removeAudio = UIDRecord.removeAudio;
+        updRec.launchAudio = commonUtils.validateAudioPath(UIDRecord.launchAudio);
+        updRec.removeAudio = commonUtils.validateAudioPath(UIDRecord.removeAudio);
         UIDUtils.updateUIDRecord(updRec);
     }
     

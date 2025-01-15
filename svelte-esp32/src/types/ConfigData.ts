@@ -55,8 +55,8 @@ export interface ConfigData {
 
 export interface UIDExtdRecord {
   UID: string;
-  launchAudio: string | null;
-  removeAudio: string | null;
+  launchAudio: string;
+  removeAudio: string;
 };
 
 export interface UIDExtdRecords {
