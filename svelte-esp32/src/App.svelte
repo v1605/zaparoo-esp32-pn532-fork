@@ -10,7 +10,7 @@
     import { Toast, Collapse } from 'bootstrap';
     import { LogUtils } from './backend/LogUtils';
     import WifiConfig from './configTemplates/WifiConfig.svelte';
-
+    import logo from './lib/assets/ZapEspLogo.webp';
     let activeLink: string = ""; 
     EspUtils.initWebSocket();
     let toastElement: HTMLElement | null = null;
@@ -51,7 +51,7 @@
 <main>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm fixed-top">
     <div class="container">
-      <a class="navbar-brand" href="/">Zap Esp32</a>
+      <img alt="ZapEsp Logo" src={logo} />
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
