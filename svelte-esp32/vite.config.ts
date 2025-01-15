@@ -35,6 +35,18 @@ export default defineConfig({
         target: getBackendHttp(), // Backend server URL
         changeOrigin: true, // Adjust the `Host` header to match the target,
       },
+      '/download': {
+        target: getBackendHttp(), // Backend server URL
+        changeOrigin: true, // Adjust the `Host` header to match the target,
+      },
+      '/delete': {
+        target: getBackendHttp(), // Backend server URL
+        changeOrigin: true, // Adjust the `Host` header to match the target,
+      },
+      '/upload': {
+        target: getBackendHttp(), // Backend server URL
+        changeOrigin: true, // Adjust the `Host` header to match the target,
+      },
     },
   },
 });
