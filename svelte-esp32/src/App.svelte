@@ -1,20 +1,22 @@
 <script lang="ts">
     import { FontAwesomeIcon } from '@fortawesome/svelte-fontawesome';
-    import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
+    import { Collapse, Toast } from 'bootstrap';
+    import { EspUtils } from './backend/EspUtils';
+    import { LogUtils } from './backend/LogUtils';
+    import CreateMode from './configTemplates/CreateMode.svelte';
     import Esp32Config from './configTemplates/Esp32Config.svelte';
     import Esp32Defaults from './configTemplates/Esp32Defaults.svelte';
-    import CreateMode from './configTemplates/CreateMode.svelte';
     import UidMode from './configTemplates/UIDMode.svelte';
-    import type { NavBarLink } from './types/NavBarLink';
-    import { EspUtils } from './backend/EspUtils';
-    import { Toast, Collapse } from 'bootstrap';
-    import { LogUtils } from './backend/LogUtils';
     import WifiConfig from './configTemplates/WifiConfig.svelte';
+    import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
     import logo from './lib/assets/ZapEspLogo.webp';
+    import type { NavBarLink } from './types/NavBarLink';
+
+
     let activeLink: string = ""; 
     EspUtils.initWebSocket();
-    let toastElement: HTMLElement | null = null;
-    let toastInstance: Toast | null = null;
+    let toastElement: HTMLElement;
+    let toastInstance: Toast;
     let alertText = "";
     const links: NavBarLink[] = [
       { name: 'CREATE', id: 'create', icon: ['fab', 'nfc-symbol'] },
