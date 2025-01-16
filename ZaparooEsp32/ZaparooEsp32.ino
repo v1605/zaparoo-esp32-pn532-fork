@@ -681,6 +681,7 @@ bool readScanner() {
       cardInsertedActions();
       bool sent = false;
       if (token->isPayloadSet() && !UID_ScanMode_enabled) {
+        setUidAudioMappings(token);
         String payload = String(token->getPayload());
         sent = send(payload);
       } else if (token->isIdSet() && !UID_ScanMode_enabled) {
