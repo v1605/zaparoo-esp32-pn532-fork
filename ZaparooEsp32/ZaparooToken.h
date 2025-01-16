@@ -4,7 +4,7 @@
 class ZaparooToken {
 public:
     ZaparooToken()
-        : id(nullptr), payload(nullptr), launchAudio(nullptr), removeAudio(nullptr) {}
+        : id(nullptr), payload(nullptr), launchAudio(nullptr), removeAudio(nullptr), detectAudio(nullptr) {}
 
     ~ZaparooToken() {
         clearMemory();
@@ -12,20 +12,22 @@ public:
 
     // Copy constructor
     ZaparooToken(const ZaparooToken& other)
-        : id(nullptr), payload(nullptr), launchAudio(nullptr), removeAudio(nullptr), valid(other.valid) {
+        : id(nullptr), payload(nullptr), launchAudio(nullptr), removeAudio(nullptr), detectAudio(nullptr), valid(other.valid) {
         setId(other.id);
         setPayload(other.payload);
         setLaunchAudio(other.launchAudio);
         setRemoveAudio(other.removeAudio);
+        setDetectedAudio(other.detectAudio);
     }
 
     // Move constructor
     ZaparooToken(ZaparooToken&& other) noexcept
-        : id(other.id), payload(other.payload), launchAudio(other.launchAudio), removeAudio(other.removeAudio), valid(other.valid) {
+        : id(other.id), payload(other.payload), launchAudio(other.launchAudio), removeAudio(other.removeAudio), valid(other.valid), detectAudio(other.detectAudio) {
         other.id = nullptr;
         other.payload = nullptr;
         other.launchAudio = nullptr;
         other.removeAudio = nullptr;
+        other.detectAudio = nullptr;
     }
     // Copy assignment operator
      ZaparooToken& operator=(const ZaparooToken& other) {
@@ -36,6 +38,7 @@ public:
             setPayload(other.payload);
             setLaunchAudio(other.launchAudio);
             setRemoveAudio(other.removeAudio);
+            setDetectedAudio(other.detectAudio);
         }
         return *this;
     }
@@ -50,6 +53,7 @@ public:
             payload = other.payload;
             launchAudio = other.launchAudio;
             removeAudio = other.removeAudio;
+            detectAudio = other.detectAudio;
             valid = other.valid;
 
             // Nullify other's pointers
@@ -57,6 +61,7 @@ public:
             other.payload = nullptr;
             other.launchAudio = nullptr;
             other.removeAudio = nullptr;
+            other.detectAudio = nullptr;
         }
         return *this;
     }
@@ -65,24 +70,28 @@ public:
     const char* getPayload() const { return payload; }
     const char* getLaunchAudio() const { return launchAudio; }
     const char* getRemoveAudio() const { return removeAudio; }
+    const char* getDetectAudio() const { return detectAudio; }
     const bool getValid() const { return valid; }
 
     void setId(const char* value) { allocateAndCopy(id, value); }
     void setPayload(const char* value) { allocateAndCopy(payload, value); }
     void setLaunchAudio(const char* value) { allocateAndCopy(launchAudio, value); }
     void setRemoveAudio(const char* value) { allocateAndCopy(removeAudio, value); }
+    void setDetectAudio(const char* value) { allocateAndCopy(detectAudio, value); }
     void setValid(const bool valid){this->valid = valid;}
 
     bool isIdSet() const { return id != nullptr; }
     bool isPayloadSet() const { return payload != nullptr; }
     bool isLaunchAudioSet() const { return launchAudio != nullptr; }
     bool isRemoveAudioSet() const { return removeAudio != nullptr; }
+    bool isDetectAudioSet() const { return detectAudio != nullptr; }
 
 private:
     char* id;
     char* payload;
     char* launchAudio;
     char* removeAudio;
+    char* detectAudio;
     bool valid = true;
 
     // Helper function to allocate and copy strings
@@ -105,9 +114,11 @@ private:
         delete[] payload;
         delete[] launchAudio;
         delete[] removeAudio;
+        delete[] detectAudio;
         id = nullptr;
         payload = nullptr;
         launchAudio = nullptr;
         removeAudio = nullptr;
+        detectAudio = nullptr;
     }
 };
