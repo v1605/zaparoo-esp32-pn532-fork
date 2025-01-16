@@ -1,5 +1,10 @@
-
 <script lang="ts">
+  import type { zapSystems } from '../types/ConfigData';
+  import { zapUtils } from '../backend/zapUtils'
+  let zapSysList: zapSystems = zapUtils.getBlankSystems();
+  zapUtils.indexedSystemsList().subscribe(value=> zapSysList = value);
+  let selectedSys: string = "*";
+  let searchQry: string | null;
 
     //import QRCode from 'qrcode';
 
@@ -12,6 +17,7 @@
   // Optional: Handle form submission
     const handleSubmit = (event: Event) => {
         event.preventDefault();
+        
     };
     // import { onMount } from 'svelte';
     // let qrJSReady = false;
@@ -39,23 +45,27 @@
     //     //do whatever here
     // } 
 </script>
-<div class="text-center">
+<div class="text-center mb-3">
   <h2>Search</h2>
 </div>
-<form on:submit={handleSubmit} class="row g-2">
-  <div class="col-12"> 
-    <div class="input-group">
-      <div class="form-floating">
-        <input type="text" class="form-control col-6" id="misterIp" placeholder="mister.local" bind:value={misterAddress} disabled={!isMisterEnabled} />
-        <label for="misterIp">Mister Address</label>
+<form on:submit={handleSubmit} class="row g-3">
+  <div class="col-12">
+    <div class="input-group ">
+      <div class="col-5">
+        <label for="selSystem">Select System</label><select class="form-select" id="selSystem" bind:value={selectedSys}>
+          {#each zapSysList.systems as { id, name}}
+            <option value={id}>{name}</option>
+          {/each}
+        </select>
+      </div>
+      <div class="col-6">
+        <label for="searchQry">Search Query</label>
+        <input type="text" class="form-control" id="searchQry" bind:value={searchQry}/>
+      </div>
+      <div class="col-1">
+        <button type="submit" class="btn btn-primary mt-4">Search</button>
       </div>
     </div>
   </div>
-  <button type="submit" class="btn btn-primary mt-3">Search</button>
-</form>
-<div class="text-center mt-2">
-    <h2>Write</h2>
-</div>
-<form on:submit={handleSubmit} class="row g-2">
-    <button type="submit" class="btn btn-primary mt-3">Write</button>
+  <!-- <button type="submit" class="btn btn-primary mt-3">Search</button> -->
 </form>
