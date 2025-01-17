@@ -17,7 +17,7 @@ public:
         setPayload(other.payload);
         setLaunchAudio(other.launchAudio);
         setRemoveAudio(other.removeAudio);
-        setDetectedAudio(other.detectAudio);
+        setDetectAudio(other.detectAudio);
     }
 
     // Move constructor
@@ -38,7 +38,7 @@ public:
             setPayload(other.payload);
             setLaunchAudio(other.launchAudio);
             setRemoveAudio(other.removeAudio);
-            setDetectedAudio(other.detectAudio);
+            setDetectAudio(other.detectAudio);
         }
         return *this;
     }
