@@ -17,7 +17,7 @@
   // Optional: Handle form submission
     const handleSubmit = (event: Event) => {
         event.preventDefault();
-        
+        zapUtils.doSearch(selectedSys, searchQry);
     };
     // import { onMount } from 'svelte';
     // let qrJSReady = false;

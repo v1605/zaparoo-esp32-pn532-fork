@@ -88,6 +88,10 @@ export class zapUtils{
             let tmpSysList: zapSystems = msgData.result;
             this.processMiSTerSystems(tmpSysList);
         }
+        //return of search results
+        if(msgData.result.results){
+            let tmpSearchRes: zapSearchResults = msgData.result;
+        }
     }
 
     private static misterOnError(){
@@ -135,6 +139,30 @@ export class zapUtils{
             ]
             this.retSystems.set(tmpZapSystems);
         }        
-    }    
+    }  
+    
+    static doSearch (sysName: string, srchQuery: string | null) {
+        let newUUID = uuidv4();
+        let tmpParams;
+        if(sysName != "*"){
+            tmpParams = {query: srchQuery, maxResults: 250, systems:[sysName]}
+        }else{
+            tmpParams = {query: srchQuery, maxResults: 250}
+        }
+        let wscmd = {
+            jsonrpc: "2.0",
+            id: newUUID,
+            method: "media.search",
+            params: tmpParams
+        };
+        this.misterSocket.send(JSON.stringify(wscmd));
+        if(sysName == "steam" && this.bSteamOSConnected){
+            //do steamOS search
+            this.steamSocket.send(JSON.stringify(wscmd));
+        }else if(sysName != "steam" && this.bMisterConnected){
+            //do MiSTer search
+            this.misterSocket.send(JSON.stringify(wscmd));
+        }
+    }
 
 }
