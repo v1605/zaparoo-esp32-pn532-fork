@@ -12,12 +12,12 @@
   #define PN532
   //The GPIO pin the PN532 RSTPDN Pin is connected to ((***NOT THE PN532 RSTO PIN***)). 
   //This is essential for stability and recovery after an esp32 soft reset.
-  #define PN532_RST_PIN 36
+  #define PN532_RST_PIN 12
   //------------------------------------------------------------------------
 
   //Common Config----------------------------------------------------------
   //The SS/SDA and Reset pins of the RC522 or SD Card using the default SPI GPIO pins of your ESP32
-  #define SS_PIN 10
+  #define SS_PIN 34
   #define RST_PIN 4
   //------------------------------------------------------------------------
 
@@ -52,6 +52,36 @@
 
 // Rumble Motor   !!Configurable in Web UI!!
 // Motor          35
+
+// Audio MAX98357 Module   !!Configurable in Web UI!!
+// DOUT           17
+// BCLK           16
+// LRC            15
+// GAIN           GND
+
+//INFO ------------------------------------------------------------------------
+//DEFAULT ESP32S2 Mini GPIO PIN ASSIGNMENTS
+// PN532 Module
+// (Check your ESP32's default I2C pins as the code uses them by default)
+// SDA            8
+// SCL            9
+// RSTPDN         12 (Can be reassigned above with PN532_RST_PIN)
+
+// SDCARD or RC522 Module
+// (Check your ESP32's default vspi pins as the code uses them by default)
+// SDA            34 (Can be reassigned above with SS_PIN)
+// SCK            36
+// MOSI           35
+// MISO           34
+// RST            4 (Can be reassigned above with RST_PIN)
+
+// LED's          !!Configurable in Web UI!!
+// WIFI           11 (This is normally replicates the cards wifi led, but it may be a different gpio on your esp32)
+// PWR            6
+// Launch         4
+
+// Rumble Motor   !!Configurable in Web UI!!
+// Motor          11
 
 // Audio MAX98357 Module   !!Configurable in Web UI!!
 // DOUT           17

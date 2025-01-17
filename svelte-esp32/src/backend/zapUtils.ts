@@ -1,5 +1,5 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { zapSystem, zapSystems, zapSearchResult, zapSearchResults, ConfigData } from "../types/ConfigData";
+import type { zapSystem, zapSystems, zapSearchResult, zapSearchResults, ConfigData, sendToESPMessage } from "../types/ConfigData";
 import {v4 as uuidv4} from 'uuid';
 import { EspUtils, } from "./EspUtils";
 import { LogUtils } from "./LogUtils";
@@ -11,6 +11,7 @@ export class zapUtils{
     private static currConfig: ConfigData = EspUtils.getBlank();
     private static steamSocket: WebSocket;
     private static misterSocket: WebSocket;
+    private static isCreateModeEnabled = false;
     
     private static buildZapSocketURL(ip: string, path: string): string{
         return `ws://${ip}:7497${path}`;
@@ -22,6 +23,10 @@ export class zapUtils{
 
     static getBlankSystems(): zapSystems {
         return {} as zapSystems;
+    }
+
+    private static getBlankESPMsg(): sendToESPMessage{
+        return {} as sendToESPMessage;
     }
 
     static initConnections(){
@@ -163,6 +168,15 @@ export class zapUtils{
             //do MiSTer search
             this.misterSocket.send(JSON.stringify(wscmd));
         }
+    }
+
+    static toggleCreateMode(){
+        this.isCreateModeEnabled = !this.isCreateModeEnabled;
+        let newCMD = this.getBlankESPMsg();
+        console.log(`Setting UID Editing Mode : ${this.isCreateModeEnabled}`);
+        newCMD.cmd = "set_WriteMode";
+        newCMD.data = this.isCreateModeEnabled;
+        EspUtils.sendMessage(newCMD);
     }
 
 }

@@ -9,10 +9,7 @@ export class EspUtils{
     private static connected: Writable<boolean> = writable();
     private static intialLoad = false;
     private static updating = false;
-    private static isUIDModeEnabled= false;
     
-
-
     static initWebSocket() {
         console.log('Trying to open a WebSocket connection to ZAP ESP…');
         this.websocket = new WebSocket('/ws');
@@ -51,12 +48,6 @@ export class EspUtils{
                 UIDUtils.processPushedUID(msgData);
                 break;
         }
-    }
-
-    static toggleUIDMode(){
-        this.isUIDModeEnabled = !this.isUIDModeEnabled;
-        console.log(`Setting UID Editing Mode : ${this.isUIDModeEnabled}`);
-        this.websocket.send(`{'cmd': 'set_UIDMode', 'data': ${this.isUIDModeEnabled}}`);
     }
 
     static async loadConfig(){}
