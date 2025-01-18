@@ -12,12 +12,12 @@
   #define PN532
   //The GPIO pin the PN532 RSTPDN Pin is connected to ((***NOT THE PN532 RSTO PIN***)). 
   //This is essential for stability and recovery after an esp32 soft reset.
-  #define PN532_RST_PIN 12
+  #define PN532_RST_PIN 13
   //------------------------------------------------------------------------
 
   //Common Config----------------------------------------------------------
   //The SS/SDA and Reset pins of the RC522 or SD Card using the default SPI GPIO pins of your ESP32
-  #define SS_PIN 34
+  #define SS_PIN 5
   #define RST_PIN 4
   //------------------------------------------------------------------------
 

@@ -1,17 +1,19 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { zapSystem, zapSystems, zapSearchResult, zapSearchResults, ConfigData, sendToESPMessage } from "../types/ConfigData";
+import type { zapSystem, zapSystems, htmlFormattedSearchRes, zapSearchResults, ConfigData, sendToESPMessage, writeResultState } from "../types/ConfigData";
 import {v4 as uuidv4} from 'uuid';
 import { EspUtils, } from "./EspUtils";
 import { LogUtils } from "./LogUtils";
-
 export class zapUtils{
     private static retSystems: Writable<zapSystems> = writable({} as zapSystems);
+    private static srchResults: Writable<zapSearchResults> = writable({} as zapSearchResults);
+    private static htmlResults: Writable<htmlFormattedSearchRes> = writable({} as htmlFormattedSearchRes);
     private static bSteamOSConnected = false;
     private static bMisterConnected = false;
-    private static currConfig: ConfigData = EspUtils.getBlank();
+    private static currConfig: ConfigData;
     private static steamSocket: WebSocket;
     private static misterSocket: WebSocket;
     private static isCreateModeEnabled = false;
+    private static writeResultState: Writable<writeResultState> = writable({} as writeResultState);
     
     private static buildZapSocketURL(ip: string, path: string): string{
         return `ws://${ip}:7497${path}`;
@@ -25,8 +27,20 @@ export class zapUtils{
         return {} as zapSystems;
     }
 
+    static getBlankSearchResults(): zapSearchResults {
+        return {} as zapSearchResults;
+    }
+
     private static getBlankESPMsg(): sendToESPMessage{
         return {} as sendToESPMessage;
+    }
+
+    static getBlankhmtlSrchRes(): htmlFormattedSearchRes{
+        return {} as htmlFormattedSearchRes;
+    }
+
+    static getBlankWriteState(): writeResultState{
+        return {} as writeResultState;
     }
 
     static initConnections(){
@@ -87,7 +101,7 @@ export class zapUtils{
 
     private static misterOnMessage(event: MessageEvent){
         const msgData = JSON.parse(event.data);
-        console.log("Mister Msg Data: ", msgData);        
+        //console.log("Mister Msg Data: ", msgData);        
         ///return of systems list
         if(msgData.result.systems){
             let tmpSysList: zapSystems = msgData.result;
@@ -96,12 +110,29 @@ export class zapUtils{
         //return of search results
         if(msgData.result.results){
             let tmpSearchRes: zapSearchResults = msgData.result;
+            this.processSearchResults(tmpSearchRes);
         }
     }
 
     private static misterOnError(){
         LogUtils.notify("Unable to connect to Zaparoo on MiSTer: Check IP/service is running & reload window");
         this.bMisterConnected = false;
+    }
+
+    private static processSearchResults(recSearchRes: zapSearchResults){
+        if(recSearchRes.total > 250){
+            LogUtils.notify(`Max 250 results Shown (${recSearchRes.total}) - Refine your search`);
+        }
+        let tmpHtmlSR = this.getBlankhmtlSrchRes();
+        tmpHtmlSR.results = [];
+        for (var i = 0; i < recSearchRes.results.length; i++) {
+            tmpHtmlSR.results.push({
+                path: recSearchRes.results[i].path,
+                name: `${recSearchRes.results[i].system.name} - ${recSearchRes.results[i].name}`
+            });
+        }
+        this.srchResults.set(recSearchRes);
+        this.htmlResults.set(tmpHtmlSR);
     }
 
     private static processMiSTerSystems(recSysList: zapSystems){
@@ -128,6 +159,18 @@ export class zapUtils{
         return this.retSystems;
     }
 
+    static htmlSrchRes(): Readable<htmlFormattedSearchRes>{
+        return this.htmlResults;
+    }
+
+    static zapSrcRes(): Readable<zapSearchResults>{
+        return this.srchResults;
+    }
+
+    static writeResStat(): Readable<writeResultState>{
+        return this.writeResultState;
+    }
+
     static generateIndexedSystemsList(){        
         if(this.bMisterConnected){
             let newUUID = uuidv4();
@@ -146,7 +189,7 @@ export class zapUtils{
         }        
     }  
     
-    static doSearch (sysName: string, srchQuery: string | null) {
+    static doSearch(sysName: string, srchQuery: string | null) {
         let newUUID = uuidv4();
         let tmpParams;
         if(sysName != "*"){
@@ -170,6 +213,29 @@ export class zapUtils{
         }
     }
 
+    static doTestLaunch(launchPath: string){
+        let newCMD = this.getBlankESPMsg();
+        newCMD.cmd = "Test_Tag_Launch_Game";
+        newCMD.data = launchPath;
+        EspUtils.sendMessage(newCMD);
+        LogUtils.notify(`Sent Launch Cmd for: ${launchPath}`);
+    }
+
+    static doWriteCard(launchPath: string, aLaunchP: string | null, aRemoveP: string | null){
+        let tmpWRS = this.getBlankWriteState();
+        tmpWRS.state = 0;        
+        this.writeResultState.set(tmpWRS);
+        let newCMD = this.getBlankESPMsg();
+        newCMD.cmd = "write_Tag_Launch_Game";
+        newCMD.data = {
+            launchData: launchPath,
+            audioLaunchPath: aLaunchP,
+            audioRemovePath: aRemoveP
+        }
+        console.log("write cmd: ", newCMD);
+        EspUtils.sendMessage(newCMD);
+    }
+
     static toggleCreateMode(){
         this.isCreateModeEnabled = !this.isCreateModeEnabled;
         let newCMD = this.getBlankESPMsg();
@@ -178,5 +244,21 @@ export class zapUtils{
         newCMD.data = this.isCreateModeEnabled;
         EspUtils.sendMessage(newCMD);
     }
+
+    static handleWriteResults(isSuccess: boolean, isCardDetected: boolean){
+        let tmpWRS = this.getBlankWriteState();
+        if(isSuccess){
+            tmpWRS.state = 1;
+        }else if(!isSuccess && isCardDetected){
+            //write failed
+            tmpWRS.state = 2;
+        }else if(!isSuccess && !isCardDetected){
+            //write failed no card detetcted
+            tmpWRS.state = 3;
+        }
+        this.writeResultState.set(tmpWRS);        
+    }
+
+
 
 }

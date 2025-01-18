@@ -4,7 +4,6 @@
     import FileManager from './FileManager.svelte';
     import type { NavBarLink } from '../types/NavBarLink';
     import { zapUtils } from '../backend/zapUtils'
-    import type { zapSystems } from '../types/ConfigData';
     import { onDestroy, onMount } from 'svelte';
     let activeLink: string = "nfc"; 
     const links: NavBarLink[] = [
@@ -14,11 +13,7 @@
     const setActiveLink = (linkId: string): void => {
       activeLink = linkId;
     };
-    onDestroy(() => {
-      zapUtils.toggleCreateMode();
-    });
     onMount(() => {
-      zapUtils.toggleCreateMode();
       zapUtils.initConnections();
     });
 </script>

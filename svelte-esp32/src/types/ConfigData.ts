@@ -74,7 +74,7 @@ export interface zapSystems {
 }
 
 export interface zapSearchResult {
-  system: Array<zapSystem>;
+  system: zapSystem;
   name: string;
   path: string;
 }
@@ -82,4 +82,17 @@ export interface zapSearchResult {
 export interface zapSearchResults {
   results: Array<zapSearchResult>;
   total: number;
+}
+
+export interface htmlFormattedSearchRec {
+  path: string;
+  name: string;
+}
+
+export interface htmlFormattedSearchRes {
+  results: Array<htmlFormattedSearchRec>
+}
+
+export interface writeResultState {
+  state: number
 }

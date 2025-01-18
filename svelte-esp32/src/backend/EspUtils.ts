@@ -2,6 +2,7 @@ import { writable, type Readable, type Writable } from "svelte/store";
 import type { ConfigData, ConfigMessage, sendToESPMessage } from "../types/ConfigData";
 import { LogUtils } from "./LogUtils";
 import { UIDUtils } from "./UIDUtils";
+import { zapUtils } from "./zapUtils";
 
 export class EspUtils{
     private static currentConfig: Writable<ConfigData> = writable({} as ConfigData);
@@ -34,7 +35,12 @@ export class EspUtils{
         const msgData = JSON.parse(event.data);		
         switch(msgData.msgType){
             case "notify":
-                LogUtils.addLogLine(msgData.data);
+                if(msgData.data.type == "alert"){
+                    LogUtils.notify(msgData.data.msgTxt);
+                }
+                if(msgData.data.type == "log"){
+                    LogUtils.addLogLine(msgData.msgTxt);
+                }
                 break;
             case "ConfigData":
                 this.currentConfig.set((msgData as ConfigMessage).data)
@@ -47,6 +53,8 @@ export class EspUtils{
             case "UIDTokenID":
                 UIDUtils.processPushedUID(msgData);
                 break;
+            case "writeResults":
+                zapUtils.handleWriteResults(msgData.data.isSuccess, msgData.data.isCardDetected);
         }
     }
 
@@ -84,7 +92,7 @@ export class EspUtils{
 
     static sendMessage(newMsg: sendToESPMessage){
         this.websocket.send(JSON.stringify(newMsg));
-        LogUtils.notify(`Message Sent.. CMD:${newMsg.cmd}`);
+        //LogUtils.notify(`Message Sent.. CMD:${newMsg.cmd}`);
     }
 
     static updateWifi(ssid: string, password: string){
