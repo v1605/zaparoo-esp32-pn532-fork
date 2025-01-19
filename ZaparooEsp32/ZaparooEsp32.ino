@@ -77,7 +77,7 @@ const char* uidExtdRecFile = "/uidExtdRecord.json";
 
 //Prototypes
 void playAudio(const String& PrefString);
-void notifyClients(const String& txtMsgToSend);
+void notifyClients(const String& txtMsgToSend, const String& msgType);
 void handleWebSocketMessage(void* arg, uint8_t* data, size_t len);
 
 
@@ -252,7 +252,7 @@ void playAudio(const String& PrefString) {
     file = source;
   }
   if (file->getSize() == 0) {
-    notifyClients("Audio file did not exist, check path: " + PrefString);
+    notifyClients("Audio file did not exist, check path: " + PrefString, "log");
     delete file;
     file = NULL;
     return;
@@ -290,24 +290,17 @@ void cardRemovedActions(const String& audioRemPath) {
   }
 }
 
-void notifyClients(const String& txtMsgToSend) {
+void notifyClients(const String& txtMsgToSend, const String& msgType) {
   Serial.println(txtMsgToSend);
   if (isWebLog) {
     JsonDocument msgJson;
     msgJson["msgType"] = "notify";
-    msgJson["data"] = txtMsgToSend;
+    msgJson["data"]["msgTxt"] = txtMsgToSend;
+    msgJson["data"]["type"] = msgType;
     String output;
     serializeJson(msgJson, output);
     delay(200);
     ws.textAll(output.c_str());
-    if (txtMsgToSend == "closeWS") {
-      delay(100);
-      ESP.restart();
-    }
-  } else {
-    if (txtMsgToSend == "closeWS") {
-      ESP.restart();
-    }
   }
 }
 
@@ -403,17 +396,23 @@ void connectWifi() {
 
 void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRemoveFile) {
   String tmpLaunchCmd = launchCmd;
+  JsonDocument cmdData;
+  cmdData["msgType"] = "writeResults";
   tmpLaunchCmd.replace("launch_cmd::", "");
   if (tokenScanner->tokenPresent()) {
     bool success = tokenScanner->writeLaunch(launchCmd, audioLaunchFile, audioRemoveFile);
     if (success) {
-      notifyClients("Data sucessfully written. Remove the Tag/Card and close 'Creation Mode' before testing.");
+      cmdData["data"]["isSuccess"] = true;
+      cmdData["data"]["isCardDetected"] = true;
     } else {
-      notifyClients("Data write failed. Resetting the NFC device! Remove the Tag/Card and try again.");
+      cmdData["data"]["isSuccess"] = false;
+      cmdData["data"]["isCardDetected"] = true;
     }
   } else {
-    notifyClients("No NFC Tag/Card detected - Aborting Write - Please insert a Valid NFC Tag/Card");
+    cmdData["data"]["isSuccess"] = false;
+    cmdData["data"]["isCardDetected"] = false;
   }
+  cmdClients(cmdData);
   tokenScanner->halt();
 }
 
@@ -472,7 +471,7 @@ bool send(String& gamePath) {
     String newURL = ZAP_URL;
     newURL.replace("<replace>", gamePath.startsWith("steam://") ? SteamIP : ZapIP);
     ZapClient.url(newURL);
-    notifyClients("URL: " + newURL);
+    notifyClients("URL: " + newURL, "log");
     int code = ZapClient.launch(gamePath);
     if (code > 0) {
       expressError(code);
@@ -482,7 +481,7 @@ bool send(String& gamePath) {
       sent = true;
     }
   }
-  notifyClients(message);
+  notifyClients(message, "log");
   return sent;
 }
 
@@ -495,7 +494,7 @@ void sendUIDtoWeb(String UIDStr){
 }
 
 void getWebConfigData() {
-  notifyClients("Retrieving Current Zap ESP Config Data");
+  notifyClients("Retrieving Current Zap ESP Config Data", "log");
   JsonDocument configData;
   configData["msgType"] = "ConfigData";
   configData["data"]["wifi_led_enabled"] = preferences.getBool("En_Wifi_LED", false);
@@ -533,7 +532,7 @@ void getWebConfigData() {
 }
 
 void setWebConfigData(JsonDocument cfgData) {
-  notifyClients("ZAP ESP Now Saving Config Data");
+  notifyClients("ZAP ESP Now Saving Config Data", "log");
   if (!cfgData["data"]["wifi_led_enabled"]) {
     wifiLedOff();
   }
@@ -572,7 +571,6 @@ void setWebConfigData(JsonDocument cfgData) {
   setPref_Bool("En_Buzz_Lau", cfgData["data"]["buzz_on_launch_enabled"]);
   setPref_Bool("En_Buzz_Rem", cfgData["data"]["buzz_on_remove_enabled"]);
   setPref_Bool("En_Buzz_Err", cfgData["data"]["buzz_on_error_enabled"]);
-  notifyClients("closeWS");
 }
 
 void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
@@ -584,21 +582,21 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
   JsonDocument root;
   DeserializationError error = deserializeJson(root, webCmd);
   if (error) {
-    notifyClients("Failed to Parse JSON");
+    notifyClients("Failed to Parse JSON", "log");
     return;
   }
   String command = root["cmd"].as<String>();
 
   if (command == "set_WriteMode") {
     bool enableWriteMode = root["data"];
-    notifyClients(enableWriteMode ? "NFC Tag Write Mode Enabled" : "NFC Tag Write Mode Disabled");
+    notifyClients(enableWriteMode ? "NFC Tag Write Mode Enabled" : "NFC Tag Write Mode Disabled", "log");
     setPref_Bool("En_NFC_Wr", enableWriteMode);
   } else if (command == "write_Tag_Launch_Game") {
     if (preferences.getBool("En_NFC_Wr", false)) {
-      notifyClients("NFC Tag Writing the Launch Game Command");
-      String launchData = root["launchData"].as<String>();
-      String audioLaunchPath = root["audioLaunchPath"].as<String>();
-      String audioRemovePath = root["audioRemovePath"].as<String>();
+      notifyClients("NFC Tag Writing the Launch Game Command", "log");
+      String launchData = root["data"]["launchData"].as<String>();
+      String audioLaunchPath = root["data"]["audioLaunchPath"].as<String>();
+      String audioRemovePath = root["data"]["audioRemovePath"].as<String>();
       writeTagLaunch(launchData, audioLaunchPath, audioRemovePath);
     }
   } else if (command == "get_Current_Config") {
@@ -606,7 +604,7 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
   } else if (command == "set_Current_Config") {
     setWebConfigData(root);
   } else if (command == "Test_Tag_Launch_Game") {
-    notifyClients("Test Launching Game");
+    notifyClients("Test Launching Game", "alert");
     String data = root["data"].as<String>();
     send(data);
   } else if (command == "closeWS") {
@@ -614,25 +612,25 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     ws.closeAll();
     ws.cleanupClients();
   } else if (command == "getUIDExtdRec") {
-    notifyClients("Retrieving UIDExtdRec Data");
+    notifyClients("Retrieving UIDExtdRec Data", "log");
     getUIDExtdRec();
   } else if (command == "set_UIDMode") {
     bool enableUIDMode = root["data"];
-    notifyClients(enableUIDMode ? "UID Scanning Mode Enabled" : "UID Scanning Mode Disabled");
+    notifyClients(enableUIDMode ? "UID Scanning Mode Enabled" : "UID Scanning Mode Disabled", "alert");
     UID_ScanMode_enabled = enableUIDMode;
     //get UIDExtdRec data if enabling UID mode
     if(enableUIDMode){getUIDExtdRec();}
   } else if (command == "saveUIDExtdRec") {
-    notifyClients("Saving UIDExtdRec Data");
+    notifyClients("Saving UIDExtdRec Data", "log");
     saveUIDExtdRec(root["data"]);
   } else if (command == "wifi") {
     setPref_Str("Wifi_SSID", root["data"]["ssid"].as<String>());
     setPref_Str("Wifi_PASS", root["data"]["password"].as<String>());
     WiFi.disconnect(); 
     WiFi.mode(WIFI_STA);
-    notifyClients("Updated ssid");
+    notifyClients("Updated ssid", "log");
   } else {
-    notifyClients("Unknown Command");
+    notifyClients("Unknown Command", "log");
   }
 }
 
@@ -659,7 +657,7 @@ bool sendUid(String& uid) {
       sent = true;
     }
   }
-  notifyClients(message);
+  notifyClients(message, "log");
   return sent;
 }
 
@@ -708,7 +706,7 @@ bool readScanner() {
           ZapClient.stop();
         }
       }
-      notifyClients("Tag Removed");
+      notifyClients("Tag Removed", "log");
       tokenScanner->halt();
       return true;
     }
