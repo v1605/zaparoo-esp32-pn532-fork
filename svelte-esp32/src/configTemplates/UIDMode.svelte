@@ -3,9 +3,9 @@
     import UidExtdRec from './UIDExtdRec.svelte';
     import FileManager from './FileManager.svelte';
     import type { NavBarLink } from '../types/NavBarLink';
-    import { EspUtils } from '../backend/EspUtils';
+    import { UIDUtils } from "../backend/UIDUtils";
     import { onDestroy } from 'svelte';
-    EspUtils.toggleUIDMode();
+    UIDUtils.toggleUIDMode();
     let isOpen: boolean = false;
     let activeLink: string = "uid"; 
     const links: NavBarLink[] = [
@@ -16,7 +16,7 @@
       activeLink = linkId;
     };
     onDestroy(() => {
-        EspUtils.toggleUIDMode();
+        UIDUtils.toggleUIDMode();
     });
 </script>
 

@@ -2,6 +2,7 @@ import { writable, type Readable, type Writable } from "svelte/store";
 import type { ConfigData, ConfigMessage, sendToESPMessage } from "../types/ConfigData";
 import { LogUtils } from "./LogUtils";
 import { UIDUtils } from "./UIDUtils";
+import { zapUtils } from "./zapUtils";
 
 export class EspUtils{
     private static currentConfig: Writable<ConfigData> = writable({} as ConfigData);
@@ -9,10 +10,7 @@ export class EspUtils{
     private static connected: Writable<boolean> = writable();
     private static intialLoad = false;
     private static updating = false;
-    private static isUIDModeEnabled= false;
     
-
-
     static initWebSocket() {
         console.log('Trying to open a WebSocket connection to ZAP ESP…');
         this.websocket = new WebSocket('/ws');
@@ -37,7 +35,12 @@ export class EspUtils{
         const msgData = JSON.parse(event.data);		
         switch(msgData.msgType){
             case "notify":
-                LogUtils.addLogLine(msgData.data);
+                if(msgData.data.type == "alert"){
+                    LogUtils.notify(msgData.data.msgTxt);
+                }
+                if(msgData.data.type == "log"){
+                    LogUtils.addLogLine(msgData.msgTxt);
+                }
                 break;
             case "ConfigData":
                 this.currentConfig.set((msgData as ConfigMessage).data)
@@ -50,13 +53,9 @@ export class EspUtils{
             case "UIDTokenID":
                 UIDUtils.processPushedUID(msgData);
                 break;
+            case "writeResults":
+                zapUtils.handleWriteResults(msgData.data.isSuccess, msgData.data.isCardDetected);
         }
-    }
-
-    static toggleUIDMode(){
-        this.isUIDModeEnabled = !this.isUIDModeEnabled;
-        console.log(`Setting UID Editing Mode : ${this.isUIDModeEnabled}`);
-        this.websocket.send(`{'cmd': 'set_UIDMode', 'data': ${this.isUIDModeEnabled}}`);
     }
 
     static async loadConfig(){}
@@ -93,7 +92,7 @@ export class EspUtils{
 
     static sendMessage(newMsg: sendToESPMessage){
         this.websocket.send(JSON.stringify(newMsg));
-        LogUtils.notify(`Message Sent.. CMD:${newMsg.cmd}`);
+        //LogUtils.notify(`Message Sent.. CMD:${newMsg.cmd}`);
     }
 
     static updateWifi(ssid: string, password: string){

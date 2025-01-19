@@ -30,6 +30,7 @@
     "@fortawesome/svelte-fontawesome": "^0.2.3",
     "bootstrap": "^5.3.3",
     "qrcode": "^1.5.4",
-    "svelte-fontawesome": "^0.0.3"
+    "svelte-fontawesome": "^0.0.3",
+    "uuid": "^11.0.5"
   }
 }

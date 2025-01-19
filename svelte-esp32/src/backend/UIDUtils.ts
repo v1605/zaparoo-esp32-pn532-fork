@@ -6,9 +6,19 @@ import { LogUtils } from "./LogUtils";
 export class UIDUtils{
     private static currentUIDData: UIDExtdRecords;
     private static currentUIDRecord: Writable<UIDExtdRecord> = writable({} as UIDExtdRecord);
+    private static isUIDModeEnabled= false;
 
     private static getBlankESPMsg(): sendToESPMessage{
         return {} as sendToESPMessage;
+    }
+
+    static toggleUIDMode(){
+        this.isUIDModeEnabled = !this.isUIDModeEnabled;
+        let newCMD = this.getBlankESPMsg();
+        console.log(`Setting UID Editing Mode : ${this.isUIDModeEnabled}`);
+        newCMD.cmd = "set_UIDMode";
+        newCMD.data = this.isUIDModeEnabled;
+        EspUtils.sendMessage(newCMD);
     }
     
     static getBlank(): UIDExtdRecord{
