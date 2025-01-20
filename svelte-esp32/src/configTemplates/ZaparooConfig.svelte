@@ -5,7 +5,12 @@
     EspUtils.config().subscribe(value=> config = value);
     const handleSubmit = (event: Event) => {
       event.preventDefault();
-      const update: Partial<ConfigData> = {ZapIP: config.ZapIP, mister_enabled: config.mister_enabled};
+      const update: Partial<ConfigData> = {
+        ZapIP: config.ZapIP, 
+        mister_enabled: config.mister_enabled,
+        SteamIP: config.SteamIP,
+        steamOS_enabled: config.steamOS_enabled      
+      };
         EspUtils.updateConfig(update);
     };
 </script>
@@ -15,6 +20,12 @@
   <form on:submit={handleSubmit} class="row g-2">
   <div class="col-12"> 
     <div class="input-group">
+      <div class="input-group-text">
+        <div class="form-check form-switch col-2">
+          <input class="form-check-input" type="checkbox" role="switch" id="enableMister" bind:checked={config.mister_enabled}/>
+          <label class="form-check-label visually-hidden" for="enableMister">Enable Mister</label>
+        </div>
+      </div>
       <div class="form-floating">
         <input type="text" class="form-control col-6" id="misterIp" placeholder="mister.local" bind:value={config.ZapIP} disabled={!config.mister_enabled} />
         <label for="misterIp">Mister Address</label>

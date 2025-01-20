@@ -59,7 +59,7 @@
 
   function diagWriteOpen() {
     dialogWrite.showModal();
-    zapUtils.toggleCreateMode();
+    zapUtils.toggleCreateMode(true);
   }
 
   function diagWaitOpen(){
@@ -76,7 +76,7 @@
 
   function diagNoCardClose(){
     dialogNoCard.close("true");
-    zapUtils.toggleCreateMode();
+    zapUtils.toggleCreateMode(false);
   }
 
   function diagFailOpen(){
@@ -85,12 +85,12 @@
 
   function diagFailClose(){
     dialogFailure.close("true");
-    zapUtils.toggleCreateMode();
+    zapUtils.toggleCreateMode(false);
   }
 
   function diagSuccessClose() {
     dialogSuccess.close("true");
-    zapUtils.toggleCreateMode();
+    zapUtils.toggleCreateMode(false);
   }
 
   function diagSucessOpen() {
@@ -102,11 +102,14 @@
   };
     
 </script>
+{#if zapSysList.systems}
 <div class="text-center mb-3">
-  <h2>Search</h2>
+  <h2>Search for a title</h2>
 </div>
+{/if}
 <form on:submit={handleSubmit} class="row g-3">
   <div class="col-12">
+    {#if zapSysList.systems}
     <div class="input-group ">
       <div class="col-5">
         <label for="selSystem">Select System</label><select class="form-select" id="selSystem" bind:value={selectedSys}>
@@ -123,6 +126,15 @@
         <button type="submit" class="btn btn-primary mt-4">Search</button>
       </div>
     </div>
+    {/if}
+    {#if !zapSysList.systems}
+    <div class="text-center mt-5">
+      <h3>Unable to connect to Zaparoo service. Check the service is running and IP address is correct.</h3>
+    </div>
+    <div class="text-center mt-5">
+      <h3>Reload this window to try again</h3>
+    </div>
+    {/if}
     {#if zapSrchRes.total > 0}
       <div class="input-group mt-3">
         <div class="col-8">

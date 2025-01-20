@@ -404,15 +404,19 @@ void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRem
     if (success) {
       cmdData["data"]["isSuccess"] = true;
       cmdData["data"]["isCardDetected"] = true;
+      cmdClients(cmdData);
     } else {
       cmdData["data"]["isSuccess"] = false;
       cmdData["data"]["isCardDetected"] = true;
+      cmdClients(cmdData);
+      delay(500);
+      ESP.restart();
     }
   } else {
     cmdData["data"]["isSuccess"] = false;
     cmdData["data"]["isCardDetected"] = false;
-  }
-  cmdClients(cmdData);
+    cmdClients(cmdData);
+  }  
   tokenScanner->halt();
 }
 
@@ -571,6 +575,7 @@ void setWebConfigData(JsonDocument cfgData) {
   setPref_Bool("En_Buzz_Lau", cfgData["data"]["buzz_on_launch_enabled"]);
   setPref_Bool("En_Buzz_Rem", cfgData["data"]["buzz_on_remove_enabled"]);
   setPref_Bool("En_Buzz_Err", cfgData["data"]["buzz_on_error_enabled"]);
+  ESP.restart();
 }
 
 void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
