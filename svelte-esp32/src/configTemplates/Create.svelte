@@ -57,6 +57,11 @@
     dialogWrite.close("true");
   }
 
+  function diagWriteCancel() {
+    dialogWrite.close("true");
+    zapUtils.toggleCreateMode(false);
+  }
+
   function diagWriteOpen() {
     dialogWrite.showModal();
     zapUtils.toggleCreateMode(true);
@@ -184,7 +189,7 @@
     <div class="row">
       <div class="col text-center">  
         <button type="button" class="btn btn-primary mt-4" on:click="{doWrite}">OK</button>      
-        <button type="button" class="btn btn-primary mt-4" on:click="{diagWriteClose}">Cancel</button>
+        <button type="button" class="btn btn-primary mt-4" on:click="{diagWriteCancel}">Cancel</button>
       </div>
     </div>
   </div>
@@ -203,7 +208,7 @@
 </dialog>
 <dialog bind:this={dialogFailure}>
   <div class="text-center mb-3">
-    <h4>Write Failed! ESP resetting. Remove Card -> Click OK & try again</h4>
+    <h4>Write Failed! Check TAG/Card type. Remove Card -> Click OK & try again</h4>
   </div>
   <div class="container">
     <div class="row">

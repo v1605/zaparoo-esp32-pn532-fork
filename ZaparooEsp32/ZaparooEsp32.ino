@@ -409,8 +409,6 @@ void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRem
       cmdData["data"]["isSuccess"] = false;
       cmdData["data"]["isCardDetected"] = true;
       cmdClients(cmdData);
-      delay(500);
-      ESP.restart();
     }
   } else {
     cmdData["data"]["isSuccess"] = false;

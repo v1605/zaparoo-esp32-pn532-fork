@@ -78,20 +78,21 @@ public:
   // Write a token to the given device
   bool writeLaunch(String& launchCmd, String& audioLaunchFile, String& audioRemoveFile) override {
     if (nfc->tagPresent()) {
-      nfc->erase();
-      NdefMessage message = NdefMessage();
-      message.addTextRecord(launchCmd.c_str());
-      if (audioLaunchFile.length() > 0) {
-        message.addTextRecord(audioLaunchFile.c_str());
+      if(nfc->erase()){
+        NdefMessage message = NdefMessage();
+        message.addTextRecord(launchCmd.c_str());
+        if (audioLaunchFile.length() > 0) {
+          message.addTextRecord(audioLaunchFile.c_str());
+        }
+        if (audioRemoveFile.length() > 0) {
+          message.addTextRecord(audioRemoveFile.c_str());
+        }
+        bool success = nfc->write(message);
+        if (!success) {
+          reset();
+        }
+        return success;
       }
-      if (audioRemoveFile.length() > 0) {
-        message.addTextRecord(audioRemoveFile.c_str());
-      }
-      bool success = nfc->write(message);
-      if (!success) {
-        reset();
-      }
-      return success;
     }
     return false;
   }

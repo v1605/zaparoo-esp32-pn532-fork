@@ -239,7 +239,7 @@ export class zapUtils{
     static toggleCreateMode(isEnabled: boolean){
         this.isCreateModeEnabled = isEnabled;
         let newCMD = this.getBlankESPMsg();
-        console.log(`Setting UID Editing Mode : ${this.isCreateModeEnabled}`);
+        console.log(`Setting Create Mode : ${this.isCreateModeEnabled}`);
         newCMD.cmd = "set_WriteMode";
         newCMD.data = this.isCreateModeEnabled;
         EspUtils.sendMessage(newCMD);
