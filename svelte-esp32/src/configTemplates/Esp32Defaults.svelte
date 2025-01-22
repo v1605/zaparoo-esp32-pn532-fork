@@ -25,6 +25,7 @@
   <h2>ESP32 Defaults</h2>
 </div>
 <form on:submit={handleSubmit} class="row g-4">
+  {#if config.motor_enabled}
   <div class="col-12">
     <div class="d-flex flex-column flex-md-row align-items-start justify-content-between">
       <div class="input-group-text col-12 col-md-3">
@@ -53,6 +54,8 @@
       </div>
     </div>
   </div>
+  {/if}
+  {#if config.audio_enabled}
   <div class="col-12">
     <div class="d-flex flex-column flex-md-row align-items-center justify-content-between">
       <div class="form-floating col-12 col-md-3">
@@ -83,6 +86,14 @@
       </div>
     </div>
   </div>
-
+  {/if}
+  {#if config.motor_enabled || config.audio_enabled}
   <button type="submit" class="btn btn-primary mt-3">Save</button>
+  {/if}
+  {#if !config.motor_enabled && !config.audio_enabled}
+    <div class="text-center mt-5">
+      <h3>Both Audio & Rumble Motor are disabled in ESP32 Config</h3>
+      <h3>Enable to change default settings.</h3>
+    </div>
+  {/if}
 </form>

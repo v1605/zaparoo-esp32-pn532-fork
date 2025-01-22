@@ -236,14 +236,16 @@ export class zapUtils{
         EspUtils.sendMessage(newCMD);
     }
 
-    static toggleCreateMode(){
-        this.isCreateModeEnabled = !this.isCreateModeEnabled;
+    static toggleCreateMode(isEnabled: boolean){
+        this.isCreateModeEnabled = isEnabled;
         let newCMD = this.getBlankESPMsg();
-        console.log(`Setting UID Editing Mode : ${this.isCreateModeEnabled}`);
+        console.log(`Setting Create Mode : ${this.isCreateModeEnabled}`);
         newCMD.cmd = "set_WriteMode";
         newCMD.data = this.isCreateModeEnabled;
         EspUtils.sendMessage(newCMD);
     }
+
+    
 
     static handleWriteResults(isSuccess: boolean, isCardDetected: boolean){
         let tmpWRS = this.getBlankWriteState();
