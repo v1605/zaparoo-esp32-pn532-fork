@@ -1,4 +1,7 @@
 #include "FeedbackManager.h"
+#include "ZaparooEsp32.hpp"
+
+#define UID_MAP_FILE "/uidExtdRecord.json"
 
 FeedbackManager::FeedbackManager() {
     out = nullptr;
@@ -38,125 +41,181 @@ void FeedbackManager::init(Preferences* prefs) {
     pwrLedPin = preferences->getInt("pwrLedPin", -1);
 
     // Read the I2S pins from preferences but don't save them in member variables
-    int i2sBclkPin = preferences->getInt("i2sBclkPin", -1);
-    int i2sLrcPin = preferences->getInt("i2sLrcPin", -1);
-    int i2sDoutPin = preferences->getInt("i2sDoutPin", -1);
+    i2sBclkPin = preferences->getInt("i2sBclkPin", -1);
+    i2sLrcPin = preferences->getInt("i2sLrcPin", -1);
+    i2sDoutPin = preferences->getInt("i2sDoutPin", -1);
 
-    if (audioEnabled) {
-        out = new AudioOutputI2S();
-        out->SetPinout(i2sBclkPin, i2sLrcPin, i2sDoutPin);
-        out->SetChannels(1);
-        out->SetGain(audioGain);
+    setupPins();
+
+}
+
+
+void FeedbackManager::setupPins() {
+  if (motorEnabled) {
+    pinMode(motorPin, OUTPUT);
+  }
+  if (wifiLed) {
+    pinMode(wifiLedPin, OUTPUT);
+  }
+  if (launchLed) {
+    pinMode(launchLedPin, OUTPUT);
+  }
+  if (pwrLed) {
+    pinMode(pwrLedPin, OUTPUT);
+    digitalWrite(pwrLedPin, HIGH);
+  }
+  if (audioEnabled) {
+    delete out;
+    out = NULL;
+    out = new AudioOutputI2S();
+    out->SetPinout(i2sBclkPin, i2sLrcPin, i2sDoutPin);
+    out->SetChannels(1);
+    out->SetGain(audioGain);
+    if (sdCardEnabled) {
+      if (!SD.begin(SS_PIN)) {
+        Serial.println(F("failed to do SD Card"));
+      }
     }
+  }
 }
 
 void FeedbackManager::update(JsonDocument& doc) {
-    if (doc.containsKey("audioGain")) {
-        audioGain = doc["audioGain"].as<float>();
+    if (doc["data"].containsKey("audioGain")) {
+        audioGain = doc["data"]["audioGain"].as<float>();
         preferences->putFloat("audioGain", audioGain);
     }
-    if (doc.containsKey("isWebLog")) {
-        isWebLog = doc["isWebLog"].as<bool>();
+    if (doc["data"].containsKey("isWebLog")) {
+        isWebLog = doc["data"]["isWebLog"].as<bool>();
         preferences->putBool("isWebLog", isWebLog);
     }
-    if (doc.containsKey("wifiLed")) {
-        wifiLed = doc["wifiLed"].as<bool>();
+    if (doc["data"].containsKey("wifiLed")) {
+        wifiLed = doc["data"]["wifiLed"].as<bool>();
         preferences->putBool("wifiLed", wifiLed);
     }
-    if (doc.containsKey("motor")) {
-        motorEnabled = doc["motor"].as<bool>();
+    if (doc["data"].containsKey("motor")) {
+        motorEnabled = doc["data"]["motor"].as<bool>();
         preferences->putBool("motor", motorEnabled);
     }
-    if (doc.containsKey("launchLed")) {
-        launchLed = doc["launchLed"].as<bool>();
+    if (doc["data"].containsKey("launchLed")) {
+        launchLed = doc["data"]["launchLed"].as<bool>();
         preferences->putBool("launchLed", launchLed);
     }
-    if (doc.containsKey("audioEnabled")) {
-        audioEnabled = doc["audioEnabled"].as<bool>();
+    if (doc["data"].containsKey("audioEnabled")) {
+        audioEnabled = doc["data"]["audioEnabled"].as<bool>();
         preferences->putBool("audioEnabled", audioEnabled);
     }
-    if (doc.containsKey("pwrLed")) {
-        pwrLed = doc["pwrLed"].as<bool>();
+    if (doc["data"].containsKey("pwrLed")) {
+        pwrLed = doc["data"]["pwrLed"].as<bool>();
         preferences->putBool("pwrLed", pwrLed);
     }
-    if (doc.containsKey("resetOnRemove")) {
-        resetOnRemove = doc["resetOnRemove"].as<bool>();
+    if (doc["data"].containsKey("resetOnRemove")) {
+        resetOnRemove = doc["data"]["resetOnRemove"].as<bool>();
         preferences->putBool("resetOnRemove", resetOnRemove);
     }
-    if (doc.containsKey("sdCardEnabled")) {
-        sdCardEnabled = doc["sdCardEnabled"].as<bool>();
+    if (doc["data"].containsKey("sdCardEnabled")) {
+        sdCardEnabled = doc["data"]["sdCardEnabled"].as<bool>();
         preferences->putBool("sdCardEnabled", sdCardEnabled);
     }
-    if (doc.containsKey("systemAudioEnabled")) {
-        systemAudioEnabled = doc["systemAudioEnabled"].as<bool>();
+    if (doc["data"].containsKey("systemAudioEnabled")) {
+        systemAudioEnabled = doc["data"]["systemAudioEnabled"].as<bool>();
         preferences->putBool("systemAudioEnabled", systemAudioEnabled);
     }
-    if (doc.containsKey("gameAudioEnabled")) {
-        gameAudioEnabled = doc["gameAudioEnabled"].as<bool>();
+    if (doc["data"].containsKey("gameAudioEnabled")) {
+        gameAudioEnabled = doc["data"]["gameAudioEnabled"].as<bool>();
         preferences->putBool("gameAudioEnabled", gameAudioEnabled);
     }
-    if (doc.containsKey("buzzOnDetect")) {
-        buzzOnDetect = doc["buzzOnDetect"].as<bool>();
+    if (doc["data"].containsKey("buzzOnDetect")) {
+        buzzOnDetect = doc["data"]["buzzOnDetect"].as<bool>();
         preferences->putBool("buzzOnDetect", buzzOnDetect);
     }
-    if (doc.containsKey("buzzOnLaunch")) {
-        buzzOnLaunch = doc["buzzOnLaunch"].as<bool>();
+    if (doc["data"].containsKey("buzzOnLaunch")) {
+        buzzOnLaunch = doc["data"]["buzzOnLaunch"].as<bool>();
         preferences->putBool("buzzOnLaunch", buzzOnLaunch);
     }
-    if (doc.containsKey("buzzOnRemove")) {
-        buzzOnRemove = doc["buzzOnRemove"].as<bool>();
+    if (doc["data"].containsKey("buzzOnRemove")) {
+        buzzOnRemove = doc["data"]["buzzOnRemove"].as<bool>();
         preferences->putBool("buzzOnRemove", buzzOnRemove);
     }
-    if (doc.containsKey("buzzOnError")) {
-        buzzOnError = doc["buzzOnError"].as<bool>();
+    if (doc["data"].containsKey("buzzOnError")) {
+        buzzOnError = doc["data"]["buzzOnError"].as<bool>();
         preferences->putBool("buzzOnError", buzzOnError);
     }
-    if (doc.containsKey("defaultInsertAudio")) {
-        defaultInsertAudio = (char*)doc["defaultInsertAudio"].as<String>().c_str();
+    if (doc["data"].containsKey("defaultInsertAudio")) {
+        defaultInsertAudio = (char*)doc["data"]["defaultInsertAudio"].as<String>().c_str();
         preferences->putString("defaultInsertAudio", defaultInsertAudio);
     }
-    if (doc.containsKey("defaultLaunchAudio")) {
-        defaultLaunchAudio = (char*)doc["defaultLaunchAudio"].as<String>().c_str();
+    if (doc["data"].containsKey("defaultLaunchAudio")) {
+        defaultLaunchAudio = (char*)doc["data"]["defaultLaunchAudio"].as<String>().c_str();
         preferences->putString("defaultLaunchAudio", defaultLaunchAudio);
     }
-    if (doc.containsKey("defaultRemoveAudio")) {
-        defaultRemoveAudio = (char*)doc["defaultRemoveAudio"].as<String>().c_str();
+    if (doc["data"].containsKey("defaultRemoveAudio")) {
+        defaultRemoveAudio = (char*)doc["data"]["defaultRemoveAudio"].as<String>().c_str();
         preferences->putString("defaultRemoveAudio", defaultRemoveAudio);
     }
-    if (doc.containsKey("defaultErrorAudio")) {
-        defaultErrorAudio = (char*)doc["defaultErrorAudio"].as<String>().c_str();
+    if (doc["data"].containsKey("defaultErrorAudio")) {
+        defaultErrorAudio = (char*)doc["data"]["defaultErrorAudio"].as<String>().c_str();
         preferences->putString("defaultErrorAudio", defaultErrorAudio);
     }
 
     // Pin assignments - saved to Preferences
-    if (doc.containsKey("motorPin")) {
-        motorPin = doc["motorPin"].as<int>();
+    if (doc["data"].containsKey("motorPin")) {
+        motorPin = doc["data"]["motorPin"].as<int>();
         preferences->putInt("motorPin", motorPin);
     }
-    if (doc.containsKey("launchLedPin")) {
-        launchLedPin = doc["launchLedPin"].as<int>();
+    if (doc["data"].containsKey("launchLedPin")) {
+        launchLedPin = doc["data"]["launchLedPin"].as<int>();
         preferences->putInt("launchLedPin", launchLedPin);
     }
-    if (doc.containsKey("wifiLedPin")) {
-        wifiLedPin = doc["wifiLedPin"].as<int>();
+    if (doc["data"].containsKey("wifiLedPin")) {
+        wifiLedPin = doc["data"]["wifiLedPin"].as<int>();
         preferences->putInt("wifiLedPin", wifiLedPin);
     }
-    if (doc.containsKey("pwrLedPin")) {
-        pwrLedPin = doc["pwrLedPin"].as<int>();
+    if (doc["data"].containsKey("pwrLedPin")) {
+        pwrLedPin = doc["data"]["pwrLedPin"].as<int>();
         preferences->putInt("pwrLedPin", pwrLedPin);
     }
-    if (doc.containsKey("i2sBclkPin")) {
-        int i2sBclkPin = doc["i2sBclkPin"].as<int>();
+    if (doc["data"].containsKey("i2sBclkPin")) {
+        i2sBclkPin = doc["data"]["i2sBclkPin"].as<int>();
         preferences->putInt("i2sBclkPin", i2sBclkPin);
     }
-    if (doc.containsKey("i2sLrcPin")) {
-        int i2sLrcPin = doc["i2sLrcPin"].as<int>();
+    if (doc["data"].containsKey("i2sLrcPin")) {
+        i2sLrcPin = doc["data"]["i2sLrcPin"].as<int>();
         preferences->putInt("i2sLrcPin", i2sLrcPin);
     }
-    if (doc.containsKey("i2sDoutPin")) {
-        int i2sDoutPin = doc["i2sDoutPin"].as<int>();
+    if (doc["data"].containsKey("i2sDoutPin")) {
+        i2sDoutPin = doc["data"]["i2sDoutPin"].as<int>();
         preferences->putInt("i2sDoutPin", i2sDoutPin);
     }
+}
+
+
+void FeedbackManager::set(JsonDocument& doc) {
+    doc["data"]["audioGain"] = audioGain;
+    doc["data"]["isWebLog"] = isWebLog;
+    doc["data"]["wifiLed"] = wifiLed;
+    doc["data"]["motor"] = motorEnabled;
+    doc["data"]["launchLed"] = launchLed;
+    doc["data"]["audioEnabled"] = audioEnabled;
+    doc["data"]["pwrLed"] = pwrLed;
+    doc["data"]["resetOnRemove"] = resetOnRemove;
+    doc["data"]["sdCardEnabled"] = sdCardEnabled;
+    doc["data"]["systemAudioEnabled"] = systemAudioEnabled;
+    doc["data"]["gameAudioEnabled"] = gameAudioEnabled;
+    doc["data"]["buzzOnDetect"] = buzzOnDetect;
+    doc["data"]["buzzOnLaunch"] = buzzOnLaunch;
+    doc["data"]["buzzOnRemove"] = buzzOnRemove;
+    doc["data"]["buzzOnError"] = buzzOnError;
+    doc["data"]["defaultInsertAudio"] = defaultInsertAudio;
+    doc["data"]["defaultLaunchAudio"] = defaultLaunchAudio;
+    doc["data"]["defaultRemoveAudio"] = defaultRemoveAudio;
+    doc["data"]["defaultErrorAudio"] = defaultErrorAudio;
+    doc["data"]["motorPin"] = motorPin;
+    doc["data"]["launchLedPin"] = launchLedPin;
+    doc["data"]["wifiLedPin"] = wifiLedPin;
+    doc["data"]["pwrLedPin"] = pwrLedPin;
+    doc["data"]["i2sBclkPin"] = i2sBclkPin;
+    doc["data"]["i2sLrcPin"] = i2sLrcPin;
+    doc["data"]["i2sDoutPin"] = i2sDoutPin;
 }
 
 
@@ -239,14 +298,13 @@ void FeedbackManager::successActions(ZaparooToken* obj) {
 
 void FeedbackManager::setUidAudioMappings(ZaparooToken* obj) {
     if (!audioEnabled) return;
-    const char* uidExtdRecFile = "/uidExtdRecord.json";
     File file;
     JsonDocument uidFile;
 
-    if (sdCardEnabled && SD.exists(uidExtdRecFile)) {
-        file = SD.open(uidExtdRecFile, FILE_READ);
-    } else if (LittleFS.exists(uidExtdRecFile)) {
-        file = LittleFS.open(uidExtdRecFile, "r");
+    if (sdCardEnabled && SD.exists(UID_MAP_FILE)) {
+        file = SD.open(UID_MAP_FILE, FILE_READ);
+    } else if (LittleFS.exists(UID_MAP_FILE)) {
+        file = LittleFS.open(UID_MAP_FILE, "r");
     } else {
         return;
     }
@@ -266,6 +324,27 @@ void FeedbackManager::setUidAudioMappings(ZaparooToken* obj) {
         }
     }
     file.close();
+}
+
+void FeedbackManager::getUidMappings(JsonDocument& toSet){
+  JsonDocument parsed;
+  File file;
+  toSet["msgType"] = "getUIDExtdRec";
+  if(sdCardEnabled && SD.exists(UID_MAP_FILE)){
+    file = SD.open(UID_MAP_FILE, FILE_READ);
+  }else if(LittleFS.exists(UID_MAP_FILE)){
+    file = LittleFS.open(UID_MAP_FILE, "r");
+  }
+  while (file.available()) { 
+    DeserializationError error = deserializeJson(parsed, file);
+    if(!error){
+      toSet["data"] = parsed;
+      file.close();
+      return;
+    }
+  }
+  file.close();
+  return;
 }
 
 int FeedbackManager::playAudio(const char* audioPath) {
