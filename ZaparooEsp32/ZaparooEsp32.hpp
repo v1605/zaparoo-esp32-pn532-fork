@@ -4,12 +4,12 @@
   //*********************Reguired Configuration******************************
   
   //uncomment for RC522----------------------------------------------------
-  #define RC522
+  //#define RC522
   //-----------------------------------------------------------------------
 
 
   //uncomment for PN532----------------------------------------------------
-  //#define PN532
+  #define PN532
   //The GPIO pin the PN532 RSTPDN Pin is connected to ((***NOT THE PN532 RSTO PIN***)). 
   //This is essential for stability and recovery after an esp32 soft reset.
   #define PN532_RST_PIN 13
@@ -23,7 +23,7 @@
 
   //Set True for serial only-----------------------------------------------
   //wifi Game Launch & Reset API calls will not be used - webUI features will still be available
-  #define SERIAL_ONLY true
+  #define SERIAL_ONLY false
   //-----------------------------------------------------------------------
 
 #endif
