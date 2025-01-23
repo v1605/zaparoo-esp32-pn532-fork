@@ -1,15 +1,15 @@
 <script lang="ts">
   import type { zapSystems, zapSearchResults, htmlFormattedSearchRes, writeResultState } from '../types/ConfigData';
-  import { zapUtils } from '../backend/zapUtils';
-  import { commonUtils } from '../backend/common';
-  let zapSysList: zapSystems = zapUtils.getBlankSystems();
-  let zapSrchRes: zapSearchResults = zapUtils.getBlankSearchResults();
-  let htmlSerRes: htmlFormattedSearchRes = zapUtils.getBlankhmtlSrchRes();
-  let WriteResState: writeResultState = zapUtils.getBlankWriteState();
-  zapUtils.zapSrcRes().subscribe(value=> zapSrchRes = value);
-  zapUtils.indexedSystemsList().subscribe(value=> zapSysList = value);
-  zapUtils.htmlSrchRes().subscribe(value=> htmlSerRes = value);
-  zapUtils.writeResStat().subscribe(value => WrStIsChanged(value));
+  import { ZapUtils } from '../backend/ZapUtils';
+  import { CommonUtils } from '../backend/CommonUtils';
+  let zapSysList: zapSystems = ZapUtils.getBlankSystems();
+  let zapSrchRes: zapSearchResults = ZapUtils.getBlankSearchResults();
+  let htmlSerRes: htmlFormattedSearchRes = ZapUtils.getBlankhmtlSrchRes();
+  //let WriteResState: writeResultState = zapUtils.getBlankWriteState();
+  ZapUtils.zapSrcRes().subscribe(value=> zapSrchRes = value);
+  ZapUtils.indexedSystemsList().subscribe(value=> zapSysList = value);
+  ZapUtils.htmlSrchRes().subscribe(value=> htmlSerRes = value);
+  ZapUtils.writeResStat().subscribe(value => WrStIsChanged(value));
   let selectedSys: string = "*";
   let searchQry: string | null;
   let selectedGame: string = "";
@@ -38,17 +38,16 @@
           break;
       }
   }
-
-  // Optional: Handle form submission
+  
   const handleSubmit = (event: Event) => {
     event.preventDefault();
-    zapUtils.doSearch(selectedSys, searchQry);
+    ZapUtils.doSearch(selectedSys, searchQry);
   };
 
   function doWrite() {
-    if(audLaunchP){audLaunchP = commonUtils.validateAudioPath(audLaunchP)};
-    if(audRemoveP){audRemoveP = commonUtils.validateAudioPath(audRemoveP)};
-    zapUtils.doWriteCard(selectedGame, audLaunchP, audRemoveP);
+    if(audLaunchP){audLaunchP = CommonUtils.validateAudioPath(audLaunchP)};
+    if(audRemoveP){audRemoveP = CommonUtils.validateAudioPath(audRemoveP)};
+    ZapUtils.doWriteCard(selectedGame, audLaunchP, audRemoveP);
     diagWriteClose();
     diagWaitOpen();
   };
@@ -59,12 +58,12 @@
 
   function diagWriteCancel() {
     dialogWrite.close("true");
-    zapUtils.toggleCreateMode(false);
+    ZapUtils.toggleCreateMode(false);
   }
 
   function diagWriteOpen() {
     dialogWrite.showModal();
-    zapUtils.toggleCreateMode(true);
+    ZapUtils.toggleCreateMode(true);
   }
 
   function diagWaitOpen(){
@@ -81,7 +80,7 @@
 
   function diagNoCardClose(){
     dialogNoCard.close("true");
-    zapUtils.toggleCreateMode(false);
+    ZapUtils.toggleCreateMode(false);
   }
 
   function diagFailOpen(){
@@ -90,12 +89,12 @@
 
   function diagFailClose(){
     dialogFailure.close("true");
-    zapUtils.toggleCreateMode(false);
+    ZapUtils.toggleCreateMode(false);
   }
 
   function diagSuccessClose() {
     dialogSuccess.close("true");
-    zapUtils.toggleCreateMode(false);
+    ZapUtils.toggleCreateMode(false);
   }
 
   function diagSucessOpen() {
@@ -103,7 +102,7 @@
   }
 
   function doTestLaunch() {
-    zapUtils.doTestLaunch(selectedGame);
+    ZapUtils.doTestLaunch(selectedGame);
   };
     
 </script>

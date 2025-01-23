@@ -1,8 +1,8 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { ConfigData, ConfigMessage, sendToESPMessage } from "../types/ConfigData";
+import type { ConfigData, ConfigMessage, EspMessage } from "../types/ConfigData";
 import { LogUtils } from "./LogUtils";
 import { UIDUtils } from "./UIDUtils";
-import { zapUtils } from "./zapUtils";
+import { ZapUtils } from "./ZapUtils";
 
 export class EspUtils{
     private static currentConfig: Writable<ConfigData> = writable({} as ConfigData);
@@ -55,7 +55,7 @@ export class EspUtils{
                 break;
             case "writeResults":
             console.log("wr: ", msgData.data)    
-            zapUtils.handleWriteResults(msgData.data.isSuccess, msgData.data.isCardDetected);
+            ZapUtils.handleWriteResults(msgData.data.isSuccess, msgData.data.isCardDetected);
         }
     }
 
@@ -75,6 +75,7 @@ export class EspUtils{
 
     static updateConfig(update: Partial<ConfigData>){
         if(this.updating) return true;
+        console.log(update);
         this.updating = true;
         this.currentConfig.subscribe((conf=>{
             const data = Object.assign({...conf}, update);
@@ -91,7 +92,7 @@ export class EspUtils{
         }))();
     }
 
-    static sendMessage(newMsg: sendToESPMessage){
+    static sendMessage(newMsg: EspMessage){
         this.websocket.send(JSON.stringify(newMsg));
         //LogUtils.notify(`Message Sent.. CMD:${newMsg.cmd}`);
     }

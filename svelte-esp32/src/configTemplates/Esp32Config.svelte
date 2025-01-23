@@ -6,19 +6,19 @@
     const handleSubmit = (event: Event) => {
       event.preventDefault();
       const update: Partial<ConfigData> = {
-          wifi_led_enabled: config.wifi_led_enabled,
-          motor_enabled: config.motor_enabled,
-          launch_led_enabled: config.launch_led_enabled,
-          audio_enabled: config.audio_enabled,
-          pwr_led_enabled: config.pwr_led_enabled,
-          pin_I2S_DOUT: config.pin_I2S_DOUT,
-          pin_I2S_BCLK: config.pin_I2S_BCLK,
-          pin_I2S_LRC: config.pin_I2S_LRC,
-          pin_MOTOR_PIN: config.pin_MOTOR_PIN,
-          pin_WIFI_LED_PIN: config.pin_WIFI_LED_PIN,
-          pin_LAUNCH_LED_PIN: config.pin_LAUNCH_LED_PIN,
-          pin_EXTERNAL_POWER_LED: config.pin_EXTERNAL_POWER_LED,
-          sdCard_enabled: config.sdCard_enabled
+          wifiLedEnabled: config.wifiLedEnabled,
+          motorEnabled: config.motorEnabled,
+          launchLedEnabled: config.launchLedEnabled,
+          audioEnabled: config.audioEnabled,
+          pwrLedEnabled: config.pwrLedEnabled,
+          i2sDoutPin: config.i2sDoutPin,
+          i2sBclkPin: config.i2sBclkPin,
+          i2sLrcPin: config.i2sLrcPin,
+          motorPin: config.motorPin,
+          wifiLedPin: config.wifiLedPin,
+          launchLedPin: config.launchLedPin,
+          pwrLedPin: config.pwrLedPin,
+          sdCardEnabled: config.sdCardEnabled
       };
       EspUtils.updateConfig(update);
     };
@@ -28,12 +28,12 @@
     <div class="input-group">
       <div class="input-group-text">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableWiFiLED" bind:checked={config.wifi_led_enabled}/>
+          <input class="form-check-input" type="checkbox" role="switch" id="enableWiFiLED" bind:checked={config.wifiLedEnabled}/>
           <label class="form-check-label" for="enableWiFiLED">WiFi LED</label>
         </div>
       </div>
       <div class="form-floating">
-        <input type="number" class="form-control" id="pinWifiLED" placeholder="2" bind:value={config.pin_WIFI_LED_PIN} disabled={!config.wifi_led_enabled} />
+        <input type="number" class="form-control" id="pinWifiLED" placeholder="2" bind:value={config.wifiLedPin} disabled={!config.wifiLedEnabled} />
         <label for="pinWifiLED">GPIO PIN</label>
       </div>
     </div>
@@ -42,12 +42,12 @@
     <div class="input-group">
       <div class="input-group-text">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableLaunchLED" bind:checked={config.launch_led_enabled}/>
+          <input class="form-check-input" type="checkbox" role="switch" id="enableLaunchLED" bind:checked={config.launchLedEnabled}/>
           <label class="form-check-label" for="enableLaunchLED">Launch LED</label>
         </div>
       </div>
       <div class="form-floating">
-        <input type="number" class="form-control" id="pinLaunchLED" placeholder="33" bind:value={config.pin_LAUNCH_LED_PIN} disabled={!config.launch_led_enabled} />
+        <input type="number" class="form-control" id="pinLaunchLED" placeholder="33" bind:value={config.launchLedPin} disabled={!config.launchLedEnabled} />
         <label for="pinLaunchLED">GPIO PIN</label>
       </div>
     </div>
@@ -56,12 +56,12 @@
     <div class="input-group">
       <div class="input-group-text">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" id="enablePwrLED" bind:checked={config.pwr_led_enabled}/>
+          <input class="form-check-input" type="checkbox" role="switch" id="enablePwrLED" bind:checked={config.pwrLedEnabled}/>
           <label class="form-check-label" for="enablePwrLED">Power LED</label>
         </div>
       </div>
       <div class="form-floating">
-        <input type="number" class="form-control" id="pinPwrLED" placeholder="15" bind:value={config.pin_EXTERNAL_POWER_LED} disabled={!config.pwr_led_enabled} />
+        <input type="number" class="form-control" id="pinPwrLED" placeholder="15" bind:value={config.pwrLedPin} disabled={!config.pwrLedEnabled} />
         <label for="pinPwrLED">GPIO PIN</label>
       </div>
     </div>
@@ -70,12 +70,12 @@
     <div class="input-group">
       <div class="input-group-text">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableRumbleLED" bind:checked={config.motor_enabled}/>
+          <input class="form-check-input" type="checkbox" role="switch" id="enableRumbleLED" bind:checked={config.motorEnabled}/>
           <label class="form-check-label" for="enableRumbleLED">Rumble Motor</label>
         </div>
       </div>
       <div class="form-floating">
-        <input type="number" class="form-control" id="pinMotor" placeholder="32" bind:value={config.pin_MOTOR_PIN} disabled={!config.motor_enabled} />
+        <input type="number" class="form-control" id="pinMotor" placeholder="32" bind:value={config.motorPin} disabled={!config.motorEnabled} />
         <label for="pinMotor">GPIO PIN</label>
       </div>
     </div>
@@ -84,20 +84,20 @@
     <div class="input-group">
       <div class="input-group-text col-md-4 col-12">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableAudio" bind:checked={config.audio_enabled}/>
+          <input class="form-check-input" type="checkbox" role="switch" id="enableAudio" bind:checked={config.audioEnabled}/>
           <label class="form-check-label" for="enableAudio">Audio Module</label>
         </div>
       </div>
       <div class="form-floating col-md-2 col-12">
-        <input type="number" class="form-control" id="pinI2SDOUT" placeholder="25" bind:value={config.pin_I2S_DOUT} disabled={!config.audio_enabled} />
+        <input type="number" class="form-control" id="pinI2SDOUT" placeholder="25" bind:value={config.i2sDoutPin} disabled={!config.audioEnabled} />
         <label for="pinI2SDOUT">GPIO I2SDOUT</label>
       </div>
       <div class="form-floating col-md-2 col-12">
-        <input type="number" class="form-control" id="pinI2SBCLK" placeholder="27" bind:value={config.pin_I2S_BCLK} disabled={!config.audio_enabled} />
+        <input type="number" class="form-control" id="pinI2SBCLK" placeholder="27" bind:value={config.i2sBclkPin} disabled={!config.audioEnabled} />
         <label for="pinI2SBCLK">GPIO I2SBCLK</label>
       </div>
       <div class="form-floating col-md-2 col-12">
-        <input type="number" class="form-control" id="pinI2SLRC" placeholder="26" bind:value={config.pin_I2S_LRC} disabled={!config.audio_enabled} />
+        <input type="number" class="form-control" id="pinI2SLRC" placeholder="26" bind:value={config.i2sLrcPin} disabled={!config.audioEnabled} />
         <label for="pinI2SLRC">GPIO I2SLRC</label>
       </div>
     </div>
@@ -106,7 +106,7 @@
     <div class="input-group justify-content-md-center">
       <div class="input-group-text">
         <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableSDCard" bind:checked={config.sdCard_enabled}/>
+          <input class="form-check-input" type="checkbox" role="switch" id="enableSDCard" bind:checked={config.sdCardEnabled}/>
           <label class="form-check-label" for="enableSDCard">SD Card Module</label>
         </div>
       </div>

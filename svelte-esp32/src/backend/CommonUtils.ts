@@ -1,9 +1,9 @@
-export class commonUtils{
+export class CommonUtils{
 
     static validateAudioPath(strPath: string):string {
-        if(strPath.length !==0){
-            var firstChar = strPath.charAt(0);
-            if(firstChar != "/"){
+        if(strPath){
+            strPath = strPath.trim();
+            if(strPath.charAt(0) != "/"){
                 strPath = "/" + strPath
             }
         }

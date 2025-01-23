@@ -1,15 +1,15 @@
 <script lang="ts">
     import { UIDUtils } from "../backend/UIDUtils";
     import type { UIDExtdRecord } from "../types/ConfigData";
-    import { commonUtils } from "../backend/common";
-    let UIDRecord: UIDExtdRecord = UIDUtils.getBlank();
-    UIDUtils.UIDRecord().subscribe(value=> UIDRecord = value);
+    import { CommonUtils } from "../backend/CommonUtils";
+    let uidRecord: UIDExtdRecord = UIDUtils.getBlank();
+    UIDUtils.UIDRecord().subscribe(value=> uidRecord = value);
     const handleSubmit = (event: Event) => {
         event.preventDefault();
         const updRec = UIDUtils.getBlank();
-        updRec.UID = UIDRecord.UID;
-        updRec.launchAudio = commonUtils.validateAudioPath(UIDRecord.launchAudio);
-        updRec.removeAudio = commonUtils.validateAudioPath(UIDRecord.removeAudio);
+        updRec.UID = uidRecord.UID;
+        updRec.launchAudio = CommonUtils.validateAudioPath(uidRecord.launchAudio);
+        updRec.removeAudio = CommonUtils.validateAudioPath(uidRecord.removeAudio);
         UIDUtils.updateUIDRecord(updRec);
     }
     
@@ -21,15 +21,15 @@
     <div class="col-12">
         <div class="d-flex flex-column flex-md-row align-items-center justify-content-between">
             <div class="form-floating col-12 col-md-3">
-                <input type="text" class="form-control" id="tokenUID" placeholder="/" bind:value={UIDRecord.UID}/>
+                <input type="text" class="form-control" id="tokenUID" placeholder="/" bind:value={uidRecord.UID}/>
                 <label for="tokenUID">Token UID</label>
             </div>
             <div class="form-floating col-12 col-md-3">
-                <input type="text" class="form-control" id="LaunPath" placeholder="/" bind:value={UIDRecord.launchAudio}/>
+                <input type="text" class="form-control" id="LaunPath" placeholder="/" bind:value={uidRecord.launchAudio}/>
                 <label for="LaunPath">Launch Audio File</label>
             </div>
             <div class="form-floating col-12 col-md-3">
-                <input type="text" class="form-control" id="RemPath" placeholder="/" bind:value={UIDRecord.removeAudio}/>
+                <input type="text" class="form-control" id="RemPath" placeholder="/" bind:value={uidRecord.removeAudio}/>
                 <label for="RemPath">Remove Audio File</label>
             </div>
         </div>

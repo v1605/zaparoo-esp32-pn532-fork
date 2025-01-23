@@ -51,16 +51,11 @@ int timeoutLoop = 0;
 bool isConnected = false;
 bool isWebLog = false;
 bool softReset = false;
-bool reset_on_remove_enabled = true;
 bool mister_enabled = true;
 bool steamOS_enabled = false;
-bool systemAudio_enabled = false;
-bool gameAudio_enabled = false;
 bool UID_ScanMode_enabled = false;
 String SteamIP = "steamOS.local";
 String ZapIP = "mister.local";
-//const char* uidAudio = "/uidAudioMappings.csv";
-//const char* uidExtdRecFile = "/uidExtdRecord.json";
 
 //Prototypes
 void notifyClients(const String& txtMsgToSend, const String& msgType);
@@ -259,11 +254,9 @@ void getWebConfigData() {
   JsonDocument configData;
   feedback.set(configData);
   configData["msgType"] = "ConfigData";
-  configData["data"]["reset_on_remove_enabled"] = preferences.getBool("En_RoR", true);
   configData["data"]["ZapIP"] = preferences.getString("ZapIP", "mister.local");
   configData["data"]["mister_enabled"] = preferences.getBool("En_Mister", true);
   configData["data"]["steamOS_enabled"] = preferences.getBool("En_SteamOS", false);
-  configData["data"]["sdCard_enabled"] = preferences.getBool("En_SDCard", false);
   configData["data"]["SteamIP"] = preferences.getString("SteamIP", "steamOS.local");
   configData["data"]["PN532_module"] = isPN532;
   configData["data"]["zap_ws_path"] = ZaparooLaunchApi::wsPath; 
@@ -274,11 +267,20 @@ void setWebConfigData(JsonDocument& cfgData) {
   notifyClients("ZAP ESP Now Saving Config Data", "log");
   feedback.launchLedOff();
   feedback.update(cfgData);
-  setPref_Bool("En_RoR", cfgData["data"]["reset_on_remove_enabled"]);
-  setPref_Str("ZapIP", cfgData["data"]["ZapIP"]);
-  setPref_Bool("En_SteamOS", cfgData["data"]["steamOS_enabled"]);
-  setPref_Bool("En_Mister", cfgData["data"]["mister_enabled"]);
-  setPref_Str("SteamIP", cfgData["data"]["SteamIP"]);
+  if(cfgData["data"].containsKey("ZapIP")){
+    setPref_Str("ZapIP", cfgData["data"]["ZapIP"]);
+  }
+  if(cfgData["data"].containsKey("steamOS_enabled")){
+    setPref_Bool("En_SteamOS", cfgData["data"]["steamOS_enabled"]);
+  }
+  if(cfgData["data"].containsKey("mister_enabled")){
+    setPref_Bool("En_Mister", cfgData["data"]["mister_enabled"]);
+  }
+  if(cfgData["data"].containsKey("SteamIP")){
+    setPref_Str("SteamIP", cfgData["data"]["SteamIP"]);
+  }
+  preferences.end();
+  Serial.println("Rebooting after saving");
   ESP.restart();
 }
 
@@ -300,38 +302,40 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
     bool enableWriteMode = root["data"];
     notifyClients(enableWriteMode ? "NFC Tag Write Mode Enabled" : "NFC Tag Write Mode Disabled", "log");
     setPref_Bool("En_NFC_Wr", enableWriteMode);
-  } else if (command == "write_Tag_Launch_Game") {
-    if (preferences.getBool("En_NFC_Wr", false)) {
+  } else if (command == "write_Tag_Launch_Game" && preferences.getBool("En_NFC_Wr", false)) {
       notifyClients("NFC Tag Writing the Launch Game Command", "log");
       String launchData = root["data"]["launchData"].as<String>();
       String audioLaunchPath = root["data"]["audioLaunchPath"].as<String>();
       String audioRemovePath = root["data"]["audioRemovePath"].as<String>();
       writeTagLaunch(launchData, audioLaunchPath, audioRemovePath);
-    }
   } else if (command == "get_Current_Config") {
-    getWebConfigData();
+      getWebConfigData();
   } else if (command == "set_Current_Config") {
-    setWebConfigData(root);
+      setWebConfigData(root);
   } else if (command == "Test_Tag_Launch_Game") {
-    notifyClients("Test Launching Game", "alert");
-    String data = root["data"].as<String>();
-    send(data);
+      notifyClients("Test Launching Game", "alert");
+      String data = root["data"].as<String>();
+      send(data);
   } else if (command == "closeWS") {
-    setPref_Bool("En_NFC_Wr", false);
-    ws.closeAll();
-    ws.cleanupClients();
+      setPref_Bool("En_NFC_Wr", false);
+      ws.closeAll();
+      ws.cleanupClients();
   } else if (command == "getUIDExtdRec") {
-    notifyClients("Retrieving UIDExtdRec Data", "log");
-    getUIDExtdRec();
+      notifyClients("Retrieving UIDExtdRec Data", "log");
+      getUIDExtdRec();
   } else if (command == "set_UIDMode") {
-    bool enableUIDMode = root["data"];
-    notifyClients(enableUIDMode ? "UID Scanning Mode Enabled" : "UID Scanning Mode Disabled", "alert");
-    UID_ScanMode_enabled = enableUIDMode;
-    //get UIDExtdRec data if enabling UID mode
-    if(enableUIDMode){getUIDExtdRec();}
+      bool enableUIDMode = root["data"];
+      notifyClients(enableUIDMode ? "UID Scanning Mode Enabled" : "UID Scanning Mode Disabled", "alert");
+      UID_ScanMode_enabled = enableUIDMode;
+      //get UIDExtdRec data if enabling UID mode
+      if(enableUIDMode){
+        getUIDExtdRec();
+      }
   } else if (command == "saveUIDExtdRec") {
-    notifyClients("Saving UIDExtdRec Data", "log");
-    //saveUIDExtdRec(root["data"]);
+      notifyClients("Saving UIDExtdRec Data", "log");
+      JsonDocument data = root["data"];
+      feedback.saveUidMapping(data);
+      //saveUIDExtdRec(root["data"]);
   } else if (command == "wifi") {
     setPref_Str("Wifi_SSID", root["data"]["ssid"].as<String>());
     setPref_Str("Wifi_PASS", root["data"]["password"].as<String>());
@@ -409,7 +413,7 @@ bool readScanner() {
         removeAudio = token->getRemoveAudio();
       }
       feedback.cardRemovedActions(token);
-      if (reset_on_remove_enabled && !SERIAL_ONLY && token->isPayloadSet()) {
+      if (feedback.resetOnRemove && !SERIAL_ONLY && token->isPayloadSet()) {
         String payloadAsString = String(token->getPayload());
         if (!payloadAsString.startsWith("steam://")) {
           ZapClient.stop();
@@ -452,7 +456,6 @@ void setup() {
   UID_ScanMode_enabled = false;
   
   //set globals to reduce the number of call to preference library (performance)
-  reset_on_remove_enabled = preferences.getBool("En_RoR", true);
   ZapIP = preferences.getString("ZapIP", "mister.local");
   mister_enabled = preferences.getBool("En_Mister", true);
   steamOS_enabled = preferences.getBool("En_SteamOS", false);
@@ -467,27 +470,6 @@ void setup() {
     fileManager.initFileSystem(ESPWebFileManager::FS_LITTLEFS, true);
     fileManager.setServer(&server);
   }
-
-  //check if uidExtdRecord.json file exists and if not create it
-  JsonDocument tmpDoc;
-  tmpDoc["UID_ExtdRecs"][0]["UID"] = "";
-  tmpDoc["UID_ExtdRecs"][0]["launchAudio"] = "";
-  tmpDoc["UID_ExtdRecs"][0]["removeAudio"] = "";
-  String tmpJSONStr = "";
-  serializeJson(tmpDoc, tmpJSONStr);
-  /*if (sdCard_enabled){
-    if(!SD.exists(uidExtdRecFile)){
-      File UIDfile;
-      UIDfile = SD.open(uidExtdRecFile, FILE_WRITE);
-      UIDfile.print(tmpJSONStr);
-      UIDfile.close();
-    }
-  }else if(!LittleFS.exists(uidExtdRecFile)){
-    File UIDfile;
-    UIDfile = LittleFS.open(uidExtdRecFile, FILE_WRITE);
-    UIDfile.print(tmpJSONStr);
-    UIDfile.close();
-  }*/
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
     AsyncWebServerResponse* response = request->beginResponse_P(200, "text/html", index_html, index_html_len);

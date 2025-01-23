@@ -9,46 +9,46 @@ export interface UIDExtdRecsMessage{
   data: UIDExtdRecords;
 }
 
-export interface pushedUIDTokenMessage{
+export interface PushedUIDTokenMessage{
   msgType: "UIDTokenID";
   data: string;
 }
 
-export interface sendToESPMessage{
+export interface EspMessage{
   cmd: string;
   data: any;
 }
 
 export interface ConfigData {
-  wifi_led_enabled: boolean;
-  motor_enabled: boolean;
-  launch_led_enabled: boolean;
-  audio_enabled: boolean;
-  pwr_led_enabled: boolean;
-  reset_on_remove_enabled: boolean;
-  defAudioPath: string;
+  wifiLedEnabled: boolean;
+  motorEnabled: boolean;
+  launchLedEnabled: boolean;
+  audioEnabled: boolean;
+  pwrLedEnabled: boolean;
+  resetOnRemove: boolean;
   ZapIP: string;
-  pin_I2S_DOUT: number;
-  pin_I2S_BCLK: number;
-  pin_I2S_LRC: number;
-  val_AUDIO_GAIN: number;
-  pin_MOTOR_PIN: number;
-  pin_WIFI_LED_PIN: number;
-  pin_LAUNCH_LED_PIN: number;
-  pin_EXTERNAL_POWER_LED: number;
+  i2sDoutPin: number;
+  i2sBclkPin: number;
+  i2sLrcPin: number;
+  audioGain: number;
+  motorPin: number;
+  wifiLedPin: number;
+  launchLedPin: number;
+  pwrLedPin: number;
   mister_enabled: boolean;
   steamOS_enabled: boolean;
-  sdCard_enabled: boolean;
+  sdCardEnabled: boolean;
   SteamIP: string;
-  defDetectAudioPath: string;
-  defRemoveAudioPath: string;
-  defErrAudioPath: string;
-  systemAudio_enabled: boolean;
-  gameAudio_enabled: boolean;
-  buzz_on_detect_enabled: boolean;
-  buzz_on_launch_enabled: boolean;
-  buzz_on_remove_enabled: boolean;
-  buzz_on_error_enabled: boolean;
+  defaultLaunchAudio: string;
+  defaultInsertAudio: string;
+  defaultRemoveAudio: string;
+  defaultErrorAudio: string;
+  systemAudioEnabled: boolean;
+  gameAudioEnabled: boolean;
+  buzzOnDetect: boolean;
+  buzzOnLaunch: boolean;
+  buzzOnRemove: boolean;
+  buzzOnError: boolean;
   PN532_module: boolean;
   zap_ws_path: string;
 };

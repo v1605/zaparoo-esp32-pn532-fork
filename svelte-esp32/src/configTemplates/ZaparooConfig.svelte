@@ -9,7 +9,8 @@
         ZapIP: config.ZapIP, 
         mister_enabled: config.mister_enabled,
         SteamIP: config.SteamIP,
-        steamOS_enabled: config.steamOS_enabled      
+        steamOS_enabled: config.steamOS_enabled,
+        resetOnRemove: config.resetOnRemove
       };
         EspUtils.updateConfig(update);
     };
@@ -32,7 +33,7 @@
       </div>
       <div class="input-group-text">
         <div class="form-check form-switch col-4">
-          <input class="form-check-input" type="checkbox" role="switch" id="enableRRoR" bind:checked={config.reset_on_remove_enabled} disabled={!config.mister_enabled}/>
+          <input class="form-check-input" type="checkbox" role="switch" id="enableRRoR" bind:checked={config.resetOnRemove} disabled={!config.mister_enabled}/>
           <label class="form-check-label" for="enableRRoR">Reset On Remove</label>
         </div>
       </div>

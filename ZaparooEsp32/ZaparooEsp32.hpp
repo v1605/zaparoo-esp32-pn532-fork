@@ -23,7 +23,7 @@
 
   //Set True for serial only-----------------------------------------------
   //wifi Game Launch & Reset API calls will not be used - webUI features will still be available
-  #define SERIAL_ONLY false
+  #define SERIAL_ONLY true
   //-----------------------------------------------------------------------
 
 #endif

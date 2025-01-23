@@ -1,9 +1,9 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { zapSystem, zapSystems, htmlFormattedSearchRes, zapSearchResults, ConfigData, sendToESPMessage, writeResultState } from "../types/ConfigData";
+import type { zapSystem, zapSystems, htmlFormattedSearchRes, zapSearchResults, ConfigData, EspMessage, writeResultState } from "../types/ConfigData";
 import {v4 as uuidv4} from 'uuid';
 import { EspUtils, } from "./EspUtils";
 import { LogUtils } from "./LogUtils";
-export class zapUtils{
+export class ZapUtils{
     private static retSystems: Writable<zapSystems> = writable({} as zapSystems);
     private static srchResults: Writable<zapSearchResults> = writable({} as zapSearchResults);
     private static htmlResults: Writable<htmlFormattedSearchRes> = writable({} as htmlFormattedSearchRes);
@@ -31,8 +31,8 @@ export class zapUtils{
         return {} as zapSearchResults;
     }
 
-    private static getBlankESPMsg(): sendToESPMessage{
-        return {} as sendToESPMessage;
+    private static getBlankESPMsg(): EspMessage{
+        return {} as EspMessage;
     }
 
     static getBlankhmtlSrchRes(): htmlFormattedSearchRes{
@@ -101,8 +101,6 @@ export class zapUtils{
 
     private static misterOnMessage(event: MessageEvent){
         const msgData = JSON.parse(event.data);
-        //console.log("Mister Msg Data: ", msgData);        
-        ///return of systems list
         if(msgData.result.systems){
             let tmpSysList: zapSystems = msgData.result;
             this.processMiSTerSystems(tmpSysList);
@@ -125,7 +123,7 @@ export class zapUtils{
         }
         let tmpHtmlSR = this.getBlankhmtlSrchRes();
         tmpHtmlSR.results = [];
-        for (var i = 0; i < recSearchRes.results.length; i++) {
+        for (let i = 0; i < recSearchRes.results.length; i++) {
             tmpHtmlSR.results.push({
                 path: recSearchRes.results[i].path,
                 name: `${recSearchRes.results[i].system.name} - ${recSearchRes.results[i].name}`

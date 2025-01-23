@@ -13,27 +13,25 @@ class FeedbackManager {
 private:
     Preferences* preferences;
     void setupPins();
+    void createUidMappingFile();
 public:
-    float audioGain = 1;
-    bool isWebLog = false;
-    bool wifiLed = false;
+    float audioGain = 1.0;
+    bool wifiLedEnabled = false;
     bool motorEnabled = false;
-    bool launchLed = false;
+    bool launchLedEnabled = false;
     bool audioEnabled = false;
-    bool pwrLed = false;
+    bool pwrLedEnabled = false;
     bool resetOnRemove = true;
     bool sdCardEnabled = false;
-    bool systemAudioEnabled = false;
-    bool gameAudioEnabled = false;
     bool buzzOnDetect = true;
     bool buzzOnLaunch = true;
     bool buzzOnRemove = true;
     bool buzzOnError = true;
 
-    char* defaultInsertAudio = "";
-    char* defaultLaunchAudio = "";
-    char* defaultRemoveAudio = "";
-    char* defaultErrorAudio = "";
+    String defaultInsertAudio = "";
+    String defaultLaunchAudio = "";
+    String defaultRemoveAudio = "";
+    String defaultErrorAudio = "";
 
     AudioOutputI2S* out = nullptr;
 
@@ -60,6 +58,7 @@ public:
     void successActions(ZaparooToken* obj);
     void setUidAudioMappings(ZaparooToken* obj);
     void getUidMappings(JsonDocument& toSet);
+    void saveUidMapping(JsonDocument& value);
     int playAudio(const char* audioPath);
     void cardInsertedActions(ZaparooToken* obj);
     void cardRemovedActions(ZaparooToken* obj);

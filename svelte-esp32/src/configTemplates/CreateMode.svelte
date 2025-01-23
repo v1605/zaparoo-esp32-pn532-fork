@@ -3,8 +3,6 @@
     import Create from './Create.svelte';
     import FileManager from './FileManager.svelte';
     import type { NavBarLink } from '../types/NavBarLink';
-    import { zapUtils } from '../backend/zapUtils'
-    import { onMount } from 'svelte';
     let activeLink: string = "nfc"; 
     const links: NavBarLink[] = [
       { name: 'NFC', id: 'nfc', icon: ['fab', 'nfc-symbol'] },
@@ -13,9 +11,6 @@
     const setActiveLink = (linkId: string): void => {
       activeLink = linkId;
     };
-    onMount(() => {
-      zapUtils.initConnections();
-    });
 </script>
 
 <div class="h-100">
@@ -25,7 +20,7 @@
   <ul class="nav nav-tabs">
     {#each links as { name, id, icon }}
       <li class="nav-item" >
-        <a class="nav-link {activeLink === id ? 'active' : ''}" href="#"  on:click={() => setActiveLink(id)}>
+        <a class="nav-link {activeLink === id ? 'active' : ''}" href="#create"  on:click={() => setActiveLink(id)}>
           {name} <FontAwesomeIcon icon={icon}></FontAwesomeIcon>
         </a>
       </li>
