@@ -1,5 +1,5 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { UIDExtdRecords, UIDExtdRecord, UIDExtdRecsMessage, pushedUIDTokenMessage, sendToESPMessage } from "../types/ConfigData";
+import type { UIDExtdRecords, UIDExtdRecord, UIDExtdRecsMessage, PushedUIDTokenMessage, EspMessage } from "../types/ConfigData";
 import { EspUtils } from "./EspUtils";
 import { LogUtils } from "./LogUtils";
 
@@ -8,12 +8,12 @@ export class UIDUtils{
     private static currentUIDRecord: Writable<UIDExtdRecord> = writable({} as UIDExtdRecord);
     private static isUIDModeEnabled= false;
 
-    private static getBlankESPMsg(): sendToESPMessage{
-        return {} as sendToESPMessage;
+    private static getBlankESPMsg(): EspMessage{
+        return {} as EspMessage;
     }
 
-    static toggleUIDMode(){
-        this.isUIDModeEnabled = !this.isUIDModeEnabled;
+    static setUIDMode(value: boolean){
+        this.isUIDModeEnabled = value;
         let newCMD = this.getBlankESPMsg();
         console.log(`Setting UID Editing Mode : ${this.isUIDModeEnabled}`);
         newCMD.cmd = "set_UIDMode";
@@ -36,7 +36,7 @@ export class UIDUtils{
         console.log("currentUIDData:", this.currentUIDData);
     }
 
-    static processPushedUID(PushedUIDRecord: pushedUIDTokenMessage){
+    static processPushedUID(PushedUIDRecord: PushedUIDTokenMessage){
         console.log("PushedUIDRecord:", PushedUIDRecord)
         let curRec = this.currentUIDData.UID_ExtdRecs.filter((item: {UID: string}) => (item.UID == PushedUIDRecord.data));
         if(curRec.length !== 0){
@@ -53,7 +53,7 @@ export class UIDUtils{
     static updateUIDRecord(update: UIDExtdRecord){
         let bDidUpdate = false;
         let newCMD = this.getBlankESPMsg();
-        for (var i = 0; i < this.currentUIDData.UID_ExtdRecs.length; i++) {
+        for (let i = 0; i < this.currentUIDData.UID_ExtdRecs.length; i++) {
             if(this.currentUIDData.UID_ExtdRecs[i].UID == update.UID){
                 this.currentUIDData.UID_ExtdRecs[i].launchAudio = update.launchAudio;
                 this.currentUIDData.UID_ExtdRecs[i].removeAudio = update.removeAudio;
@@ -62,7 +62,7 @@ export class UIDUtils{
         }
         if(!bDidUpdate){
             //new record
-            var tmpRecord = this.getBlank();
+            const tmpRecord = this.getBlank();
             tmpRecord.UID = update.UID;
             tmpRecord.launchAudio = update.launchAudio;
             tmpRecord.removeAudio = update.removeAudio;

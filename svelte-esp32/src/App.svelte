@@ -10,6 +10,7 @@
     import WifiConfig from './configTemplates/WifiConfig.svelte';
     import ZaparooConfig from './configTemplates/ZaparooConfig.svelte';
     import logo from './lib/assets/ZapEspLogo.webp';
+    import { onMount } from 'svelte';
     import type { NavBarLink } from './types/NavBarLink';
 
 
@@ -28,6 +29,9 @@
     ];
     let navbarElement: HTMLDivElement;
     const setActiveLink = (linkId: string): void => {
+      if(!linkId){
+        linkId = "zaparoo";
+      }
       const collapse = Collapse.getInstance(navbarElement);
       if (collapse) {
         collapse.hide();
@@ -47,7 +51,10 @@
         showToast();
       }
     });
-
+    onMount(()=>{
+      EspUtils.initWebSocket();
+      setActiveLink(window.location.hash.slice(1));
+    });
 
 </script>
 <main>
@@ -61,7 +68,7 @@
         <ul class="navbar-nav ms-auto">
           {#each links as { name, id, icon }}
             <li class="nav-item">
-              <a class="nav-link {activeLink === id ? 'active' : ''}" href="#" on:click={(e) => setActiveLink(id)}>
+              <a class="nav-link {activeLink === id ? 'active' : ''}" href="#{id}" on:click={(e) => setActiveLink(id)}>
                 {name} <FontAwesomeIcon icon={icon}></FontAwesomeIcon>
               </a>
             </li>

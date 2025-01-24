@@ -4,9 +4,7 @@
     import FileManager from './FileManager.svelte';
     import type { NavBarLink } from '../types/NavBarLink';
     import { UIDUtils } from "../backend/UIDUtils";
-    import { onDestroy } from 'svelte';
-    UIDUtils.toggleUIDMode();
-    let isOpen: boolean = false;
+    import { onDestroy, onMount } from 'svelte';
     let activeLink: string = "uid"; 
     const links: NavBarLink[] = [
       { name: 'UID Control', id: 'uid', icon: 'music' },
@@ -15,8 +13,11 @@
     const setActiveLink = (linkId: string): void => {
       activeLink = linkId;
     };
+    onMount(()=>{
+      UIDUtils.setUIDMode(true);
+    })
     onDestroy(() => {
-        UIDUtils.toggleUIDMode();
+      UIDUtils.setUIDMode(false);
     });
 </script>
 
@@ -27,7 +28,7 @@
   <ul class="nav nav-tabs">
     {#each links as { name, id, icon }}
       <li class="nav-item" >
-        <a class="nav-link {activeLink === id ? 'active' : ''}" href="#"  on:click={() => setActiveLink(id)}>
+        <a class="nav-link {activeLink === id ? 'active' : ''}" href="#uid-control"  on:click={() => setActiveLink(id)}>
           {name} <FontAwesomeIcon icon={icon}></FontAwesomeIcon>
         </a>
       </li>
