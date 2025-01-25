@@ -5,7 +5,6 @@
   let zapSysList: zapSystems = ZapUtils.getBlankSystems();
   let zapSrchRes: zapSearchResults = ZapUtils.getBlankSearchResults();
   let htmlSerRes: htmlFormattedSearchRes = ZapUtils.getBlankhmtlSrchRes();
-  //let WriteResState: writeResultState = zapUtils.getBlankWriteState();
   ZapUtils.zapSrcRes().subscribe(value=> zapSrchRes = value);
   ZapUtils.indexedSystemsList().subscribe(value=> zapSysList = value);
   ZapUtils.htmlSrchRes().subscribe(value=> htmlSerRes = value);

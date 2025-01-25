@@ -16,6 +16,7 @@ export class ZapUtils{
     private static writeResultState: Writable<writeResultState> = writable({} as writeResultState);
     
     private static buildZapSocketURL(ip: string, path: string): string{
+        console.log("socket path", `ws://${ip}:7497${path}`)
         return `ws://${ip}:7497${path}`;
     }
 
@@ -101,12 +102,12 @@ export class ZapUtils{
 
     private static misterOnMessage(event: MessageEvent){
         const msgData = JSON.parse(event.data);
-        if(msgData.result.systems){
+        if(typeof(msgData.result.systems) != "undefined"){
             let tmpSysList: zapSystems = msgData.result;
             this.processMiSTerSystems(tmpSysList);
         }
         //return of search results
-        if(msgData.result.results){
+        if(typeof(msgData.result.results) != "undefined"){
             let tmpSearchRes: zapSearchResults = msgData.result;
             this.processSearchResults(tmpSearchRes);
         }

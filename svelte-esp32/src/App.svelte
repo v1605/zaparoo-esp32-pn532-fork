@@ -52,7 +52,7 @@
       }
     });
     onMount(()=>{
-      EspUtils.initWebSocket();
+      //EspUtils.initWebSocket();
       setActiveLink(window.location.hash.slice(1));
     });
 
