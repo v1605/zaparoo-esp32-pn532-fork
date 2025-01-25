@@ -390,6 +390,7 @@ bool readScanner() {
       token = NULL;
       token = parsed;
       feedback.cardInsertedActions(token);
+      inserted = true;
       bool sent = false;
       if (token->isPayloadSet() && !UID_ScanMode_enabled) {
         feedback.setUidAudioMappings(token);
@@ -420,6 +421,7 @@ bool readScanner() {
         }
       }
       notifyClients("Tag Removed", "log");
+      inserted = false;
       tokenScanner->halt();
       return true;
     }
