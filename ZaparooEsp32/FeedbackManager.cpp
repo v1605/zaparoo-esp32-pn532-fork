@@ -18,7 +18,6 @@ void FeedbackManager::init(Preferences* prefs) {
     preferences = prefs;
     audioGain = preferences->getFloat("audioGain", 1.0);
     wifiLedEnabled = preferences->getBool("wifiLed", false);
-    wifiLedEnabled = false;
     motorEnabled = preferences->getBool("motor", false);
     launchLedEnabled = preferences->getBool("launchLed", false);
     audioEnabled = preferences->getBool("audio", false);
