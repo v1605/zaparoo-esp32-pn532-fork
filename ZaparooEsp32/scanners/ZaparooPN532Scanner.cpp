@@ -43,15 +43,15 @@ public:
       NdefMessage message = tag.getNdefMessage();
       int recordCount = message.getRecordCount();
       if (recordCount != 0) {
-        token->setPayload(parseNdfMessage(message, token, 0));
+        token->setPayload(parseNdfMessage(message, token, 0).c_str());
         if (!token->getValid()) {
           return token;
         }
         if (recordCount > 1) {
-          token->setLaunchAudio(parseNdfMessage(message, token, 1));
+          token->setLaunchAudio(parseNdfMessage(message, token, 1).c_str());
         }
         if (recordCount > 2) {
-          token->setRemoveAudio(parseNdfMessage(message, token, 2));
+          token->setRemoveAudio(parseNdfMessage(message, token, 2).c_str());
         }
       }
     }
@@ -117,7 +117,7 @@ private:
   String lastId = "";
   NfcAdapter* nfc = nullptr;
 
-  const char* parseNdfMessage(NdefMessage& message, ZaparooToken* currentToken, int recordIndex) {
+  const String parseNdfMessage(NdefMessage& message, ZaparooToken* currentToken, int recordIndex) {
     NdefRecord record = message.getRecord(recordIndex);
     int payloadLength = record.getPayloadLength();
     byte payload[payloadLength];
@@ -131,7 +131,7 @@ private:
       }
       payloadAsString += (char)payload[i];
     }
-    return payloadAsString.c_str();
+    return payloadAsString;
   }
 
   String getTagUID() {
