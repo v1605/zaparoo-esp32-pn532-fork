@@ -187,6 +187,7 @@ void writeTagLaunch(String& launchCmd, String& audioLaunchFile, String& audioRem
   JsonDocument cmdData;
   cmdData["msgType"] = "writeResults";
   tmpLaunchCmd.replace("launch_cmd::", "");
+  notifyClients("Launch Cmd Written: " + launchCmd, "log");
   if (tokenScanner->tokenPresent()) {
     bool success = tokenScanner->writeLaunch(launchCmd, audioLaunchFile, audioRemoveFile);
     if (success) {
@@ -393,10 +394,12 @@ bool readScanner() {
       inserted = true;
       bool sent = false;
       if (token->isPayloadSet() && !UID_ScanMode_enabled) {
+        //notifyClients("token set", "log");
         feedback.setUidAudioMappings(token);
         String payload = String(token->getPayload());
         sent = send(payload);
       } else if (token->isIdSet() && !UID_ScanMode_enabled) {
+       //notifyClients("id set", "log");
        feedback.setUidAudioMappings(token);
         String id = String(token->getId());
         sent = sendUid(id);

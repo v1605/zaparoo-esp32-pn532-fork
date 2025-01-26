@@ -1,5 +1,5 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { zapSystem, zapSystems, htmlFormattedSearchRes, zapSearchResults, ConfigData, EspMessage, writeResultState, sourceZapSvs, sourceZapSvsList } from "../types/ConfigData";
+import type { zapSystem, zapSystems, htmlFormattedSearchRes, zapSearchResults, ConfigData, EspMessage, writeResultState, sourceZapSvs, sourceZapSvsList, indexingMessage } from "../types/ConfigData";
 import {v4 as uuidv4} from 'uuid';
 import { EspUtils, } from "./EspUtils";
 import { LogUtils } from "./LogUtils";
@@ -15,7 +15,7 @@ export class ZapUtils{
     private static currZapSvs: string = "";
     
     private static buildZapSocketURL(ip: string, path: string): string{
-        console.log("socket path", `ws://${ip}:7497${path}`)
+        //console.log("socket path", `ws://${ip}:7497${path}`)
         return `ws://${ip}:7497${path}`;
     }
 
@@ -49,6 +49,10 @@ export class ZapUtils{
 
     private static getBlankSourceZapSvsList(): sourceZapSvsList{
         return {} as sourceZapSvsList;
+    }
+
+    static getBlankIndexingMsg(): indexingMessage{
+        return {} as indexingMessage;
     }
 
     static getActiveSourceList(): sourceZapSvsList{
@@ -107,28 +111,43 @@ export class ZapUtils{
     }
 
     private static connOnClose(){
+        LogUtils.notify("Disconnected From Zaparoo");
+        //console.log("zap conn closed");
         this.bZapSvsConnected = false;
     }
 
     private static connOnMessage(event: MessageEvent){
         const msgData = JSON.parse(event.data);
-        if(typeof(msgData.result.systems) != "undefined"){
-            let tmpSysList: zapSystems = msgData.result;
-            this.processMiSTerSystems(tmpSysList);
-        }
-        //return of search results
-        if(typeof(msgData.result.results) != "undefined"){
-            let tmpSearchRes: zapSearchResults = msgData.result;
-            this.processSearchResults(tmpSearchRes);
+        //console.log("ZapSvs Msg: ", event.data);
+        if(typeof(msgData.result) != "undefined"){
+            //return of Systems List
+            if(typeof(msgData.result.systems) != "undefined"){
+                let tmpSysList: zapSystems = msgData.result;
+                this.processMiSTerSystems(tmpSysList);
+            }
+            //return of search results
+            if(typeof(msgData.result.results) != "undefined"){
+                let tmpSearchRes: zapSearchResults = msgData.result;
+                this.processSearchResults(tmpSearchRes);
+            }
+        }else if(typeof(msgData.method) != "undefined"){
+            //DB Indexing Status
+            if((msgData.method) == "media.indexing"){
+                let tmpIdxMsg = this.getBlankIndexingMsg();
+                tmpIdxMsg.params = msgData.params;
+                if(tmpIdxMsg.params.indexing){
+                    LogUtils.notify(`Indexing: ${tmpIdxMsg.params.currentStepDisplay} - Step: ${tmpIdxMsg.params.currentStep} of ${tmpIdxMsg.params.totalSteps}`);
+                }else if(!tmpIdxMsg.params.indexing && typeof(tmpIdxMsg.params.totalFiles) != "undefined"){
+                    LogUtils.notify(`Indexing Complete: Total Files Indexed = ${tmpIdxMsg.params.totalFiles}`);
+                }
+            }
         }
     }
 
     private static connOnError(){
         LogUtils.notify("Unable to connect to Zaparoo: Check IP/service is running & reload window");
         this.bZapSvsConnected = false;
-    }
-
-    
+    }    
 
     private static processSearchResults(recSearchRes: zapSearchResults){
         if(recSearchRes.total > 250){
@@ -204,21 +223,20 @@ export class ZapUtils{
                 id: newUUID,
                 method: "systems"
             };
-            console.log("Sending Cmd to Zao Svs:", wscmd)
+            //console.log("Sending Cmd to Zap Svs:", wscmd);
             this.zapSvsSocket.send(JSON.stringify(wscmd));
         }   
     }  
 
-    static updateGamesDB(sysName: string){
+    static updateGamesDB(){
+        //console.log("UpdatingDB");
         let newUUID = uuidv4();
         let wscmd = {
             jsonrpc: "2.0",
             id: newUUID,
             method: "media.index"
         };        
-        if(this.bZapSvsConnected){
-            this.zapSvsSocket.send(JSON.stringify(wscmd));
-        }
+        this.zapSvsSocket.send(JSON.stringify(wscmd));
     }
     
     static doSearch(sysName: string, srchQuery: string | null) {
@@ -237,7 +255,8 @@ export class ZapUtils{
         };
         this.zapSvsSocket.send(JSON.stringify(wscmd));
         if(this.bZapSvsConnected){
-            console.log("zapsvs cmd:", wscmd)
+            LogUtils.notify(`Searching`);
+            //console.log("zapsvs cmd:", wscmd)
             this.zapSvsSocket.send(JSON.stringify(wscmd));
         }
     }
@@ -257,18 +276,18 @@ export class ZapUtils{
         let newCMD = this.getBlankESPMsg();
         newCMD.cmd = "write_Tag_Launch_Game";
         newCMD.data = {
-            launchData: launchPath,
+            launchData: launchPath.trim(),
             audioLaunchPath: aLaunchP,
             audioRemovePath: aRemoveP
         }
-        console.log("write cmd: ", newCMD);
+        //console.log("write cmd: ", newCMD);
         EspUtils.sendMessage(newCMD);
     }
 
     static toggleCreateMode(isEnabled: boolean){
         this.isCreateModeEnabled = isEnabled;
         let newCMD = this.getBlankESPMsg();
-        console.log(`Setting Create Mode : ${this.isCreateModeEnabled}`);
+        //console.log(`Setting Create Mode : ${this.isCreateModeEnabled}`);
         newCMD.cmd = "set_WriteMode";
         newCMD.data = this.isCreateModeEnabled;
         EspUtils.sendMessage(newCMD);

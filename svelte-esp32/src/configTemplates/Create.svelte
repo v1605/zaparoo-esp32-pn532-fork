@@ -3,6 +3,7 @@
   import { ZapUtils } from '../backend/ZapUtils';
   import { CommonUtils } from '../backend/CommonUtils';
   import { EspUtils } from "../backend/EspUtils";
+    import { LogUtils } from '../backend/LogUtils';
   let zapSysList: zapSystems = ZapUtils.getBlankSystems();
   let zapSvsList: sourceZapSvsList = ZapUtils.getActiveSourceList();
   let zapSrchRes: zapSearchResults = ZapUtils.getBlankSearchResults();
@@ -56,6 +57,7 @@
 
   function getSystems(){
     ZapUtils.initConnection(selectedSource);
+    searchQry = "";
   }
   
   const handleSubmit = (event: Event) => {
@@ -123,6 +125,10 @@
   function doTestLaunch() {
     ZapUtils.doTestLaunch(selectedGame);
   };
+
+  function doDBIndex() {
+    ZapUtils.updateGamesDB();
+  }
     
 </script>
 <div class="text-center mb-3">
@@ -131,15 +137,20 @@
 <form on:submit={handleSubmit} class="row g-3">
   <div class="col-12">
     <div class="input-group mb-3">
-      <div class="col-5">
+      <div class="col-4">
         <label for="selSystem">Select Source</label><select class="form-select" id="selSystem" bind:value={selectedSource} on:change={getSystems}>
           {#each zapSvsList.sources as { value, name}}
             <option value={value}>{name}</option>
           {/each}
         </select>
       </div>
+      {#if selectedSource != ""}
+      <div class="col-2">
+        <button type="button" class="btn btn-primary mt-4" on:click={doDBIndex}>Update Zap DB</button>
+      </div>
+      {/if}
     </div>
-    {#if zapSysList.systems}
+    {#if zapSysList.systems && selectedSource != ""}
     <div class="input-group ">
       <div class="col-5">
         <label for="selSystem">Select System</label><select class="form-select" id="selSystem" bind:value={selectedSys}>

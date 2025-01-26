@@ -102,8 +102,12 @@ export interface indexingMessage {
 }
 
 export interface indexingParams {
-  totalSteps: number,
-  currentStep: number
+  totalSteps?: number,
+  currentStep?: number,
+  indexing: boolean,
+  currentStepDisplay?: string,
+  totalFiles?: number,
+  exists?: boolean
 }
 
 export interface sourceZapSvsList {
