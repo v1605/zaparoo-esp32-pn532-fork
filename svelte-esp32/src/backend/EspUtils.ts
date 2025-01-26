@@ -54,8 +54,9 @@ export class EspUtils{
                 UIDUtils.processPushedUID(msgData);
                 break;
             case "writeResults":
-            console.log("wr: ", msgData.data)    
-            ZapUtils.handleWriteResults(msgData.data.isSuccess, msgData.data.isCardDetected);
+                console.log("wr: ", msgData.data)    
+                ZapUtils.handleWriteResults(msgData.data.isSuccess, msgData.data.isCardDetected);
+                break;
         }
     }
 

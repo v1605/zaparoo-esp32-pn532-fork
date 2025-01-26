@@ -1,14 +1,19 @@
 <script lang="ts">
-  import type { zapSystems, zapSearchResults, htmlFormattedSearchRes, writeResultState } from '../types/ConfigData';
+  import type { zapSystems, zapSearchResults, htmlFormattedSearchRes, writeResultState, sourceZapSvsList, ConfigData } from '../types/ConfigData';
   import { ZapUtils } from '../backend/ZapUtils';
   import { CommonUtils } from '../backend/CommonUtils';
+  import { EspUtils } from "../backend/EspUtils";
   let zapSysList: zapSystems = ZapUtils.getBlankSystems();
+  let zapSvsList: sourceZapSvsList = ZapUtils.getActiveSourceList();
   let zapSrchRes: zapSearchResults = ZapUtils.getBlankSearchResults();
   let htmlSerRes: htmlFormattedSearchRes = ZapUtils.getBlankhmtlSrchRes();
+  let selectedSource: string = "";
+  let dialogWait: HTMLDialogElement;
   ZapUtils.zapSrcRes().subscribe(value=> zapSrchRes = value);
   ZapUtils.indexedSystemsList().subscribe(value=> zapSysList = value);
   ZapUtils.htmlSrchRes().subscribe(value=> htmlSerRes = value);
   ZapUtils.writeResStat().subscribe(value => WrStIsChanged(value));
+  EspUtils.config().subscribe(value=> settingsIsChanged(value));
   let selectedSys: string = "*";
   let searchQry: string | null;
   let selectedGame: string = "";
@@ -18,9 +23,7 @@
   let dialogSuccess: HTMLDialogElement;
   let dialogFailure: HTMLDialogElement;
   let dialogNoCard: HTMLDialogElement;
-  let dialogWait: HTMLDialogElement;
-
-  
+    
   function WrStIsChanged(currVal: writeResultState) {
       switch(currVal.state){
         case 1:
@@ -36,6 +39,23 @@
           diagNoCardOpen();
           break;
       }
+  }
+
+  function settingsIsChanged(currSet: ConfigData){
+    //monitors for changes to settings and reloads SourceList
+    if(currSet.SteamIP != "" || currSet.ZapIP != ""){
+      zapSvsList = ZapUtils.getActiveSourceList();
+    }
+    if(currSet.steamOS_enabled || currSet.mister_enabled){
+      zapSvsList = ZapUtils.getActiveSourceList();
+    }
+    if(!currSet.steamOS_enabled || !currSet.mister_enabled){
+      zapSvsList = ZapUtils.getActiveSourceList();
+    }    
+  }
+
+  function getSystems(){
+    ZapUtils.initConnection(selectedSource);
   }
   
   const handleSubmit = (event: Event) => {
@@ -105,13 +125,20 @@
   };
     
 </script>
-{#if zapSysList.systems}
 <div class="text-center mb-3">
   <h2>Search for a title</h2>
 </div>
-{/if}
 <form on:submit={handleSubmit} class="row g-3">
   <div class="col-12">
+    <div class="input-group mb-3">
+      <div class="col-5">
+        <label for="selSystem">Select Source</label><select class="form-select" id="selSystem" bind:value={selectedSource} on:change={getSystems}>
+          {#each zapSvsList.sources as { value, name}}
+            <option value={value}>{name}</option>
+          {/each}
+        </select>
+      </div>
+    </div>
     {#if zapSysList.systems}
     <div class="input-group ">
       <div class="col-5">
@@ -130,7 +157,7 @@
       </div>
     </div>
     {/if}
-    {#if !zapSysList.systems}
+    {#if !zapSysList.systems && selectedSource != ""}
     <div class="text-center mt-5">
       <h3>Unable to connect to Zaparoo service. Check the service is running and IP address is correct.</h3>
     </div>

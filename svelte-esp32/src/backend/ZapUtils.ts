@@ -1,5 +1,5 @@
 import { writable, type Readable, type Writable } from "svelte/store";
-import type { zapSystem, zapSystems, htmlFormattedSearchRes, zapSearchResults, ConfigData, EspMessage, writeResultState } from "../types/ConfigData";
+import type { zapSystem, zapSystems, htmlFormattedSearchRes, zapSearchResults, ConfigData, EspMessage, writeResultState, sourceZapSvs, sourceZapSvsList } from "../types/ConfigData";
 import {v4 as uuidv4} from 'uuid';
 import { EspUtils, } from "./EspUtils";
 import { LogUtils } from "./LogUtils";
@@ -7,13 +7,12 @@ export class ZapUtils{
     private static retSystems: Writable<zapSystems> = writable({} as zapSystems);
     private static srchResults: Writable<zapSearchResults> = writable({} as zapSearchResults);
     private static htmlResults: Writable<htmlFormattedSearchRes> = writable({} as htmlFormattedSearchRes);
-    private static bSteamOSConnected = false;
-    private static bMisterConnected = false;
+    private static bZapSvsConnected = false;
     private static currConfig: ConfigData;
-    private static steamSocket: WebSocket;
-    private static misterSocket: WebSocket;
+    private static zapSvsSocket: WebSocket;
     private static isCreateModeEnabled = false;
     private static writeResultState: Writable<writeResultState> = writable({} as writeResultState);
+    private static currZapSvs: string = "";
     
     private static buildZapSocketURL(ip: string, path: string): string{
         console.log("socket path", `ws://${ip}:7497${path}`)
@@ -44,63 +43,74 @@ export class ZapUtils{
         return {} as writeResultState;
     }
 
-    static initConnections(){
+    private static getBlankSourceZapSvs(): sourceZapSvs{
+        return {} as sourceZapSvs;
+    }
+
+    private static getBlankSourceZapSvsList(): sourceZapSvsList{
+        return {} as sourceZapSvsList;
+    }
+
+    static getActiveSourceList(): sourceZapSvsList{
         EspUtils.config().subscribe(value=> this.currConfig = value);
-        if(this.currConfig.steamOS_enabled){this.initSteamConn();}
-        if(this.currConfig.mister_enabled){this.initMisterConn();}
-        if(!this.currConfig.steamOS_enabled && !this.currConfig.mister_enabled){
-            LogUtils.notify("Both MiSTer & SteamOS are disabled in settings");
+        if(this.bZapSvsConnected){
+            this.zapSvsSocket.close();
+            this.srchResults.set(this.getBlankSearchResults());
+            this.retSystems.set(this.getBlankSystems());
+        }
+        let newZapSvs = null;
+        let newZapSvsList = this.getBlankSourceZapSvsList();
+        newZapSvsList.sources = [];
+        if(this.currConfig.steamOS_enabled){
+            newZapSvs = this.getBlankSourceZapSvs();
+            newZapSvs.name = "SteamOS";
+            newZapSvs.value = "steam";
+            newZapSvsList.sources.push(newZapSvs);
+        }
+        if(this.currConfig.mister_enabled){
+            newZapSvs = this.getBlankSourceZapSvs();
+            newZapSvs.name = "MiSTer";
+            newZapSvs.value = "mister";
+            newZapSvsList.sources.push(newZapSvs);
+        }
+        return newZapSvsList;
+    }
+
+    static initConnection(source: string){
+        if(this.bZapSvsConnected){
+            this.zapSvsSocket.close();
+            this.srchResults.set(this.getBlankSearchResults());
+        }
+        this.currZapSvs = source;
+        switch(source){
+            case "steam":
+                this.initConn(this.buildZapSocketURL(this.currConfig.SteamIP, this.currConfig.zap_ws_path));
+                break;
+            case "mister":
+                this.initConn(this.buildZapSocketURL(this.currConfig.ZapIP, this.currConfig.zap_ws_path));
+                break;
         }
     }
 
-    private static initSteamConn() {
-        this.steamSocket = new WebSocket(this.buildZapSocketURL(this.currConfig.SteamIP, this.currConfig.zap_ws_path));
-        this.steamSocket.onopen    = this.steamOnOpen.bind(this);
-        this.steamSocket.onclose   = this.steamOnClose.bind(this);
-        this.steamSocket.onmessage = this.steamOnMessage.bind(this);
-        this.steamSocket.onerror = this.steamOnError.bind(this);
+    private static initConn(connPath: string) {
+        this.zapSvsSocket = new WebSocket(connPath);
+        this.zapSvsSocket.onopen    = this.connOnOpen.bind(this);
+        this.zapSvsSocket.onclose   = this.connOnClose.bind(this);
+        this.zapSvsSocket.onmessage = this.connOnMessage.bind(this);
+        this.zapSvsSocket.onerror = this.connOnError.bind(this);
     }
 
-    private static steamOnOpen(){
-        LogUtils.notify("Connected to Zaparoo on SteamOS");
-        this.bSteamOSConnected = true;
-    }
-
-    private static steamOnClose(){
-        this.bSteamOSConnected = false;
-        setTimeout(()=> this.initSteamConn(), 2000);
-    }
-
-    private static steamOnMessage(event: MessageEvent){
-        const msgData = JSON.parse(event.data);
-        console.log("Steam Msg Data: ", event.data);
-    }
-
-    private static steamOnError(){
-        LogUtils.notify("Unable to connect to Zaparoo on SteamOS: Check IP/service is running & reload window");
-        this.bSteamOSConnected = false;
-    }
-
-    private static initMisterConn() {
-        this.misterSocket = new WebSocket(this.buildZapSocketURL(this.currConfig.ZapIP, this.currConfig.zap_ws_path));
-        this.misterSocket.onopen    = this.misterOnOpen.bind(this);
-        this.misterSocket.onclose   = this.misterOnClose.bind(this);
-        this.misterSocket.onmessage = this.misterOnMessage.bind(this);
-        this.misterSocket.onerror = this.misterOnError.bind(this);
-    }
-
-    private static misterOnOpen(){
-        LogUtils.notify("Connected to Zaparoo on MiSTer");
-        this.bMisterConnected = true;
+    private static connOnOpen(){
+        LogUtils.notify("Connected to Zaparoo");
+        this.bZapSvsConnected = true;
         this.generateIndexedSystemsList();
     }
 
-    private static misterOnClose(){
-        this.bMisterConnected = false;
-        setTimeout(()=> this.initMisterConn(), 2000);
+    private static connOnClose(){
+        this.bZapSvsConnected = false;
     }
 
-    private static misterOnMessage(event: MessageEvent){
+    private static connOnMessage(event: MessageEvent){
         const msgData = JSON.parse(event.data);
         if(typeof(msgData.result.systems) != "undefined"){
             let tmpSysList: zapSystems = msgData.result;
@@ -113,10 +123,12 @@ export class ZapUtils{
         }
     }
 
-    private static misterOnError(){
-        LogUtils.notify("Unable to connect to Zaparoo on MiSTer: Check IP/service is running & reload window");
-        this.bMisterConnected = false;
+    private static connOnError(){
+        LogUtils.notify("Unable to connect to Zaparoo: Check IP/service is running & reload window");
+        this.bZapSvsConnected = false;
     }
+
+    
 
     private static processSearchResults(recSearchRes: zapSearchResults){
         if(recSearchRes.total > 250){
@@ -135,23 +147,37 @@ export class ZapUtils{
     }
 
     private static processMiSTerSystems(recSysList: zapSystems){
-        recSysList.systems.sort(function (a: any, b: any) {
-            if (a.name < b.name) {
-                return -1;
+        //only Sort & process results if MiSTer else return special values for ESP32 routing launch command
+        if(this.currZapSvs != "mister"){
+            let tmpObj = this.getBlankSystem(); 
+            if(this.currZapSvs == "steam"){
+                tmpObj.category = "steamOS";
+                tmpObj.id = "steam";
+                tmpObj.name = "Steam";
             }
-            if (a.name > b.name) {
-                return 1;
+            if(this.currZapSvs == "windows"){
+                tmpObj.category = "windows";
+                tmpObj.id = "windows";
+                tmpObj.name = "Windows";
             }
-            return 0;
-        });
-        //if steam is connected add it to the top of the list
-        let tmpAllObj = {category: "all", id: "*", name:"All MiSTer Systems"};
-        recSysList.systems.unshift(tmpAllObj);        
-        if(this.bSteamOSConnected){
-            let tmpObj = {category: "steamOS", id: "steam", name:"Steam"};
-            recSysList.systems.unshift(tmpObj);
+            let tmpSysList = this.getBlankSystems();
+            tmpSysList.systems=[];
+            tmpSysList.systems.push(tmpObj);
+            this.retSystems.set(tmpSysList);
+        }else{
+            recSysList.systems.sort(function (a: any, b: any) {
+                if (a.name < b.name) {
+                    return -1;
+                }
+                if (a.name > b.name) {
+                    return 1;
+                }
+                return 0;
+            });
+            let tmpAllObj = {category: "all", id: "*", name:"All MiSTer Systems"};
+            recSysList.systems.unshift(tmpAllObj);
+            this.retSystems.set(recSysList);
         }
-        this.retSystems.set(recSysList);
     }
 
     static indexedSystemsList(): Readable<zapSystems> {
@@ -171,27 +197,34 @@ export class ZapUtils{
     }
 
     static generateIndexedSystemsList(){        
-        if(this.bMisterConnected){
+        if(this.bZapSvsConnected){
             let newUUID = uuidv4();
             let wscmd = {
                 jsonrpc: "2.0",
                 id: newUUID,
                 method: "systems"
             };
-            this.misterSocket.send(JSON.stringify(wscmd));
-        }else if(this.bSteamOSConnected){
-            let tmpZapSystems = this.getBlankSystems();
-            tmpZapSystems.systems = [
-                {category: "steamOS", id: "steam", name:"Steam"}
-            ]
-            this.retSystems.set(tmpZapSystems);
-        }        
+            console.log("Sending Cmd to Zao Svs:", wscmd)
+            this.zapSvsSocket.send(JSON.stringify(wscmd));
+        }   
     }  
+
+    static updateGamesDB(sysName: string){
+        let newUUID = uuidv4();
+        let wscmd = {
+            jsonrpc: "2.0",
+            id: newUUID,
+            method: "media.index"
+        };        
+        if(this.bZapSvsConnected){
+            this.zapSvsSocket.send(JSON.stringify(wscmd));
+        }
+    }
     
     static doSearch(sysName: string, srchQuery: string | null) {
         let newUUID = uuidv4();
         let tmpParams;
-        if(sysName != "*"){
+        if(sysName != "*" && sysName != "steam"){
             tmpParams = {query: srchQuery, maxResults: 250, systems:[sysName]}
         }else{
             tmpParams = {query: srchQuery, maxResults: 250}
@@ -202,13 +235,10 @@ export class ZapUtils{
             method: "media.search",
             params: tmpParams
         };
-        this.misterSocket.send(JSON.stringify(wscmd));
-        if(sysName == "steam" && this.bSteamOSConnected){
-            //do steamOS search
-            this.steamSocket.send(JSON.stringify(wscmd));
-        }else if(sysName != "steam" && this.bMisterConnected){
-            //do MiSTer search
-            this.misterSocket.send(JSON.stringify(wscmd));
+        this.zapSvsSocket.send(JSON.stringify(wscmd));
+        if(this.bZapSvsConnected){
+            console.log("zapsvs cmd:", wscmd)
+            this.zapSvsSocket.send(JSON.stringify(wscmd));
         }
     }
 
@@ -242,9 +272,7 @@ export class ZapUtils{
         newCMD.cmd = "set_WriteMode";
         newCMD.data = this.isCreateModeEnabled;
         EspUtils.sendMessage(newCMD);
-    }
-
-    
+    }    
 
     static handleWriteResults(isSuccess: boolean, isCardDetected: boolean){
         let tmpWRS = this.getBlankWriteState();

@@ -96,3 +96,21 @@ export interface htmlFormattedSearchRes {
 export interface writeResultState {
   state: number
 }
+
+export interface indexingMessage {
+  params: indexingParams
+}
+
+export interface indexingParams {
+  totalSteps: number,
+  currentStep: number
+}
+
+export interface sourceZapSvsList {
+  sources: Array<sourceZapSvs>
+}
+
+export interface sourceZapSvs {
+  name: string,
+  value: string
+}
