@@ -56,6 +56,7 @@ bool steamOS_enabled = false;
 bool UID_ScanMode_enabled = false;
 String SteamIP = "steamOS.local";
 String ZapIP = "mister.local";
+String lastSerialCommand = "";
 
 //Prototypes
 void notifyClients(const String& txtMsgToSend, const String& msgType);
@@ -79,7 +80,7 @@ void setPref_Float(const String& key, float valFloat) {
 }
 
 void notifyClients(const String& txtMsgToSend, const String& msgType) {
-  Serial.println(txtMsgToSend);
+  if(!SERIAL_ONLY) Serial.println(txtMsgToSend);
   if (isWebLog) {
     JsonDocument msgJson;
     msgJson["msgType"] = "notify";
@@ -219,8 +220,11 @@ bool send(String& gamePath) {
   String message;
   bool sent = false;
   if (SERIAL_ONLY) {
-    Serial.print("SCAN\t");
-    Serial.println(gamePath);
+    lastSerialCommand = "SCAN\ttext=" + gamePath;
+    if(!feedback.resetOnRemove){
+      lastSerialCommand = lastSerialCommand + "\tremovable=no";
+    }
+    Serial.println(lastSerialCommand);
     Serial.flush();
     message = "Sent game path to serial: " + gamePath;
     sent = true;
@@ -235,6 +239,36 @@ bool send(String& gamePath) {
       message = "Zaparoo Error Launching Game: " + gamePath + " | Error Code: " + code;
     } else {
       message = "Launched Game: " + gamePath;
+      sent = true;
+    }
+  }
+  notifyClients(message, "log");
+  return sent;
+}
+
+bool sendUid(String& uid) {
+  String message;
+  bool sent = false;
+  if (SERIAL_ONLY) {
+    lastSerialCommand = "SCAN\tuid=" + uid;
+    if(!feedback.resetOnRemove){
+      lastSerialCommand = lastSerialCommand + "\tremovable=no";
+    }
+    Serial.println(lastSerialCommand);
+    Serial.flush();
+    message = "Sent Card/Tag UID: " + uid;
+    sent = true;
+  } else {
+    //not possible to determine if steam game from UID so always default to MiSTer if enabled
+    String newURL = ZAP_URL;
+    newURL.replace("<replace>", mister_enabled ? ZapIP : SteamIP);
+    ZapClient.url(newURL);
+    int code = ZapClient.launchUid(uid);
+    if (code > 0) {
+      feedback.expressError(code);
+      message = "Zaparoo Error Sending Card/Tag UID " + uid + " | Error Code: " + code;
+    } else {
+      message = "Sent Card/Tag UID: " + uid;
       sent = true;
     }
   }
@@ -348,31 +382,27 @@ void handleWebSocketMessage(void* arg, uint8_t* data, size_t len) {
   }
 }
 
-bool sendUid(String& uid) {
-  String message;
+void handleSend(){
   bool sent = false;
-  if (SERIAL_ONLY) {
-    Serial.print("SCAN\tuid=");
-    Serial.println(uid);
-    Serial.flush();
-    message = "Sent Card/Tag UID: " + uid;
+  bool playAudioFirst = SERIAL_ONLY && feedback.resetOnRemove &&!UID_ScanMode_enabled;
+  feedback.setUidAudioMappings(token);
+  if(playAudioFirst){
+    feedback.successActions(token); //Play the audio before launch to support remove with simple serial
     sent = true;
-  } else {
-    //not possible to determine if steam game from UID so always default to MiSTer if enabled
-    String newURL = ZAP_URL;
-    newURL.replace("<replace>", mister_enabled ? ZapIP : SteamIP);
-    ZapClient.url(newURL);
-    int code = ZapClient.launchUid(uid);
-    if (code > 0) {
-      feedback.expressError(code);
-      message = "Zaparoo Error Sending Card/Tag UID " + uid + " | Error Code: " + code;
-    } else {
-      message = "Sent Card/Tag UID: " + uid;
-      sent = true;
-    }
   }
-  notifyClients(message, "log");
-  return sent;
+  if (!token->isBlankPayload() && !UID_ScanMode_enabled) {
+    String payload = String(token->getPayload());
+    sent = send(payload);
+  } else if (token->isIdSet() && !UID_ScanMode_enabled) {
+    String id = String(token->getId());
+    sent = sendUid(id);
+  }else if(token->isIdSet() && UID_ScanMode_enabled){
+    String id = String(token->getId());
+    sendUIDtoWeb(id);
+  }
+  if(!playAudioFirst && sent){
+    feedback.successActions(token);
+  }
 }
 
 //Loop 20 times per read to break out and run other loop code
@@ -392,25 +422,7 @@ bool readScanner() {
       token = parsed;
       feedback.cardInsertedActions(token);
       inserted = true;
-      bool sent = false;
-      if (token->isPayloadSet() && !UID_ScanMode_enabled) {
-        //notifyClients("token set", "log");
-        feedback.setUidAudioMappings(token);
-        String payload = String(token->getPayload());
-        sent = send(payload);
-      } else if (token->isIdSet() && !UID_ScanMode_enabled) {
-       //notifyClients("id set", "log");
-       feedback.setUidAudioMappings(token);
-        String id = String(token->getId());
-        sent = sendUid(id);
-      }else if(token->isIdSet() && UID_ScanMode_enabled){
-        String id = String(token->getId());
-        sendUIDtoWeb(id);
-      }
-      if(sent && !UID_ScanMode_enabled) {
-        String audio = token->isLaunchAudioSet() ? String(token->getLaunchAudio()) : "";
-        feedback.successActions(token);
-      }
+      handleSend();
     } else if (!present && inserted) {  //Must have been removed
       String removeAudio = "";
       if (token->isRemoveAudioSet()) {
@@ -427,6 +439,9 @@ bool readScanner() {
       inserted = false;
       tokenScanner->halt();
       return true;
+    }else if (present && inserted && SERIAL_ONLY && feedback.resetOnRemove){
+      Serial.println(lastSerialCommand);
+      Serial.flush();
     }
     delay(10);
   }

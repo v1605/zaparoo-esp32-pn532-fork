@@ -86,6 +86,8 @@ public:
     bool isRemoveAudioSet() const { return removeAudio != nullptr; }
     bool isDetectAudioSet() const { return detectAudio != nullptr; }
 
+    bool isBlankPayload() const { return !payload || payload[0] == '\0'; }
+
 private:
     char* id;
     char* payload;

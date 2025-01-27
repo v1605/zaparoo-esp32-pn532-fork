@@ -139,7 +139,8 @@ private:
             }
             payloadAsString += (char)payload[i];
       }
-       return payloadAsString;
+      payloadAsString.trim();
+      return payloadAsString;
     } 
 
     String getUidString() {

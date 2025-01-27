@@ -17,13 +17,13 @@
 
   //Common Config----------------------------------------------------------
   //The SS/SDA and Reset pins of the RC522 or SD Card using the default SPI GPIO pins of your ESP32
-  #define SS_PIN 10
+  #define SS_PIN 5
   #define RST_PIN 4
   //------------------------------------------------------------------------
 
   //Set True for serial only-----------------------------------------------
   //wifi Game Launch & Reset API calls will not be used - webUI features will still be available
-  #define SERIAL_ONLY true
+  #define SERIAL_ONLY false
   //-----------------------------------------------------------------------
 
 #endif
